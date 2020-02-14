@@ -14,11 +14,11 @@ ANSIBLE_METADATA = {
 
 DOCUMENTATION = '''
 ---
-module: my_test
+module: guacamole_connections
 
-short_description: This is my test module
+short_description: Administer guacamole connections using the rest API
 
-version_added: "2.4"
+version_added: "2.9"
 
 description:
     - "This is my longer description explaining my test module"
@@ -37,7 +37,7 @@ extends_documentation_fragment:
     - azure
 
 author:
-    - Your Name (@yourhandle)
+    - Pablo Escobar Lopez (@pescobar)
 '''
 
 EXAMPLES = '''
