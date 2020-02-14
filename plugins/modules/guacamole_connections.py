@@ -219,7 +219,7 @@ def main():
     )
 
     result = dict(changed=False, msg='', diff={},
-                  proposed={}, existing={}, end_state={})
+                  connection_info={})
 
     module = AnsibleModule(
         argument_spec=module_args,
@@ -254,12 +254,11 @@ def main():
     except GuacamoleError as e:
         module.fail_json(msg=str(e))
 
-    #  print(guacamole_connections)
+    #  print(guacamole_connections_before)
 
 
     if module.params.get('state') == 'present':
 
-        #  print(module.params.get('base_url'))
         # Add connection
         try:
             add_connection = guacamole_add_connection(
@@ -271,9 +270,6 @@ def main():
             )
         except GuacamoleError as e:
             module.fail_json(msg=str(e))
-
-        #  print(add_connection.__class__)
-        #  print(add_connection)
 
     # Get guacamole connections after
     try:
@@ -289,6 +285,10 @@ def main():
 
     if guacamole_connections_before != guacamole_connections_after:
         result['changed'] = True
+
+    for connection in guacamole_connections_after['guacamole_connections']['childConnections']:
+        if connection['name'] == module.params.get('connection_name'):
+            result['connection_info'] = connection
 
     #  print connection_header
     #  run_module()
