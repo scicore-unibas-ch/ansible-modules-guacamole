@@ -4,6 +4,12 @@
 # GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 
 from __future__ import absolute_import, division, print_function
+import json
+
+from ansible.module_utils.basic import AnsibleModule
+from ansible.module_utils.urls import open_url
+from ansible.module_utils.six.moves.urllib.error import HTTPError
+from ansible_collections.scicore.guacamole.plugins.module_utils.guacamole import GuacamoleError, guacamole_get_token
 __metaclass__ = type
 
 ANSIBLE_METADATA = {
@@ -69,14 +75,6 @@ message:
     returned: always
 '''
 
-import json
-
-from ansible.module_utils.urls import open_url
-from ansible.module_utils.basic import AnsibleModule
-from ansible.module_utils.six.moves.urllib.error import HTTPError
-from ansible.module_utils.six.moves.urllib.parse import urlencode
-from ansible_collections.scicore.guacamole.plugins.module_utils.guacamole import GuacamoleError,guacamole_get_token
-
 
 URL_LIST_CONNECTIONS = "{url}/api/session/data/{datasource}/connectionGroups/\
 {parent_identifier}/tree?token={token}"
@@ -128,15 +126,16 @@ def guacamole_add_connection(base_url, validate_certs, datasource, auth_token, m
     try:
         headers = {'Content-Type': 'application/json'}
         r = open_url(url_add_connection, method='POST', validate_certs=validate_certs,
-                 headers=headers, data=json.dumps(payload))
+                     headers=headers, data=json.dumps(payload))
     except HTTPError as e:
         # guacamole api returns http error code 400 if connection
         # with the same name already exists
         if e.code == 400:
-            return 0
+            pass
     except Exception as e:
         raise GuacamoleError('Could not add a new connection in %s: %s'
                              % (url_add_connection, str(e)))
+
 
 def guacamole_delete_connection(base_url, validate_certs, datasource, connection_id, auth_token):
 
@@ -151,7 +150,7 @@ def guacamole_delete_connection(base_url, validate_certs, datasource, connection
             % (url_delete_connection, str(e)))
     except Exception as e:
         raise GuacamoleError('Could not delete guacamole connection from %s: %s'
-                             % (url_delete_connections, str(e)))
+                             % (url_delete_connection, str(e)))
 
     return {
         'guacamole_connections': r,
@@ -166,7 +165,7 @@ def main():
         base_url=dict(type='str', aliases=['url'], required=True),
         auth_username=dict(type='str', required=True),
         auth_password=dict(type='str', required=True,
-                            no_log=True),
+                           no_log=True),
         validate_certs=dict(type='bool', default=True),
         parentIdentifier=dict(type='str', default='ROOT'),
         connection_name=dict(type='str', aliases=['name'], required=True),
@@ -198,7 +197,6 @@ def main():
     except GuacamoleError as e:
         module.fail_json(msg=str(e))
 
-
     # Get guacamole connections before doing anything else
     try:
         guacamole_connections_before = guacamole_get_connections(
@@ -211,12 +209,11 @@ def main():
     except GuacamoleError as e:
         module.fail_json(msg=str(e))
 
-
     if module.params.get('state') == 'present':
 
         # Add connection
         try:
-            add_connection = guacamole_add_connection(
+            guacamole_add_connection(
                 base_url=module.params.get('base_url'),
                 validate_certs=module.params.get('validate_certs'),
                 datasource=guacamole_token['dataSource'],
@@ -243,7 +240,7 @@ def main():
         else:
             # If we found the connection id then delete the connection
             try:
-                delete_connection = guacamole_delete_connection(
+                guacamole_delete_connection(
                     base_url=module.params.get('base_url'),
                     validate_certs=module.params.get('validate_certs'),
                     datasource=guacamole_token['dataSource'],
