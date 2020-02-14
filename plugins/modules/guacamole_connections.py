@@ -138,26 +138,9 @@ def guacamole_get_connections(base_url, validate_certs, datasource, parent_ident
 
 def guacamole_add_connection(base_url, validate_certs, datasource, auth_token, module_params):
 
-    #  print('##################################')
-    #  print(module_params['base_url'])
-    #  print(module_params.get.hostname)
-    #  realm = module.params.get('base_url')
-
     url_add_connection = URL_ADD_CONNECTION.format(
         url=base_url, datasource=datasource, token=auth_token)
 
-    #  payload = {
-    #      'username': 'user1',
-    #      'password': 'password1',
-    #      'attributes': {
-    #          'disabled': '',
-    #          'expired': '',
-    #          'guac-full-name': 'user_full_name',
-    #          'guac-email-address': 'email@mail.com',
-    #          'guac-organization': 'scicore',
-    #          'guac-organizational-role': 'sysadmin'
-    #          }
-    #  }
     payload = {
         "parentIdentifier": module_params['parentIdentifier'],
         "name": module_params['connection_name'],
@@ -173,25 +156,15 @@ def guacamole_add_connection(base_url, validate_certs, datasource, auth_token, m
         }
     }
 
-    # print(json.loads(payload))
-    #  print(json.dumps(payload))
-    #  print(guacamole_add_connection)
-
     try:
         headers = {'Content-Type': 'application/json'}
         r = open_url(url_add_connection, method='POST', validate_certs=validate_certs,
                  headers=headers, data=json.dumps(payload))
-        #  print(r)
-    #except urllib_error.HTTPError as e:
-        #  print('bbbbbbbbbbbbbbb')
-        #  print(r)
     except HTTPError as e:
         # guacamole api returns http error code 400 if connection
         # with the same name already exists
         if e.code == 400:
             return 0
-            #  print('We got a 400')
-            #  result['changed'] = False
     except Exception as e:
         raise GuacamoleError('Could not add a new connection in %s: %s'
                              % (url_add_connection, str(e)))
@@ -225,10 +198,6 @@ def main():
         argument_spec=module_args,
         supports_check_mode=True
     )
-    #  print(module.params)
-
-    #  if module.check_mode:
-    #      module.exit_json(**result)
 
     # Obtain access token, initialize API
     try:
@@ -253,8 +222,6 @@ def main():
         )
     except GuacamoleError as e:
         module.fail_json(msg=str(e))
-
-    #  print(guacamole_connections_before)
 
 
     if module.params.get('state') == 'present':
@@ -290,9 +257,6 @@ def main():
         if connection['name'] == module.params.get('connection_name'):
             result['connection_info'] = connection
 
-    #  print connection_header
-    #  run_module()
-    #  result['msg'] = "lalala"
     module.exit_json(**result)
 
 
