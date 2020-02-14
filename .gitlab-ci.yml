@@ -1,0 +1,13 @@
+pylint:
+  stage: test
+  before_script:
+    - pip install pylint
+  script:
+    - pylint --rcfile=.pylintrc --output-format=text plugins/
+
+autopep8:
+  stage: test
+  before_script:
+    - pip install autopep8
+  script:
+    - autopep8 --exit-code --aggressive --aggressive --diff --recursive .
