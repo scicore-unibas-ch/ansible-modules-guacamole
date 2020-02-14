@@ -81,6 +81,7 @@ URL_TOKEN = "{url}/api/tokens"
 URL_LIST_CONNECTIONS = "{url}/api/session/data/{datasource}/connectionGroups/\
 {parent_identifier}/tree?token={token}"
 URL_ADD_CONNECTION = "{url}/api/session/data/{datasource}/connections?token={token}"
+URL_DELETE_CONNECTION = "{url}/api/session/data/{datasource}/connections/{connection_id}?token={token}"
 
 
 class GuacamoleError(Exception):
@@ -169,6 +170,25 @@ def guacamole_add_connection(base_url, validate_certs, datasource, auth_token, m
         raise GuacamoleError('Could not add a new connection in %s: %s'
                              % (url_add_connection, str(e)))
 
+def guacamole_delete_connection(base_url, validate_certs, datasource, connection_id, auth_token):
+
+    url_delete_connection = URL_DELETE_CONNECTION.format(
+        url=base_url, datasource=datasource, connection_id=connection_id, token=auth_token)
+
+    try:
+        r = open_url(url_delete_connection, method='DELETE', validate_certs=validate_certs)
+    except ValueError as e:
+        raise GuacamoleError(
+            'API returned invalid JSON when trying to delete connection from %s: %s'
+            % (url_delete_connection, str(e)))
+    except Exception as e:
+        raise GuacamoleError('Could not delete guacamole connection from %s: %s'
+                             % (url_delete_connections, str(e)))
+
+    return {
+        'guacamole_connections': r,
+    }
+
 
 def main():
 
@@ -237,6 +257,33 @@ def main():
             )
         except GuacamoleError as e:
             module.fail_json(msg=str(e))
+
+    if module.params.get('state') == 'absent':
+
+        # Delete connection
+
+        # first find the ID of the connection
+        for connection in guacamole_connections_before['guacamole_connections']['childConnections']:
+            if connection['name'] == module.params.get('connection_name'):
+                connection_id = connection['identifier']
+
+        # Check if we could find the connection
+        try:
+            connection_id
+        except NameError:
+            result['msg'] = "There is no guacamole connection named " + module.params.get('connection_name')
+        else:
+            # If we found the connection id then delete the connection
+            try:
+                delete_connection = guacamole_delete_connection(
+                    base_url=module.params.get('base_url'),
+                    validate_certs=module.params.get('validate_certs'),
+                    datasource=guacamole_token['dataSource'],
+                    auth_token=guacamole_token['authToken'],
+                    connection_id=connection_id,
+                )
+            except GuacamoleError as e:
+                module.fail_json(msg=str(e))
 
     # Get guacamole connections after
     try:
