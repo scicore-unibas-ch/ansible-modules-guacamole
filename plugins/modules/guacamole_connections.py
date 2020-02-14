@@ -75,45 +75,13 @@ from ansible.module_utils.urls import open_url
 from ansible.module_utils.basic import AnsibleModule
 from ansible.module_utils.six.moves.urllib.error import HTTPError
 from ansible.module_utils.six.moves.urllib.parse import urlencode
+from ansible_collections.scicore.guacamole.plugins.module_utils.guacamole import GuacamoleError,guacamole_get_token
 
 
-URL_TOKEN = "{url}/api/tokens"
 URL_LIST_CONNECTIONS = "{url}/api/session/data/{datasource}/connectionGroups/\
 {parent_identifier}/tree?token={token}"
 URL_ADD_CONNECTION = "{url}/api/session/data/{datasource}/connections?token={token}"
 URL_DELETE_CONNECTION = "{url}/api/session/data/{datasource}/connections/{connection_id}?token={token}"
-
-
-class GuacamoleError(Exception):
-    pass
-
-
-def guacamole_get_token(base_url, validate_certs, auth_username, auth_password):
-
-    url_token = URL_TOKEN.format(url=base_url)
-    payload = {
-        'username': auth_username,
-        'password': auth_password
-    }
-    try:
-        r = json.load(open_url(url_token, method='POST',
-                               validate_certs=validate_certs,
-                               data=urlencode(payload)))
-    except ValueError as e:
-        raise GuacamoleError(
-            'API returned invalid JSON when trying to obtain access token from %s: %s'
-            % (url_token, str(e)))
-    except Exception as e:
-        raise GuacamoleError('Could not obtain access token from %s: %s'
-                             % (url_token, str(e)))
-    try:
-        return {
-            'authToken': r['authToken'],
-            'dataSource': r['dataSource'],
-        }
-    except KeyError:
-        raise GuacamoleError(
-            'Could not obtain access token from %s' % url_token)
 
 
 def guacamole_get_connections(base_url, validate_certs, datasource, parent_identifier, auth_token):
