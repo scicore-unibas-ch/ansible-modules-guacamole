@@ -181,6 +181,7 @@ def guacamole_add_connection(base_url, validate_certs, datasource, auth_token, m
         headers = {'Content-Type': 'application/json'}
         r = open_url(url_add_connection, method='POST', validate_certs=validate_certs,
                  headers=headers, data=json.dumps(payload))
+        #  print(r)
     #except urllib_error.HTTPError as e:
         #  print('bbbbbbbbbbbbbbb')
         #  print(r)
@@ -241,9 +242,9 @@ def main():
         module.fail_json(msg=str(e))
 
 
-    # Get guacamole connections
+    # Get guacamole connections before doing anything else
     try:
-        guacamole_connections = guacamole_get_connections(
+        guacamole_connections_before = guacamole_get_connections(
             base_url=module.params.get('base_url'),
             validate_certs=module.params.get('validate_certs'),
             datasource=guacamole_token['dataSource'],
@@ -271,7 +272,23 @@ def main():
         except GuacamoleError as e:
             module.fail_json(msg=str(e))
 
-    module.exit_json(**result)
+        #  print(add_connection.__class__)
+        #  print(add_connection)
+
+    # Get guacamole connections after
+    try:
+        guacamole_connections_after = guacamole_get_connections(
+            base_url=module.params.get('base_url'),
+            validate_certs=module.params.get('validate_certs'),
+            datasource=guacamole_token['dataSource'],
+            parent_identifier='ROOT',
+            auth_token=guacamole_token['authToken'],
+        )
+    except GuacamoleError as e:
+        module.fail_json(msg=str(e))
+
+    if guacamole_connections_before != guacamole_connections_after:
+        result['changed'] = True
 
     #  print connection_header
     #  run_module()
