@@ -382,36 +382,39 @@ def main():
     except GuacamoleError as e:
         module.fail_json(msg=str(e))
 
+    # first check if the connection already exists and fetch its id
+    connection_id = None
+    for connection in guacamole_connections_before['guacamole_connections']['childConnections']:
+        if connection['name'] == module.params.get('connection_name'):
+            connection_id = connection['identifier']
+
     if module.params.get('state') == 'present':
 
-        # Add connection
-        try:
-            guacamole_add_connection(
-                base_url=module.params.get('base_url'),
-                validate_certs=module.params.get('validate_certs'),
-                datasource=guacamole_token['dataSource'],
-                auth_token=guacamole_token['authToken'],
-                module_params=module.params,
-            )
-        except GuacamoleError as e:
-            module.fail_json(msg=str(e))
+        if connection_id is None:
+            # We couldn't find a connection with the provided name so we don't have a connection_id
+            # Add connection
+            try:
+                guacamole_add_connection(
+                    base_url=module.params.get('base_url'),
+                    validate_certs=module.params.get('validate_certs'),
+                    datasource=guacamole_token['dataSource'],
+                    auth_token=guacamole_token['authToken'],
+                    module_params=module.params,
+                )
+            except GuacamoleError as e:
+                module.fail_json(msg=str(e))
+
+        else:
+            # if we reach here is because the connection already exists.
+            # We have a connection_id and we have to update the properties of the existing connection
+            print("here we update an existing connection")
+            #result['msg'] = "There is no guacamole connection named " + module.params.get('connection_name')
 
     if module.params.get('state') == 'absent':
 
-        # Delete connection
-
-        # first find the ID of the connection
-        for connection in guacamole_connections_before['guacamole_connections']['childConnections']:
-            if connection['name'] == module.params.get('connection_name'):
-                connection_id = connection['identifier']
-
-        # Check if we could find the connection
-        try:
-            connection_id
-        except NameError:
-            result['msg'] = "There is no guacamole connection named " + module.params.get('connection_name')
-        else:
-            # If we found the connection id then delete the connection
+        if connection_id:
+            # We found a connection with the provided name and we have the connection_id
+            # Delete connection
             try:
                 guacamole_delete_connection(
                     base_url=module.params.get('base_url'),
@@ -422,6 +425,11 @@ def main():
                 )
             except GuacamoleError as e:
                 module.fail_json(msg=str(e))
+
+        else:
+            # the connection doesn't exists and we don't have a connection_id
+            result['msg'] = "There is no guacamole connection named " + module.params.get('connection_name')
+
 
     # Get guacamole connections after
     try:
