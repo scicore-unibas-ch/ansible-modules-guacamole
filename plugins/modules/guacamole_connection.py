@@ -335,6 +335,10 @@ def guacamole_add_connection(base_url, validate_certs, datasource, auth_token, p
         # with the same name already exists
         if e.code == 400:
             pass
+    except ValueError as e:
+        raise GuacamoleError(
+            'API returned invalid JSON when trying to add connection from %s: %s'
+            % (url_add_connection, str(e)))
     except Exception as e:
         raise GuacamoleError('Could not add a new connection in %s: %s'
                              % (url_add_connection, str(e)))
@@ -357,6 +361,10 @@ def guacamole_update_connection(base_url, validate_certs, datasource, connection
         # with the same name already exists
         if e.code == 400:
             pass
+    except ValueError as e:
+        raise GuacamoleError(
+            'API returned invalid JSON when trying to update connection from %s: %s'
+            % (url_update_connection, str(e)))
     except Exception as e:
         raise GuacamoleError('Could not add a new connection in %s: %s'
                              % (url_update_connection, str(e)))
