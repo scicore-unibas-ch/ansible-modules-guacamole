@@ -172,21 +172,43 @@ author:
 '''
 
 EXAMPLES = '''
-# Pass in a message
-- name: Test with a message
-  my_test:
-    name: hello world
 
-# pass in a message and have changed true
-- name: Test with a message and changed output
-  my_test:
-    name: hello world
-    new: true
+- name: Create a new rdp connection
+  scicore.guacamole.guacamole_connection:
+    base_url: http://localhost/guacamole
+    validate_certs: false
+    auth_username: guacadmin
+    auth_password: guacadmin
+    connection_name: test_name_3
+    protocol: rdp
+    parentIdentifier: ROOT
+    hostname: 192.168.33.44
+    port: 3389
+    username: rdp_user
+    password: rdp_pass
+    state: present
 
-# fail the module
-- name: Test failure of the module
-  my_test:
-    name: fail me
+- name: Create a new vnc connection with sftp enabled
+  scicore.guacamole.guacamole_connection:
+    base_url: http://localhost/guacamole
+    validate_certs: false
+    auth_username: guacadmin
+    auth_password: guacadmin
+    connection_name: test_vnc
+    protocol: vnc
+    parentIdentifier: ROOT
+    hostname: 192.168.33.44
+    port: 5900
+    username: rdp_user
+    password: rdp_pass
+    state: present
+    sftp_enable: true
+    sftp_port: 22
+    sftp_hostname: 192.168.11.11
+    sftp_server_alive_interval: 10
+    sftp_username: sftp_user
+    sftp_password: adsfadfasfdasf
+
 '''
 
 RETURN = '''
