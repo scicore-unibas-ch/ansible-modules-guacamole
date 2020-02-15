@@ -278,7 +278,7 @@ def guacamole_get_connection_details(base_url, validate_certs, datasource, conne
         'guacamole_connection_details': r,
     }
 
-def guacamole_populate_payload(module_params):
+def guacamole_populate_connection_payload(module_params):
     """
     Populate the json that we send to the guaccamole API to create new connection
     or update existing ones
@@ -463,7 +463,7 @@ def main():
 
     if module.params.get('state') == 'present':
 
-        payload = guacamole_populate_payload(module.params)
+        payload = guacamole_populate_connection_payload(module.params)
 
         if connection_id is None:
             # We couldn't find a connection with the provided name so we don't have a connection_id
