@@ -232,6 +232,9 @@ URL_CONNECTION_DETAILS = "{url}/api/session/data/{datasource}/connections/{conne
 
 
 def guacamole_get_connections(base_url, validate_certs, datasource, parent_identifier, auth_token):
+    """
+    Return all the connections registered in the guacamole server
+    """
 
     url_list_connections = URL_LIST_CONNECTIONS.format(
         url=base_url, datasource=datasource, parent_identifier=parent_identifier, token=auth_token)
@@ -252,6 +255,10 @@ def guacamole_get_connections(base_url, validate_certs, datasource, parent_ident
     }
 
 def guacamole_get_connection_details(base_url, validate_certs, datasource, connection_id, auth_token):
+    """
+    Get detailed connection parameters for a single connection.
+    This function requires a connection id and provides more information than function guacamole_get_connections()
+    """
 
     url_connection_details = URL_CONNECTION_DETAILS.format(
         url=base_url, datasource=datasource, connection_id=connection_id, token=auth_token)
@@ -272,8 +279,10 @@ def guacamole_get_connection_details(base_url, validate_certs, datasource, conne
     }
 
 def guacamole_populate_payload(module_params):
-
-    # this is the json we send to the api to create or update the connections
+    """
+    Populate the json that we send to the guaccamole API to create new connection
+    or update existing ones
+    """
 
     payload = {
         "parentIdentifier": module_params['parentIdentifier'],
@@ -309,6 +318,10 @@ def guacamole_populate_payload(module_params):
     return payload
 
 def guacamole_add_connection(base_url, validate_certs, datasource, auth_token, payload):
+    """
+    Add a new connection to the guacamole server. ]
+    Connection can be RDP, VNC, SSH or TELNET
+    """
 
     url_add_connection = URL_ADD_CONNECTION.format(
         url=base_url, datasource=datasource, token=auth_token)
@@ -328,6 +341,9 @@ def guacamole_add_connection(base_url, validate_certs, datasource, auth_token, p
 
 
 def guacamole_update_connection(base_url, validate_certs, datasource, connection_id, auth_token, payload):
+    """
+    Update an existing guacamole connection
+    """
 
     url_update_connection = URL_UPDATE_CONNECTION.format(
         url=base_url, datasource=datasource, connection_id=connection_id, token=auth_token)
@@ -347,6 +363,9 @@ def guacamole_update_connection(base_url, validate_certs, datasource, connection
 
 
 def guacamole_delete_connection(base_url, validate_certs, datasource, connection_id, auth_token):
+    """
+    Delete an existing guacamole connection
+    """
 
     url_delete_connection = URL_DELETE_CONNECTION.format(
         url=base_url, datasource=datasource, connection_id=connection_id, token=auth_token)
