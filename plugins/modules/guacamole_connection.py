@@ -101,6 +101,15 @@ options:
         required: true
         type: str
 
+    state:
+        description:
+            - Create or delete the connection?
+        default: 'present'
+        type: str
+        choices:
+            - present
+            - absent
+
     max_connections:
         description:
             - Max simultaneos connections allowed for this connection
@@ -151,16 +160,6 @@ options:
         description:
             - File browser default upload directory
         type: str
-
-     state:
-        description:
-            - Create or delete the connection?
-        default: 'present'
-        type: str
-        choices:
-            - present
-            - absent
-
 
 
 author:
@@ -304,6 +303,7 @@ def main():
         port=dict(type='int', required=True),
         username=dict(type='str', required=True),
         password=dict(type='str', required=True, no_log=True),
+        state=dict(type='str', choices=['absent', 'present'], default='present'),
         max_connections=dict(type='int', default=1),
         sftp_enable=dict(type='bool', default=False),
         sftp_port=dict(type='int', required=False),
@@ -313,8 +313,7 @@ def main():
         sftp_password=dict(type='str', required=False, no_log=True),
         sftp_private_key=dict(type='str', required=False),
         sftp_root_directory=dict(type='str', required=False),
-        sftp_default_upload_directory=dict(type='str', required=False),
-        state=dict(type='str', choices=['absent', 'present'], default='present')
+        sftp_default_upload_directory=dict(type='str', required=False)
     )
 
     result = dict(changed=False, msg='', diff={},
