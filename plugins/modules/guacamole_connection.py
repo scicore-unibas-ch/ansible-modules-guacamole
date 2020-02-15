@@ -228,6 +228,7 @@ URL_LIST_CONNECTIONS = "{url}/api/session/data/{datasource}/connectionGroups/\
 URL_ADD_CONNECTION = "{url}/api/session/data/{datasource}/connections?token={token}"
 URL_UPDATE_CONNECTION = "{url}/api/session/data/{datasource}/connections/{connection_id}?token={token}"
 URL_DELETE_CONNECTION = URL_UPDATE_CONNECTION
+URL_CONNECTION_DETAILS = "{url}/api/session/data/{datasource}/connections/{connection_id}/parameters?token={token}"
 
 
 def guacamole_get_connections(base_url, validate_certs, datasource, parent_identifier, auth_token):
@@ -248,6 +249,26 @@ def guacamole_get_connections(base_url, validate_certs, datasource, parent_ident
 
     return {
         'guacamole_connections': r,
+    }
+
+def guacamole_get_connection_details(base_url, validate_certs, datasource, connection_id, auth_token):
+
+    url_connection_details = URL_CONNECTION_DETAILS.format(
+        url=base_url, datasource=datasource, connection_id=connection_id, token=auth_token)
+
+    try:
+        r = json.load(open_url(url_connection_details, method='GET',
+                               validate_certs=validate_certs))
+    except ValueError as e:
+        raise GuacamoleError(
+            'API returned invalid JSON when trying to obtain connection details from %s: %s'
+            % (url_connection_details, str(e)))
+    except Exception as e:
+        raise GuacamoleError('Could not obtain connection details from %s: %s'
+                             % (url_connection_details, str(e)))
+
+    return {
+        'guacamole_connection_details': r,
     }
 
 def guacamole_populate_payload(module_params):
@@ -434,6 +455,18 @@ def main():
         else:
             # if we reach here is because the connection already exists.
             # We have a connection_id and we have to update the properties of the existing connection
+
+            try:
+                connection_config_before_update = guacamole_get_connection_details(
+                    base_url=module.params.get('base_url'),
+                    validate_certs=module.params.get('validate_certs'),
+                    datasource=guacamole_token['dataSource'],
+                    auth_token=guacamole_token['authToken'],
+                    connection_id=connection_id,
+                )
+            except GuacamoleError as e:
+                module.fail_json(msg=str(e))
+
             try:
                 guacamole_update_connection(
                     base_url=module.params.get('base_url'),
@@ -445,6 +478,21 @@ def main():
                 )
             except GuacamoleError as e:
                 module.fail_json(msg=str(e))
+
+            try:
+                connection_config_after_update = guacamole_get_connection_details(
+                    base_url=module.params.get('base_url'),
+                    validate_certs=module.params.get('validate_certs'),
+                    datasource=guacamole_token['dataSource'],
+                    auth_token=guacamole_token['authToken'],
+                    connection_id=connection_id,
+                )
+            except GuacamoleError as e:
+                module.fail_json(msg=str(e))
+
+            if connection_config_before_update != connection_config_after_update:
+                result['changed'] = True
+                result['msg'] = 'Connection config has been updated'
 
     if module.params.get('state') == 'absent':
 
