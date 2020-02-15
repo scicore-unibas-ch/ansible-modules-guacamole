@@ -4,7 +4,7 @@ default-docstring-type=sphinx
 extension-pkg-whitelist=PySide2
 
 [MESSAGES CONTROL]
-disable=import-star-module-level,old-division,missing-docstring,invalid-name,too-many-instance-attributes,too-many-arguments,too-many-locals,bad-continuation,too-few-public-methods,too-many-branches,fixme,missing-return-type-doc,missing-type-doc,missing-yield-type-doc,import-error,no-name-in-module
+disable=import-star-module-level,old-division,missing-docstring,invalid-name,too-many-instance-attributes,too-many-arguments,too-many-locals,bad-continuation,too-few-public-methods,too-many-branches,fixme,missing-return-type-doc,missing-type-doc,missing-yield-type-doc,import-error,no-name-in-module,too-many-statements
 
 [REPORTS]
 output-format=text
