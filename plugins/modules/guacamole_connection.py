@@ -212,12 +212,12 @@ EXAMPLES = '''
 '''
 
 RETURN = '''
-original_message:
-    description: The original name param that was passed in
-    type: str
+connection_info:
+    description: Information about the created or updated connection
+    type: dict
     returned: always
 message:
-    description: The output message that the test module generates
+    description: Some extra info about what the module did
     type: str
     returned: always
 '''
