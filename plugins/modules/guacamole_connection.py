@@ -116,7 +116,16 @@ def guacamole_add_connection(base_url, validate_certs, datasource, auth_token, m
             "hostname": module_params['hostname'],
             "port": module_params['port'],
             "username": module_params['username'],
-            "password": module_params['password']
+            "password": module_params['password'],
+            "enable-sftp": module_params['sftp_enable'],
+            "sftp-port": module_params['sftp_port'],
+            "sftp-server-alive-interval": module_params['sftp_server_alive_interval'],
+            "sftp-hostname": module_params['sftp_hostname'],
+            "sftp-username": module_params['sftp_username'],
+            "sftp-password": module_params['sftp_password'],
+            "sftp-private-key": module_params['sftp_private_key'],
+            "sftp-root-directory": module_params['sftp_root_directory'],
+            "sftp-directory": module_params['sftp_default_upload_directory']
         },
         "attributes": {
             "max-connections": ""
@@ -175,6 +184,15 @@ def main():
         username=dict(type='str', required=True),
         password=dict(type='str', required=True, no_log=True),
         max_connections=dict(type='int', default=1),
+        sftp_enable=dict(type='bool', default=False),
+        sftp_port=dict(type='int', required=False),
+        sftp_server_alive_interval=dict(type='int', required=False),
+        sftp_hostname=dict(type='str', required=False),
+        sftp_username=dict(type='str', required=False),
+        sftp_password=dict(type='str', required=False, no_log=True),
+        sftp_private_key=dict(type='str', required=False),
+        sftp_root_directory=dict(type='str', required=False),
+        sftp_default_upload_directory=dict(type='str', required=False),
         state=dict(type='str', choices=['absent', 'present'], default='present')
     )
 
