@@ -276,7 +276,13 @@ def guacamole_add_connection(base_url, validate_certs, datasource, auth_token, m
             "sftp-directory": module_params['sftp_default_upload_directory']
         },
         "attributes": {
-            "max-connections": ""
+            "guacd-encryption": "",
+            "failover-only": "",
+            "weight": "",
+            "max-connections": "",
+            "guacd-hostname": "",
+            "guacd-port": "",
+            "max-connections-per-user": ""
         }
     }
 
