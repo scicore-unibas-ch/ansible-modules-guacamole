@@ -476,6 +476,9 @@ def main():
                     auth_token=guacamole_token['authToken'],
                     payload=payload
                 )
+
+                result['msg'] = "Connection added: " + module.params.get('connection_name')
+
             except GuacamoleError as e:
                 module.fail_json(msg=str(e))
 
@@ -520,6 +523,8 @@ def main():
             if connection_config_before_update != connection_config_after_update:
                 result['changed'] = True
                 result['msg'] = 'Connection config has been updated'
+            else:
+                result['msg'] = 'Connection config not changed'
 
     if module.params.get('state') == 'absent':
 
@@ -534,6 +539,8 @@ def main():
                     auth_token=guacamole_token['authToken'],
                     connection_id=connection_id,
                 )
+
+                result['msg'] = "Connection deleted: " + module.params.get('connection_name')
             except GuacamoleError as e:
                 module.fail_json(msg=str(e))
 
