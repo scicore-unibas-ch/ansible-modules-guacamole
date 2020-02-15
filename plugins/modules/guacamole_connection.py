@@ -20,27 +20,148 @@ ANSIBLE_METADATA = {
 
 DOCUMENTATION = '''
 ---
-module: guacamole_connections
+module: guacamole_connection
 
 short_description: Administer guacamole connections using the rest API
 
 version_added: "2.9"
 
 description:
-    - "This is my longer description explaining my test module"
+    - "Create or delete guacamole connections. You can create rdp, vnc, ssh or telnet connections"
 
 options:
-    name:
+    base_url:
         description:
-            - This is the message to send to the test module
+            - Url to access the guacamole API
         required: true
-    new:
-        description:
-            - Control to demo if the result of this module is changed or not
-        required: false
+        type: str
 
-extends_documentation_fragment:
-    - azure
+    auth_username:
+        description:
+            - Guacamole admin user to login to the API
+        required: true
+        type: str
+
+    auth_password:
+        description:
+            - Guacamole admin user password to login to the API
+        required: true
+        type: str
+
+    validate_certs:
+        description:
+            - Validate ssl certs?
+        default: true
+        type: bool
+
+    connection_name:
+        description:
+            - Name of the new connection to create
+        required: true
+        type: str
+
+    parentIdentifier:
+        description:
+            - Parent indentifier where to create the connection
+        default: 'ROOT'
+        type: str
+
+    protocol:
+        description:
+            - Protocol to use for the new connection
+        required: true
+        type: str
+        choices:
+            - rdp
+            - vnc
+            - ssh
+            - telnet
+
+    hostname:
+        description:
+            - Hostname or ip of the server to connect
+        required: true
+        type: str
+
+    port:
+        description:
+            - Port to connect
+        required: true
+        type: int
+
+    username:
+        description:
+            - Username for the connection
+        required: true
+        type: str
+
+    password:
+        description:
+            - Password for the connection
+        required: true
+        type: str
+
+    max_connections:
+        description:
+            - Max simultaneos connections allowed for this connection
+        required: true
+        type: int
+
+    sftp_enable:
+        description:
+            - Should we enable sftp transfers for this connection?
+        type: bool
+
+    sftp_port:
+        description:
+            - Port to use for sftp
+        type: int
+
+    sftp_server_alive_interval:
+        description:
+            - sftp keep alive interval
+        type: int
+
+     sftp_hostname:
+        description:
+            - Hostname or ip for sftp
+        type: str
+
+     sftp_username:
+        description:
+            - Username for sftp
+        type: str
+
+     sftp_password:
+        description:
+            - Password for sftp
+        type: str
+
+     sftp_private_key:
+        description:
+            - Private key for sftp authentication
+        type: str
+
+     sftp_root_directory:
+        description:
+            - File browser root directory
+        type: str
+
+     sftp_default_upload_directory:
+        description:
+            - File browser default upload directory
+        type: str
+
+     state:
+        description:
+            - Create or delete the connection?
+        default: 'present'
+        type: str
+        choices:
+            - present
+            - absent
+
+
 
 author:
     - Pablo Escobar Lopez (@pescobar)
