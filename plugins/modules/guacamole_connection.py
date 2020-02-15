@@ -308,7 +308,7 @@ def guacamole_populate_payload(module_params):
             "guacd-encryption": "",
             "failover-only": "",
             "weight": "",
-            "max-connections": "",
+            "max-connections": module_params['max_connections'],
             "guacd-hostname": "",
             "guacd-port": "",
             "max-connections-per-user": ""
@@ -541,6 +541,7 @@ def main():
                 )
 
                 result['msg'] = "Connection deleted: " + module.params.get('connection_name')
+
             except GuacamoleError as e:
                 module.fail_json(msg=str(e))
 
