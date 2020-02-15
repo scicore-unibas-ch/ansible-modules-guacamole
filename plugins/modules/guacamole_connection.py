@@ -151,6 +151,11 @@ options:
             - Private key for sftp authentication
         type: str
 
+     sftp_private_key_password:
+        description:
+            - Password for the sftp private key used for authentication
+        type: str
+
      sftp_root_directory:
         description:
             - File browser root directory
@@ -244,6 +249,7 @@ def guacamole_add_connection(base_url, validate_certs, datasource, auth_token, m
             "sftp-username": module_params['sftp_username'],
             "sftp-password": module_params['sftp_password'],
             "sftp-private-key": module_params['sftp_private_key'],
+            "passphrase": module_params['sftp_private_key_password'],
             "sftp-root-directory": module_params['sftp_root_directory'],
             "sftp-directory": module_params['sftp_default_upload_directory']
         },
@@ -312,6 +318,7 @@ def main():
         sftp_username=dict(type='str', required=False),
         sftp_password=dict(type='str', required=False, no_log=True),
         sftp_private_key=dict(type='str', required=False),
+        sftp_private_key_password=dict(type='str', required=False),
         sftp_root_directory=dict(type='str', required=False),
         sftp_default_upload_directory=dict(type='str', required=False)
     )
