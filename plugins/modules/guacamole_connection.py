@@ -250,11 +250,9 @@ def guacamole_get_connections(base_url, validate_certs, datasource, parent_ident
         'guacamole_connections': r,
     }
 
+def guacamole_populate_payload(module_params):
 
-def guacamole_add_connection(base_url, validate_certs, datasource, auth_token, module_params):
-
-    url_add_connection = URL_ADD_CONNECTION.format(
-        url=base_url, datasource=datasource, token=auth_token)
+    # this is the json we send to the api to create or update the connections
 
     payload = {
         "parentIdentifier": module_params['parentIdentifier'],
@@ -286,6 +284,13 @@ def guacamole_add_connection(base_url, validate_certs, datasource, auth_token, m
             "max-connections-per-user": ""
         }
     }
+
+    return payload
+
+def guacamole_add_connection(base_url, validate_certs, datasource, auth_token, payload):
+
+    url_add_connection = URL_ADD_CONNECTION.format(
+        url=base_url, datasource=datasource, token=auth_token)
 
     try:
         headers = {'Content-Type': 'application/json'}
@@ -301,41 +306,10 @@ def guacamole_add_connection(base_url, validate_certs, datasource, auth_token, m
                              % (url_add_connection, str(e)))
 
 
-def guacamole_update_connection(base_url, validate_certs, datasource, connection_id, auth_token, module_params):
+def guacamole_update_connection(base_url, validate_certs, datasource, connection_id, auth_token, payload):
 
     url_update_connection = URL_UPDATE_CONNECTION.format(
         url=base_url, datasource=datasource, connection_id=connection_id, token=auth_token)
-
-    payload = {
-        "parentIdentifier": module_params['parentIdentifier'],
-        "name": module_params['connection_name'],
-        "protocol": module_params['protocol'],
-        "parameters": {
-            "hostname": module_params['hostname'],
-            "port": module_params['port'],
-            "username": module_params['username'],
-            "password": module_params['password'],
-            "enable-sftp": module_params['sftp_enable'],
-            "sftp-port": module_params['sftp_port'],
-            "sftp-server-alive-interval": module_params['sftp_server_alive_interval'],
-            "sftp-hostname": module_params['sftp_hostname'],
-            "sftp-username": module_params['sftp_username'],
-            "sftp-password": module_params['sftp_password'],
-            "sftp-private-key": module_params['sftp_private_key'],
-            "passphrase": module_params['sftp_private_key_password'],
-            "sftp-root-directory": module_params['sftp_root_directory'],
-            "sftp-directory": module_params['sftp_default_upload_directory']
-        },
-        "attributes": {
-            "guacd-encryption": "",
-            "failover-only": "",
-            "weight": "",
-            "max-connections": "",
-            "guacd-hostname": "",
-            "guacd-port": "",
-            "max-connections-per-user": ""
-        }
-    }
 
     try:
         headers = {'Content-Type': 'application/json'}
@@ -441,6 +415,8 @@ def main():
 
     if module.params.get('state') == 'present':
 
+        payload = guacamole_populate_payload(module.params)
+
         if connection_id is None:
             # We couldn't find a connection with the provided name so we don't have a connection_id
             # Add connection
@@ -450,7 +426,7 @@ def main():
                     validate_certs=module.params.get('validate_certs'),
                     datasource=guacamole_token['dataSource'],
                     auth_token=guacamole_token['authToken'],
-                    module_params=module.params,
+                    payload=payload
                 )
             except GuacamoleError as e:
                 module.fail_json(msg=str(e))
@@ -465,7 +441,7 @@ def main():
                     datasource=guacamole_token['dataSource'],
                     auth_token=guacamole_token['authToken'],
                     connection_id=connection_id,
-                    module_params=module.params,
+                    payload=payload
                 )
             except GuacamoleError as e:
                 module.fail_json(msg=str(e))
@@ -488,6 +464,7 @@ def main():
 
         else:
             # the connection doesn't exists and we don't have a connection_id
+            # so we don't call delete_connection() and just return a msg
             result['msg'] = "There is no guacamole connection named " + module.params.get('connection_name')
 
 
