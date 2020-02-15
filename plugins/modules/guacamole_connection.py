@@ -226,7 +226,8 @@ message:
 URL_LIST_CONNECTIONS = "{url}/api/session/data/{datasource}/connectionGroups/\
 {parent_identifier}/tree?token={token}"
 URL_ADD_CONNECTION = "{url}/api/session/data/{datasource}/connections?token={token}"
-URL_DELETE_CONNECTION = "{url}/api/session/data/{datasource}/connections/{connection_id}?token={token}"
+URL_UPDATE_CONNECTION = "{url}/api/session/data/{datasource}/connections/{connection_id}?token={token}"
+URL_DELETE_CONNECTION = URL_UPDATE_CONNECTION
 
 
 def guacamole_get_connections(base_url, validate_certs, datasource, parent_identifier, auth_token):
@@ -298,6 +299,56 @@ def guacamole_add_connection(base_url, validate_certs, datasource, auth_token, m
     except Exception as e:
         raise GuacamoleError('Could not add a new connection in %s: %s'
                              % (url_add_connection, str(e)))
+
+
+def guacamole_update_connection(base_url, validate_certs, datasource, connection_id, auth_token, module_params):
+
+    url_update_connection = URL_UPDATE_CONNECTION.format(
+        url=base_url, datasource=datasource, connection_id=connection_id, token=auth_token)
+
+    payload = {
+        "parentIdentifier": module_params['parentIdentifier'],
+        "name": module_params['connection_name'],
+        "protocol": module_params['protocol'],
+        "parameters": {
+            "hostname": module_params['hostname'],
+            "port": module_params['port'],
+            "username": module_params['username'],
+            "password": module_params['password'],
+            "enable-sftp": module_params['sftp_enable'],
+            "sftp-port": module_params['sftp_port'],
+            "sftp-server-alive-interval": module_params['sftp_server_alive_interval'],
+            "sftp-hostname": module_params['sftp_hostname'],
+            "sftp-username": module_params['sftp_username'],
+            "sftp-password": module_params['sftp_password'],
+            "sftp-private-key": module_params['sftp_private_key'],
+            "passphrase": module_params['sftp_private_key_password'],
+            "sftp-root-directory": module_params['sftp_root_directory'],
+            "sftp-directory": module_params['sftp_default_upload_directory']
+        },
+        "attributes": {
+            "guacd-encryption": "",
+            "failover-only": "",
+            "weight": "",
+            "max-connections": "",
+            "guacd-hostname": "",
+            "guacd-port": "",
+            "max-connections-per-user": ""
+        }
+    }
+
+    try:
+        headers = {'Content-Type': 'application/json'}
+        r = open_url(url_update_connection, method='PUT', validate_certs=validate_certs,
+                     headers=headers, data=json.dumps(payload))
+    except HTTPError as e:
+        # guacamole api returns http error code 400 if connection
+        # with the same name already exists
+        if e.code == 400:
+            pass
+    except Exception as e:
+        raise GuacamoleError('Could not add a new connection in %s: %s'
+                             % (url_update_connection, str(e)))
 
 
 def guacamole_delete_connection(base_url, validate_certs, datasource, connection_id, auth_token):
@@ -407,8 +458,17 @@ def main():
         else:
             # if we reach here is because the connection already exists.
             # We have a connection_id and we have to update the properties of the existing connection
-            print("here we update an existing connection")
-            #result['msg'] = "There is no guacamole connection named " + module.params.get('connection_name')
+            try:
+                guacamole_update_connection(
+                    base_url=module.params.get('base_url'),
+                    validate_certs=module.params.get('validate_certs'),
+                    datasource=guacamole_token['dataSource'],
+                    auth_token=guacamole_token['authToken'],
+                    connection_id=connection_id,
+                    module_params=module.params,
+                )
+            except GuacamoleError as e:
+                module.fail_json(msg=str(e))
 
     if module.params.get('state') == 'absent':
 
