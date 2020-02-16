@@ -371,25 +371,19 @@ def guacamole_update_connection(base_url, validate_certs, datasource, connection
 
 def guacamole_delete_connection(base_url, validate_certs, datasource, connection_id, auth_token):
     """
-    Delete an existing guacamole connection
+    Delete an existing guacamole connection.
+    API doesn't return any json
     """
 
     url_delete_connection = URL_DELETE_CONNECTION.format(
         url=base_url, datasource=datasource, connection_id=connection_id, token=auth_token)
 
+    #  print(url_delete_connection)
     try:
-        r = open_url(url_delete_connection, method='DELETE', validate_certs=validate_certs)
-    except ValueError as e:
-        raise GuacamoleError(
-            'API returned invalid JSON when trying to delete connection from %s: %s'
-            % (url_delete_connection, str(e)))
+        open_url(url_delete_connection, method='DELETE', validate_certs=validate_certs)
     except Exception as e:
         raise GuacamoleError('Could not delete guacamole connection from %s: %s'
                              % (url_delete_connection, str(e)))
-
-    return {
-        'guacamole_connections': r,
-    }
 
 
 def main():
