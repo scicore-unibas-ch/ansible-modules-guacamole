@@ -151,7 +151,7 @@ EXAMPLES = '''
 '''
 
 RETURN = '''
-connection_info:
+user_info:
     description: Information about the created or updated user
     type: dict
     returned: always
@@ -411,6 +411,11 @@ def main():
 
     if guacamole_users_before != guacamole_users_after:
         result['changed'] = True
+
+    for user in guacamole_users_after.items():
+        if user[1]['username'] == module.params.get('username'):
+            result['user_info'] = user[1]
+            break
 
     module.exit_json(**result)
 
