@@ -135,47 +135,24 @@ author:
 
 EXAMPLES = '''
 
-- name: Create a new rdp connection
-  scicore.guacamole.guacamole_connection:
+- name: Create a new guacamole user
+  scicore.guacamole.guacamole_user:
     base_url: http://localhost/guacamole
     validate_certs: false
     auth_username: guacadmin
     auth_password: guacadmin
-    connection_name: test_name_3
-    protocol: rdp
-    parentIdentifier: ROOT
-    hostname: 192.168.33.44
-    port: 3389
-    username: rdp_user
-    password: rdp_pass
-    state: present
-
-- name: Create a new vnc connection with sftp enabled
-  scicore.guacamole.guacamole_connection:
-    base_url: http://localhost/guacamole
-    validate_certs: false
-    auth_username: guacadmin
-    auth_password: guacadmin
-    connection_name: test_vnc
-    protocol: vnc
-    parentIdentifier: ROOT
-    hostname: 192.168.33.44
-    port: 5900
-    username: rdp_user
-    password: rdp_pass
-    state: present
-    sftp_enable: true
-    sftp_port: 22
-    sftp_hostname: 192.168.11.11
-    sftp_server_alive_interval: 10
-    sftp_username: sftp_user
-    sftp_password: adsfadfasfdasf
+    username: test_user_3
+    password: user_pass
+    full_name: John Foo
+    email: john@email.com
+    organization: company_bar
+    organizational_role: ceo
 
 '''
 
 RETURN = '''
 connection_info:
-    description: Information about the created or updated connection
+    description: Information about the created or updated user
     type: dict
     returned: always
 message:
