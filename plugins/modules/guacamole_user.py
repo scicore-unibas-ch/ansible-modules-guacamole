@@ -274,6 +274,7 @@ def guacamole_populate_user_payload(module_params):
 
     return payload
 
+
 def guacamole_add_user(base_url, validate_certs, datasource, auth_token, payload):
     """
     Add a new user account to the guacamole server.
@@ -294,6 +295,7 @@ def guacamole_add_user(base_url, validate_certs, datasource, auth_token, payload
         raise GuacamoleError('Could not add a new user in %s: %s'
                              % (url_add_user, str(e)))
 
+
 def guacamole_update_user(base_url, validate_certs, datasource, username, auth_token, payload):
     """
     Update existing user in the guacamole server.
@@ -313,6 +315,7 @@ def guacamole_update_user(base_url, validate_certs, datasource, username, auth_t
     except Exception as e:
         raise GuacamoleError('Could not update user in %s: %s'
                              % (url_update_user, str(e)))
+
 
 def guacamole_delete_user(base_url, validate_certs, datasource, username, auth_token):
     """
@@ -419,7 +422,6 @@ def main():
 
         # if the user doesn't exist in guacamole we create it
         else:
-
             try:
                 guacamole_add_user(
                     base_url=module.params.get('base_url'),
@@ -456,7 +458,7 @@ def main():
         else:
             result['msg'] = "Nothing deleted. No guacamole username " + module.params.get('username')
 
-    # Get existing guacamole users after
+    # Get existing guacamole users after the module exectuion to check if something changed
     try:
         guacamole_users_after = guacamole_get_users(
             base_url=module.params.get('base_url'),
