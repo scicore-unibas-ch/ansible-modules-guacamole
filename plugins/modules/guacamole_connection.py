@@ -436,7 +436,7 @@ def main():
     except GuacamoleError as e:
         module.fail_json(msg=str(e))
 
-    # Get guacamole connections before doing anything else
+    # Get existing guacamole connections before doing anything else
     try:
         guacamole_connections_before = guacamole_get_connections(
             base_url=module.params.get('base_url'),
@@ -448,7 +448,8 @@ def main():
     except GuacamoleError as e:
         module.fail_json(msg=str(e))
 
-    # first check if the connection already exists and fetch its id
+    # First check if the connection already exists
+    # If the connection exists we get the connection_id
     guacamole_connection_exists = False
     for connection in guacamole_connections_before:
         if connection['name'] == module.params.get('connection_name'):
@@ -456,13 +457,20 @@ def main():
             connection_id = connection['identifier']
             break
 
+    # module arg state=present so we have to create a new connecion
+    # or update a connection if it already exists
     if module.params.get('state') == 'present':
 
+        # populate the payload(json) with the connection info that we
+        # will send to the API
         payload = guacamole_populate_connection_payload(module.params)
 
         if guacamole_connection_exists:
+        # the connection already exists so we update it
 
             try:
+                # query what's the current config for this connection so
+                # we can check later if it has changed
                 connection_config_before_update = guacamole_get_connection_details(
                     base_url=module.params.get('base_url'),
                     validate_certs=module.params.get('validate_certs'),
@@ -474,6 +482,7 @@ def main():
                 module.fail_json(msg=str(e))
 
             try:
+                # apply the config upddate to the connection
                 guacamole_update_connection(
                     base_url=module.params.get('base_url'),
                     validate_certs=module.params.get('validate_certs'),
@@ -486,6 +495,8 @@ def main():
                 module.fail_json(msg=str(e))
 
             try:
+                # query what's the config for this connection again to
+                # verify if it has changed
                 connection_config_after_update = guacamole_get_connection_details(
                     base_url=module.params.get('base_url'),
                     validate_certs=module.params.get('validate_certs'),
@@ -497,9 +508,11 @@ def main():
                 module.fail_json(msg=str(e))
 
             if connection_config_before_update != connection_config_after_update:
+                # if the connection config has changed we report it
                 result['changed'] = True
                 result['msg'] = 'Connection config has been updated'
             else:
+                # if the connection config hasn't changed we just report a msg
                 result['msg'] = 'Connection config not changed'
 
         else:
@@ -518,7 +531,7 @@ def main():
             except GuacamoleError as e:
                 module.fail_json(msg=str(e))
 
-
+    # module arg state=absent so we have to delete the connection
     if module.params.get('state') == 'absent':
 
         if guacamole_connection_exists:
