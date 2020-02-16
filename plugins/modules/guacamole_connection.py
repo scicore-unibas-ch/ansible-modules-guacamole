@@ -9,7 +9,8 @@ import json
 from ansible.module_utils.basic import AnsibleModule
 from ansible.module_utils.urls import open_url
 from ansible.module_utils.six.moves.urllib.error import HTTPError
-from ansible_collections.scicore.guacamole.plugins.module_utils.guacamole import GuacamoleError, guacamole_get_token
+from ansible_collections.scicore.guacamole.plugins.module_utils.guacamole import GuacamoleError, \
+    guacamole_get_token, guacamole_get_connections
 __metaclass__ = type
 
 ANSIBLE_METADATA = {
@@ -231,27 +232,6 @@ URL_DELETE_CONNECTION = URL_UPDATE_CONNECTION
 URL_CONNECTION_DETAILS = "{url}/api/session/data/{datasource}/connections/{connection_id}/parameters?token={token}"
 
 
-def guacamole_get_connections(base_url, validate_certs, datasource, parent_identifier, auth_token):
-    """
-    Return a list of dicts with all the connections registered in the guacamole server
-    for the provided parent_identifier
-    """
-
-    url_list_connections = URL_LIST_CONNECTIONS.format(
-        url=base_url, datasource=datasource, parent_identifier=parent_identifier, token=auth_token)
-
-    try:
-        parent_identifier_connections = json.load(open_url(url_list_connections, method='GET',
-                               validate_certs=validate_certs))
-    except ValueError as e:
-        raise GuacamoleError(
-            'API returned invalid JSON when trying to obtain list of connections from %s: %s'
-            % (url_list_connections, str(e)))
-    except Exception as e:
-        raise GuacamoleError('Could not obtain list of guacamole connections from %s: %s'
-                             % (url_list_connections, str(e)))
-
-    return parent_identifier_connections['childConnections']
 
 def guacamole_get_connection_details(base_url, validate_certs, datasource, connection_id, auth_token):
     """

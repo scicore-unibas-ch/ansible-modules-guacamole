@@ -8,7 +8,8 @@ import json
 
 from ansible.module_utils.basic import AnsibleModule
 from ansible.module_utils.urls import open_url
-from ansible_collections.scicore.guacamole.plugins.module_utils.guacamole import GuacamoleError, guacamole_get_token
+from ansible_collections.scicore.guacamole.plugins.module_utils.guacamole import GuacamoleError, \
+    guacamole_get_token, guacamole_get_connections
 __metaclass__ = type
 
 ANSIBLE_METADATA = {
