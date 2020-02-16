@@ -240,7 +240,7 @@ def guacamole_get_connections(base_url, validate_certs, datasource, parent_ident
         url=base_url, datasource=datasource, parent_identifier=parent_identifier, token=auth_token)
 
     try:
-        r = json.load(open_url(url_list_connections, method='GET',
+        parent_identifier_connections = json.load(open_url(url_list_connections, method='GET',
                                validate_certs=validate_certs))
     except ValueError as e:
         raise GuacamoleError(
@@ -250,9 +250,7 @@ def guacamole_get_connections(base_url, validate_certs, datasource, parent_ident
         raise GuacamoleError('Could not obtain list of guacamole connections from %s: %s'
                              % (url_list_connections, str(e)))
 
-    return {
-        'guacamole_connections': r,
-    }
+    return parent_identifier_connections['childConnections']
 
 def guacamole_get_connection_details(base_url, validate_certs, datasource, connection_id, auth_token):
     """
