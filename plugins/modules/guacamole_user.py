@@ -8,7 +8,6 @@ import json
 
 from ansible.module_utils.basic import AnsibleModule
 from ansible.module_utils.urls import open_url
-from ansible.module_utils.six.moves.urllib.error import HTTPError
 from ansible_collections.scicore.guacamole.plugins.module_utils.guacamole import GuacamoleError, guacamole_get_token
 __metaclass__ = type
 
@@ -411,7 +410,7 @@ def main():
                     validate_certs=module.params.get('validate_certs'),
                     datasource=guacamole_token['dataSource'],
                     auth_token=guacamole_token['authToken'],
-                    username=guacamole_user,
+                    username=module.params.get['username'],
                     payload=payload
                 )
 
