@@ -373,19 +373,49 @@ def main():
     except GuacamoleError as e:
         module.fail_json(msg=str(e))
 
-    payload = guacamole_populate_user_payload(module.params)
+    # check if the user already exists in guacamole
+    # if the user exists we define "guacamole_user = existing_username"
+    for user in guacamole_users_before.items():
+        guacamole_user = None
+        if user[1]['username'] == module.params.get('username'):
+            guacamole_user = user[1]['username']
 
-    try:
-        guacamole_add_user(
-            base_url=module.params.get('base_url'),
-            validate_certs=module.params.get('validate_certs'),
-            datasource=guacamole_token['dataSource'],
-            auth_token=guacamole_token['authToken'],
-            payload=payload
-        )
+    # module arg state=present so we must create or update a user in guacamole
+    if module.params.get('state') == 'present':
 
-    except GuacamoleError as e:
-        module.fail_json(msg=str(e))
+        # populate the payload to send to the API
+        payload = guacamole_populate_user_payload(module.params)
+
+        # if the user already exists in guacamole we update it
+        if guacamole_user:
+            try:
+                guacamole_update_user(
+                    base_url=module.params.get('base_url'),
+                    validate_certs=module.params.get('validate_certs'),
+                    datasource=guacamole_token['dataSource'],
+                    auth_token=guacamole_token['authToken'],
+                    username=guacamole_user,
+                    payload=payload
+                )
+
+            except GuacamoleError as e:
+                module.fail_json(msg=str(e))
+            pass
+
+        # if the user doesn't exist in guacamole we create it
+        else:
+
+            try:
+                guacamole_add_user(
+                    base_url=module.params.get('base_url'),
+                    validate_certs=module.params.get('validate_certs'),
+                    datasource=guacamole_token['dataSource'],
+                    auth_token=guacamole_token['authToken'],
+                    payload=payload
+                )
+
+            except GuacamoleError as e:
+                module.fail_json(msg=str(e))
 
     # Get existing guacamole users after
     try:
