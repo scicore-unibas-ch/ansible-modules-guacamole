@@ -226,8 +226,7 @@ message:
 URL_LIST_USERS = "{url}/api/session/data/{datasource}/users?token={token}"
 URL_ADD_USER = URL_LIST_USERS
 URL_UPDATE_USER = "{url}/api/session/data/postgresql/users/{username}?token={token}"
-URL_DELETE_USER = ""
-URL_USER_DETAILS = ""
+URL_DELETE_USER = URL_UPDATE_USER
 
 
 def guacamole_get_users(base_url, validate_certs, datasource, auth_token):
@@ -315,6 +314,24 @@ def guacamole_update_user(base_url, validate_certs, datasource, username, auth_t
     except Exception as e:
         raise GuacamoleError('Could not update user in %s: %s'
                              % (url_update_user, str(e)))
+
+def guacamole_delete_user(base_url, validate_certs, datasource, username, auth_token):
+    """
+    Delete existing user in the guacamole server.
+    """
+
+    url_delete_user = URL_DELETE_USER.format(
+        url=base_url, datasource=datasource, username=username, token=auth_token)
+
+    try:
+        r = open_url(url_delete_user, method='DELETE', validate_certs=validate_certs)
+    except ValueError as e:
+        raise GuacamoleError(
+            'API returned invalid JSON when trying to delete user from %s: %s'
+            % (url_delete_user, str(e)))
+    except Exception as e:
+        raise GuacamoleError('Could not delete user in %s: %s'
+                             % (url_delete_user, str(e)))
 
 
 def main():
