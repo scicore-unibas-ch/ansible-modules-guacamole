@@ -391,20 +391,20 @@ def main():
         module.fail_json(msg=str(e))
 
     # check if the user already exists in guacamole
-    # if the user exists we define "guacamole_user = existing_username"
+    guacamole_user_exists = False
     for user in guacamole_users_before.items():
-        guacamole_user = None
         if user[1]['username'] == module.params.get('username'):
-            guacamole_user = user[1]['username']
+            guacamole_user_exists = True
+            break
 
     # module arg state=present so we must create or update a user in guacamole
     if module.params.get('state') == 'present':
 
-        # populate the payload to send to the API
+        # populate the payload with the user info to send to the API
         payload = guacamole_populate_user_payload(module.params)
 
         # if the user already exists in guacamole we update it
-        if guacamole_user:
+        if guacamole_user_exists:
             try:
                 guacamole_update_user(
                     base_url=module.params.get('base_url'),
@@ -417,7 +417,6 @@ def main():
 
             except GuacamoleError as e:
                 module.fail_json(msg=str(e))
-            pass
 
         # if the user doesn't exist in guacamole we create it
         else:
@@ -433,6 +432,30 @@ def main():
 
             except GuacamoleError as e:
                 module.fail_json(msg=str(e))
+
+    # module arg state=absent so we must delete a user from guacamole
+    if module.params.get('state') == 'absent':
+
+        # if the user already exists in guacamole we delete it
+        if guacamole_user_exists:
+
+            try:
+                guacamole_delete_user(
+                    base_url=module.params.get('base_url'),
+                    validate_certs=module.params.get('validate_certs'),
+                    datasource=guacamole_token['dataSource'],
+                    auth_token=guacamole_token['authToken'],
+                    username=module.params.get('username'),
+                )
+
+                result['msg'] = "User deleted: " + module.params.get('username')
+
+            except GuacamoleError as e:
+                module.fail_json(msg=str(e))
+
+        # if the user doesn't exist in guacamole we just inform about it
+        else:
+            result['msg'] = "Nothing deleted. No guacamole username " + module.params.get('username')
 
     # Get existing guacamole users after
     try:
