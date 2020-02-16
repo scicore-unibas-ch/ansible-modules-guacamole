@@ -398,7 +398,7 @@ def main():
         else:
             result['msg'] = "Nothing deleted. No guacamole username " + module.params.get('username')
 
-    # Get existing guacamole users after the module exectuion to check if something changed
+    # Get existing guacamole users after the module execution to check if something changed
     try:
         guacamole_users_after = guacamole_get_users(
             base_url=module.params.get('base_url'),
