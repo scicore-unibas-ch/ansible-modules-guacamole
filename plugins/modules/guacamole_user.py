@@ -225,7 +225,7 @@ message:
 
 URL_LIST_USERS = "{url}/api/session/data/{datasource}/users?token={token}"
 URL_ADD_USER = URL_LIST_USERS
-URL_UPDATE_USER = ""
+URL_UPDATE_USER = "{url}/api/session/data/postgresql/users/{username}?token={token}"
 URL_DELETE_USER = ""
 URL_USER_DETAILS = ""
 
@@ -295,6 +295,26 @@ def guacamole_add_user(base_url, validate_certs, datasource, auth_token, payload
     except Exception as e:
         raise GuacamoleError('Could not add a new user in %s: %s'
                              % (url_add_user, str(e)))
+
+def guacamole_update_user(base_url, validate_certs, datasource, auth_token, payload):
+    """
+    Update existing user in the guacamole server.
+    """
+
+    url_update_user = URL_UPDATE_USER.format(
+        url=base_url, datasource=datasource, token=auth_token)
+
+    try:
+        headers = {'Content-Type': 'application/json'}
+        r = open_url(url_update_user, method='POST', validate_certs=validate_certs,
+                     headers=headers, data=json.dumps(payload))
+    except ValueError as e:
+        raise GuacamoleError(
+            'API returned invalid JSON when trying to update user from %s: %s'
+            % (url_update_user, str(e)))
+    except Exception as e:
+        raise GuacamoleError('Could not update user in %s: %s'
+                             % (url_update_user, str(e)))
 
 
 def main():
