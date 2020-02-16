@@ -233,7 +233,8 @@ URL_CONNECTION_DETAILS = "{url}/api/session/data/{datasource}/connections/{conne
 
 def guacamole_get_connections(base_url, validate_certs, datasource, parent_identifier, auth_token):
     """
-    Return all the connections registered in the guacamole server
+    Return a list of dicts with all the connections registered in the guacamole server
+    for the provided parent_identifier
     """
 
     url_list_connections = URL_LIST_CONNECTIONS.format(
@@ -454,35 +455,18 @@ def main():
         module.fail_json(msg=str(e))
 
     # first check if the connection already exists and fetch its id
-    connection_id = None
-    for connection in guacamole_connections_before['guacamole_connections']['childConnections']:
+    guacamole_connection_exists = False
+    for connection in guacamole_connections_before:
         if connection['name'] == module.params.get('connection_name'):
+            guacamole_connection_exists = True
             connection_id = connection['identifier']
+            break
 
     if module.params.get('state') == 'present':
 
         payload = guacamole_populate_connection_payload(module.params)
 
-        if connection_id is None:
-            # We couldn't find a connection with the provided name so we don't have a connection_id
-            # Add connection
-            try:
-                guacamole_add_connection(
-                    base_url=module.params.get('base_url'),
-                    validate_certs=module.params.get('validate_certs'),
-                    datasource=guacamole_token['dataSource'],
-                    auth_token=guacamole_token['authToken'],
-                    payload=payload
-                )
-
-                result['msg'] = "Connection added: " + module.params.get('connection_name')
-
-            except GuacamoleError as e:
-                module.fail_json(msg=str(e))
-
-        else:
-            # if we reach here is because the connection already exists.
-            # We have a connection_id and we have to update the properties of the existing connection
+        if guacamole_connection_exists:
 
             try:
                 connection_config_before_update = guacamole_get_connection_details(
@@ -524,11 +508,27 @@ def main():
             else:
                 result['msg'] = 'Connection config not changed'
 
+        else:
+            # We couldn't find a connection with the provided name so we add it
+            try:
+                guacamole_add_connection(
+                    base_url=module.params.get('base_url'),
+                    validate_certs=module.params.get('validate_certs'),
+                    datasource=guacamole_token['dataSource'],
+                    auth_token=guacamole_token['authToken'],
+                    payload=payload
+                )
+
+                result['msg'] = "Connection added: " + module.params.get('connection_name')
+
+            except GuacamoleError as e:
+                module.fail_json(msg=str(e))
+
+
     if module.params.get('state') == 'absent':
 
-        if connection_id:
-            # We found a connection with the provided name and we have the connection_id
-            # Delete connection
+        if guacamole_connection_exists:
+
             try:
                 guacamole_delete_connection(
                     base_url=module.params.get('base_url'),
@@ -544,8 +544,7 @@ def main():
                 module.fail_json(msg=str(e))
 
         else:
-            # the connection doesn't exists and we don't have a connection_id
-            # so we don't call delete_connection() and just return a msg
+            # the connection doesn't exists so we don't call delete_connection() and just return a msg
             result['msg'] = "There is no guacamole connection named " + module.params.get('connection_name')
 
 
@@ -564,7 +563,7 @@ def main():
     if guacamole_connections_before != guacamole_connections_after:
         result['changed'] = True
 
-    for connection in guacamole_connections_after['guacamole_connections']['childConnections']:
+    for connection in guacamole_connections_after:
         if connection['name'] == module.params.get('connection_name'):
             result['connection_info'] = connection
 
