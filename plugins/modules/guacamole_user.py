@@ -19,14 +19,14 @@ ANSIBLE_METADATA = {
 
 DOCUMENTATION = '''
 ---
-module: guacamole_connection
+module: guacamole_user
 
-short_description: Administer guacamole connections using the rest API
+short_description: Administer guacamole users using the rest API
 
 version_added: "2.9"
 
 description:
-    - "Create or delete guacamole connections. You can create rdp, vnc, ssh or telnet connections"
+    - "Create or delete guacamole users.
 
 options:
     base_url:
@@ -53,118 +53,81 @@ options:
         default: true
         type: bool
 
-    connection_name:
-        description:
-            - Name of the new connection to create
-        required: true
-        type: str
-
-    parentIdentifier:
-        description:
-            - Parent indentifier where to create the connection
-        default: 'ROOT'
-        type: str
-
-    protocol:
-        description:
-            - Protocol to use for the new connection
-        required: true
-        type: str
-        choices:
-            - rdp
-            - vnc
-            - ssh
-            - telnet
-
-    hostname:
-        description:
-            - Hostname or ip of the server to connect
-        required: true
-        type: str
-
-    port:
-        description:
-            - Port to connect
-        required: true
-        type: int
-
     username:
         description:
-            - Username for the connection
+            - Name of the new user to create
         required: true
         type: str
 
     password:
         description:
-            - Password for the connection
+            - Password for the new user
         required: true
         type: str
 
     state:
         description:
-            - Create or delete the connection?
+            - Create or delete the user?
         default: 'present'
         type: str
         choices:
             - present
             - absent
 
-    max_connections:
+    disabled:
         description:
-            - Max simultaneos connections allowed for this connection
-        required: true
-        type: int
-
-    sftp_enable:
-        description:
-            - Should we enable sftp transfers for this connection?
+            - Disable the account?
         type: bool
 
-    sftp_port:
+    expired:
         description:
-            - Port to use for sftp
-        type: int
+            - Is this account expired?
+        type: bool
 
-    sftp_server_alive_interval:
+    allow_access_after:
         description:
-            - sftp keep alive interval
-        type: int
-
-     sftp_hostname:
-        description:
-            - Hostname or ip for sftp
+            - Hour to allow access. Format --:--
         type: str
 
-     sftp_username:
+    do_not_allow_access_after:
         description:
-            - Username for sftp
+            - Hour to disallow access. Format --:--
         type: str
 
-     sftp_password:
+    enable_account_after:
         description:
-            - Password for sftp
+            - Date to enable the account in format dd/mm/yyyy
         type: str
 
-     sftp_private_key:
+    disable_account_after:
         description:
-            - Private key for sftp authentication
+            - Date to disable the account in format dd/mm/yyyy
         type: str
 
-     sftp_private_key_password:
+    timezone:
         description:
-            - Password for the sftp private key used for authentication
+            - User timezone
         type: str
 
-     sftp_root_directory:
+    full_name:
         description:
-            - File browser root directory
+            - Full name of the user
         type: str
 
-     sftp_default_upload_directory:
+    email:
         description:
-            - File browser default upload directory
+            - Email of the user
         type: str
 
+    organization:
+        description:
+            - Organization of the user
+        type: str
+
+    organizational_role:
+        description:
+            - Role of the user in his/her organization
+        type: str
 
 author:
     - Pablo Escobar Lopez (@pescobar)
@@ -259,11 +222,11 @@ def guacamole_populate_user_payload(module_params):
         "password": module_params['password'],
         "attributes": {
             "disabled": module_params['disabled'],
-            "expired": "",
-            "access-window-start": "",
-            "access-window-end": "",
-            "valid-from": "",
-            "valid-until": "",
+            "expired": module_params['expired'],
+            "access-window-start": module_params['allow_access_after'],
+            "access-window-end": module_params['do_not_allow_access_after'],
+            "valid-from": module_params['enable_account_after'],
+            "valid-until": module_params['disable_account_after'],
             "timezone": "",
             "guac-full-name": module_params['full_name'],
             "guac-email-address": module_params['email'],
@@ -349,17 +312,17 @@ def main():
         username=dict(type='str', aliases=['name'], required=True),
         password=dict(type='str', required=True, no_log=True),
         state=dict(type='str', choices=['absent', 'present'], default='present'),
+        full_name=dict(type='str', Default=None),
+        email=dict(type='str', Default=None),
+        organization=dict(type='str', Default=None),
+        organizational_role=dict(type='str', Default=None),
         disabled=dict(type='bool', default=None),
         expired=dict(type='str', default=None),
-        access_window_start=dict(type='str', default=None),
-        access_window_end=dict(type='str', default=None),
-        valid_from=dict(type='str', default=''),
-        valid_until=dict(type='str', default=''),
+        allow_access_after=dict(type='str', default=None),
+        do_not_allow_access_after=dict(type='str', default=None),
+        enable_account_after=dict(type='str', default=''),
+        disable_account_after=dict(type='str', default=''),
         timezone=dict(type='str', default=''),
-        full_name=dict(type='str', default=''),
-        email=dict(type='str', default=''),
-        organization=dict(type='str', default=''),
-        organizational_role=dict(type='str', default=''),
     )
 
     result = dict(changed=False, msg='', diff={},
@@ -413,7 +376,7 @@ def main():
                     validate_certs=module.params.get('validate_certs'),
                     datasource=guacamole_token['dataSource'],
                     auth_token=guacamole_token['authToken'],
-                    username=module.params.get['username'],
+                    username=module.params.get('username'),
                     payload=payload
                 )
 
