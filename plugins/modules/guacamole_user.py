@@ -238,7 +238,7 @@ def guacamole_get_users(base_url, validate_certs, datasource, auth_token):
     url_list_users = URL_LIST_USERS.format(url=base_url, datasource=datasource, token=auth_token)
 
     try:
-        r = json.load(open_url(url_list_users, method='GET', validate_certs=validate_certs))
+        guacamole_users = json.load(open_url(url_list_users, method='GET', validate_certs=validate_certs))
     except ValueError as e:
         raise GuacamoleError(
             'API returned invalid JSON when trying to obtain list of users from %s: %s'
@@ -247,9 +247,7 @@ def guacamole_get_users(base_url, validate_certs, datasource, auth_token):
         raise GuacamoleError('Could not obtain list of guacamole users from %s: %s'
                              % (url_list_users, str(e)))
 
-    return {
-        'guacamole_users': r,
-    }
+    return guacamole_users
 
 
 def guacamole_populate_user_payload(module_params):
