@@ -306,8 +306,8 @@ def guacamole_get_user_permissions(base_url, validate_certs, datasource, usernam
     return user_permissions
 
 
-def guacamole_update_user_permissions(base_url, validate_certs, datasource, username, \
-                                        connection_id, operation, auth_token):
+def guacamole_update_user_permissions(base_url, validate_certs, datasource, username,
+                                      connection_id, operation, auth_token):
     """
     Update permissions for existing user in a specific connection
     """
@@ -324,7 +324,7 @@ def guacamole_update_user_permissions(base_url, validate_certs, datasource, user
     try:
         headers = {'Content-Type': 'application/json'}
         open_url(url_update_user_permissions, method='PATCH', validate_certs=validate_certs, headers=headers,
-                data=json.dumps(payload))
+                 data=json.dumps(payload))
     except Exception as e:
         raise GuacamoleError('Could not update permissions in %s: %s'
                              % (url_update_user_permissions, str(e)))
@@ -456,7 +456,6 @@ def main():
             )
         except GuacamoleError as e:
             module.fail_json(msg=str(e))
-
 
         for connection in guacamole_connections:
             # if the connection is in the list of allowed connections for this user

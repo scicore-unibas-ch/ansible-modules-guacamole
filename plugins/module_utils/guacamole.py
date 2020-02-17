@@ -56,7 +56,7 @@ def guacamole_get_connections(base_url, validate_certs, datasource, parent_ident
 
     try:
         parent_identifier_connections = json.load(open_url(url_list_connections, method='GET',
-                               validate_certs=validate_certs))
+                                                  validate_certs=validate_certs))
     except ValueError as e:
         raise GuacamoleError(
             'API returned invalid JSON when trying to obtain list of connections from %s: %s'

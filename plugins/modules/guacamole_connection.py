@@ -444,8 +444,8 @@ def main():
         # will send to the API
         payload = guacamole_populate_connection_payload(module.params)
 
-        if guacamole_connection_exists:
         # the connection already exists so we update it
+        if guacamole_connection_exists:
 
             try:
                 # query what's the current config for this connection so
@@ -532,7 +532,6 @@ def main():
         else:
             # the connection doesn't exists so we don't call delete_connection() and just return a msg
             result['msg'] = "There is no guacamole connection named " + module.params.get('connection_name')
-
 
     # Get guacamole connections after
     try:
