@@ -66,6 +66,12 @@ options:
         required: true
         type: str
 
+    allowed_connections:
+        description:
+            - List of connections where this user can connect
+        type: list
+        elements: str
+
     state:
         description:
             - Create or delete the user?
@@ -314,6 +320,7 @@ def main():
         validate_certs=dict(type='bool', default=True),
         username=dict(type='str', aliases=['name'], required=True),
         password=dict(type='str', required=True, no_log=True),
+        allowed_connections=dict(type='list'),
         state=dict(type='str', choices=['absent', 'present'], default='present'),
         full_name=dict(type='str', Default=None),
         email=dict(type='str', Default=None),
