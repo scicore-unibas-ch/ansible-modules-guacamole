@@ -1,9 +1,21 @@
 # Ansible Collection - scicore.guacamole
 
-Ansible modules to create connections and users using the API
+Ansible modules to administer apache guacamole connections and users using the API
+
+## Installation
+
+Download the ansible collection to the root folder of your playbook:
+
+```
+$> cd /path/to/playbook/root/folder
+
+$> ansible-galaxy collection install -p ./collections/ scicore.guacamole
+```
+
+Now you can use the modules `guacamole_connection` and `guacamole_user`. Adapt the examples below to your needs.
 
 
-### Example playbook:
+## Example playbook:
 
 ```
 
