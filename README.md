@@ -13,7 +13,7 @@ Ansible modules to create connections and users using the API
 
   tasks:
 
-    - name: Add a new connection
+    - name: Add a new RDP connection
       scicore.guacamole.guacamole_connection:
         base_url: http://localhost/guacamole
         validate_certs: false
@@ -30,7 +30,7 @@ Ansible modules to create connections and users using the API
     - debug:
         var: _connection_info
 
-    - name: run the new module
+    - name: Add a new guacamole user 
       scicore.guacamole.guacamole_user:
         base_url: http://localhost/guacamole
         validate_certs: false
