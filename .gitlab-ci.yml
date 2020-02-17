@@ -3,7 +3,7 @@ pylint:
   before_script:
     - pip install pylint pylint-fail-under
   script:
-    - pylint-fail-under --fail_under 9.0 --rcfile=.pylintrc --output-format=text plugins/
+    - pylint-fail-under --fail_under 9.9 --rcfile=.pylintrc --output-format=text plugins/
 
 # autopep8:
 #   stage: test
