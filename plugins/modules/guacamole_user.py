@@ -411,19 +411,50 @@ def main():
         # now that the user has been created or updated we apply the permissions
         # so he/she can access the required connections
 
+        # Query the existing connections to check which ones the user is allowed to use
         try:
-            guacamole_update_user_permissions(
+            guacamole_connections = guacamole_get_connections(
                 base_url=module.params.get('base_url'),
                 validate_certs=module.params.get('validate_certs'),
                 datasource=guacamole_token['dataSource'],
+                parent_identifier='ROOT',
                 auth_token=guacamole_token['authToken'],
-                username=module.params.get('username'),
-                connection_id=12,
-                operation='add'
             )
-
         except GuacamoleError as e:
             module.fail_json(msg=str(e))
+
+        for connection in guacamole_connections:
+            # if the connection is in the list of allowed connections for this user
+            # we grant access
+            if connection['name'] in module.params.get('allowed_connections'):
+                try:
+                    guacamole_update_user_permissions(
+                        base_url=module.params.get('base_url'),
+                        validate_certs=module.params.get('validate_certs'),
+                        datasource=guacamole_token['dataSource'],
+                        auth_token=guacamole_token['authToken'],
+                        username=module.params.get('username'),
+                        connection_id=connection['identifier'],
+                        operation='add'
+                    )
+                except GuacamoleError as e:
+                    module.fail_json(msg=str(e))
+
+            else:
+                # if the connection is NOT in the list of allowed connections for
+                # this user we make sure to remove access
+                try:
+                    guacamole_update_user_permissions(
+                        base_url=module.params.get('base_url'),
+                        validate_certs=module.params.get('validate_certs'),
+                        datasource=guacamole_token['dataSource'],
+                        auth_token=guacamole_token['authToken'],
+                        username=module.params.get('username'),
+                        connection_id=connection['identifier'],
+                        operation='remove'
+                    )
+                except GuacamoleError as e:
+                    module.fail_json(msg=str(e))
 
     # module arg state=absent so we must delete a user from guacamole
     if module.params.get('state') == 'absent':
