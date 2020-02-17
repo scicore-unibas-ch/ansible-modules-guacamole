@@ -440,12 +440,12 @@ def main():
     # or update a connection if it already exists
     if module.params.get('state') == 'present':
 
-        # populate the payload(json) with the connection info that we
-        # will send to the API
-        payload = guacamole_populate_connection_payload(module.params)
-
         if guacamole_connection_exists:
         # the connection already exists so we update it
+
+            # populate the payload(json) with the connection info that we
+            # will send to the API
+            payload = guacamole_populate_connection_payload(module.params)
 
             try:
                 # query what's the current config for this connection so
