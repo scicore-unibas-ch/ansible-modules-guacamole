@@ -1,34 +1,53 @@
 # Ansible Collection - scicore.guacamole
 
-Documentation for the collection.
+Ansible modules to create connections and users using the API
 
 
-Example playbook:
+### Example playbook:
 
 ```
 
-- name: test my new module
+
+- name: Add a guacamole connection and user
   hosts: localhost
 
   tasks:
-  - name: run the new module
-    scicore.guacamole.guacamole_connections:
-      base_url: http://localhost/guacamole
-      validate_certs: false
-      auth_username: guacadmin
-      auth_password: guacadmin
-      connection_name: test_name_1
-      protocol: rdp
-      parentIdentifier: ROOT
-      hostname: 192.168.33.44
-      port: 3389
-      username: rdp_user
-      password: rdp_pass
-      max_connections: 1
-      state: absent
-    register: _info
 
-  - debug:
-      var: _info
+    - name: Add a new connection
+      scicore.guacamole.guacamole_connection:
+        base_url: http://localhost/guacamole
+        validate_certs: false
+        auth_username: guacadmin
+        auth_password: guacadmin
+        connection_name: test_connection
+        protocol: rdp
+        hostname: 192.168.33.43
+        port: 3389
+        username: rdp_user
+        password: rdp_pass
+      register: _connection_info
+  
+    - debug:
+        var: _connection_info
+
+    - name: run the new module
+      scicore.guacamole.guacamole_user:
+        base_url: http://localhost/guacamole
+        validate_certs: false
+        auth_username: guacadmin
+        auth_password: guacadmin
+        username: play_user_2
+        password: aaaaaaaa
+        state: present
+        full_name: "John"
+        email: "aaaaa@hotmail.com"
+        organization: "scicore"
+        disabled: false
+        allowed_connections:
+          - test_connection
+      register: _user_info
+  
+    - debug:
+        var: _user_info
       
 ```
