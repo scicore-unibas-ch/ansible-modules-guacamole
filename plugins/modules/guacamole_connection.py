@@ -131,37 +131,37 @@ options:
             - sftp keep alive interval
         type: int
 
-     sftp_hostname:
+    sftp_hostname:
         description:
             - Hostname or ip for sftp
         type: str
 
-     sftp_username:
+    sftp_username:
         description:
             - Username for sftp
         type: str
 
-     sftp_password:
+    sftp_password:
         description:
             - Password for sftp
         type: str
 
-     sftp_private_key:
+    sftp_private_key:
         description:
             - Private key for sftp authentication
         type: str
 
-     sftp_private_key_password:
+    sftp_private_key_password:
         description:
             - Password for the sftp private key used for authentication
         type: str
 
-     sftp_root_directory:
+    sftp_root_directory:
         description:
             - File browser root directory
         type: str
 
-     sftp_default_upload_directory:
+    sftp_default_upload_directory:
         description:
             - File browser default upload directory
         type: str
