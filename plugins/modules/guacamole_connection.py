@@ -224,8 +224,6 @@ message:
 '''
 
 
-URL_LIST_CONNECTIONS = "{url}/api/session/data/{datasource}/connectionGroups/\
-{parent_identifier}/tree?token={token}"
 URL_ADD_CONNECTION = "{url}/api/session/data/{datasource}/connections?token={token}"
 URL_UPDATE_CONNECTION = "{url}/api/session/data/{datasource}/connections/{connection_id}?token={token}"
 URL_DELETE_CONNECTION = URL_UPDATE_CONNECTION

@@ -278,7 +278,8 @@ def guacamole_delete_user(base_url, validate_certs, datasource, username, auth_t
                              % (url_delete_user, str(e)))
 
 
-def guacamole_update_user_permissions(base_url, validate_certs, datasource, username, connection_id, operation, auth_token):
+def guacamole_update_user_permissions(base_url, validate_certs, datasource, username, \
+                                        connection_id, operation, auth_token):
     """
     Update permissions for existing user in a specific connection
     """

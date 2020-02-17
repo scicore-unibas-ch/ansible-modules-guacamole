@@ -9,6 +9,10 @@ from ansible.module_utils.urls import open_url
 from ansible.module_utils.six.moves.urllib.parse import urlencode
 
 
+URL_LIST_CONNECTIONS = "{url}/api/session/data/{datasource}/connectionGroups/\
+{parent_identifier}/tree?token={token}"
+
+
 class GuacamoleError(Exception):
     pass
 
