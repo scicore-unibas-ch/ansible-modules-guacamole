@@ -27,7 +27,7 @@ short_description: Administer guacamole users using the rest API
 version_added: "2.9"
 
 description:
-    - "Create or delete a guacamole user.
+    - "Create or delete a guacamole user"
 
 options:
     base_url:
