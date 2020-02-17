@@ -173,7 +173,8 @@ URL_LIST_USERS = "{url}/api/session/data/{datasource}/users?token={token}"
 URL_ADD_USER = URL_LIST_USERS
 URL_UPDATE_USER = "{url}/api/session/data/postgresql/users/{username}?token={token}"
 URL_DELETE_USER = URL_UPDATE_USER
-URL_UPDATE_USER_PERMISSIONS = "{url}/api/session/data/postgresql/users/{username}/permissions?token={token}"
+URL_GET_USER_PERMISSIONS = "{url}/api/session/data/postgresql/users/{username}/permissions?token={token}"
+URL_UPDATE_USER_PERMISSIONS = URL_GET_USER_PERMISSIONS
 
 
 def guacamole_get_users(base_url, validate_certs, datasource, auth_token):
@@ -284,6 +285,27 @@ def guacamole_delete_user(base_url, validate_certs, datasource, username, auth_t
                              % (url_delete_user, str(e)))
 
 
+def guacamole_get_user_permissions(base_url, validate_certs, datasource, username, auth_token):
+    """
+    Get current permissions for a user
+    """
+
+    url_get_user_permissions = URL_GET_USER_PERMISSIONS.format(
+        url=base_url, datasource=datasource, username=username, token=auth_token)
+
+    try:
+        user_permissions = json.load(open_url(url_get_user_permissions, method='GET', validate_certs=validate_certs))
+    except ValueError as e:
+        raise GuacamoleError(
+            'API returned invalid JSON when trying to obtain user permissions from %s: %s'
+            % (url_get_user_permissions, str(e)))
+    except Exception as e:
+        raise GuacamoleError('Could not obtain user permissions from %s: %s'
+                             % (url_get_user_permissions, str(e)))
+
+    return user_permissions
+
+
 def guacamole_update_user_permissions(base_url, validate_certs, datasource, username, \
                                         connection_id, operation, auth_token):
     """
@@ -373,6 +395,19 @@ def main():
             break
 
 
+    if guacamole_user_exists:
+        # Query the current permissions for this user so we can later check if they changed
+        try:
+            user_permissions_before = guacamole_get_user_permissions(
+                base_url=module.params.get('base_url'),
+                validate_certs=module.params.get('validate_certs'),
+                datasource=guacamole_token['dataSource'],
+                datasource=guacamole_token['username'],
+                auth_token=guacamole_token['authToken'],
+            )
+        except GuacamoleError as e:
+            module.fail_json(msg=str(e))
+
     # module arg state=present so we must create or update a user in guacamole
     if module.params.get('state') == 'present':
 
@@ -422,6 +457,7 @@ def main():
             )
         except GuacamoleError as e:
             module.fail_json(msg=str(e))
+
 
         for connection in guacamole_connections:
             # if the connection is in the list of allowed connections for this user
@@ -479,6 +515,22 @@ def main():
         # if the user doesn't exist in guacamole we just inform about it
         else:
             result['msg'] = "Nothing deleted. No guacamole username " + module.params.get('username')
+
+    if guacamole_user_exists:
+        # Query the permissions for this user again so check if they changed
+        try:
+            user_permissions_after = guacamole_get_user_permissions(
+                base_url=module.params.get('base_url'),
+                validate_certs=module.params.get('validate_certs'),
+                datasource=guacamole_token['dataSource'],
+                datasource=guacamole_token['username'],
+                auth_token=guacamole_token['authToken'],
+            )
+        except GuacamoleError as e:
+            module.fail_json(msg=str(e))
+
+        if user_permissions_before != user_permissions_after:
+            result['changed'] = True
 
     # Get existing guacamole users after the module execution to check if something changed
     try:
