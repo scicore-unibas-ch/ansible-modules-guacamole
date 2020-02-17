@@ -307,7 +307,7 @@ def guacamole_add_connection(base_url, validate_certs, datasource, auth_token, p
     try:
         headers = {'Content-Type': 'application/json'}
         open_url(url_add_connection, method='POST', validate_certs=validate_certs,
-                     headers=headers, data=json.dumps(payload))
+                 headers=headers, data=json.dumps(payload))
     except Exception as e:
         raise GuacamoleError('Could not add a new connection in %s: %s'
                              % (url_add_connection, str(e)))
@@ -324,7 +324,7 @@ def guacamole_update_connection(base_url, validate_certs, datasource, connection
     try:
         headers = {'Content-Type': 'application/json'}
         open_url(url_update_connection, method='PUT', validate_certs=validate_certs,
-                     headers=headers, data=json.dumps(payload))
+                 headers=headers, data=json.dumps(payload))
     except Exception as e:
         raise GuacamoleError('Could not add a new connection in %s: %s'
                              % (url_update_connection, str(e)))

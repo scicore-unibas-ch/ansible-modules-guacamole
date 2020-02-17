@@ -235,7 +235,7 @@ def guacamole_add_user(base_url, validate_certs, datasource, auth_token, payload
     try:
         headers = {'Content-Type': 'application/json'}
         open_url(url_add_user, method='POST', validate_certs=validate_certs,
-                    headers=headers, data=json.dumps(payload))
+                 headers=headers, data=json.dumps(payload))
     except Exception as e:
         raise GuacamoleError('Could not add a new user in %s: %s'
                              % (url_add_user, str(e)))
@@ -252,7 +252,7 @@ def guacamole_update_user(base_url, validate_certs, datasource, username, auth_t
     try:
         headers = {'Content-Type': 'application/json'}
         open_url(url_update_user, method='PUT', validate_certs=validate_certs,
-                     headers=headers, data=json.dumps(payload))
+                 headers=headers, data=json.dumps(payload))
     except Exception as e:
         raise GuacamoleError('Could not update user in %s: %s'
                              % (url_update_user, str(e)))
