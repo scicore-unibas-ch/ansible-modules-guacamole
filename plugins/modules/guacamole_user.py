@@ -394,7 +394,6 @@ def main():
             guacamole_user_exists = True
             break
 
-
     if guacamole_user_exists:
         # Query the current permissions for this user so we can later check if they changed
         try:
@@ -402,7 +401,7 @@ def main():
                 base_url=module.params.get('base_url'),
                 validate_certs=module.params.get('validate_certs'),
                 datasource=guacamole_token['dataSource'],
-                datasource=guacamole_token['username'],
+                username=module.params.get('username'),
                 auth_token=guacamole_token['authToken'],
             )
         except GuacamoleError as e:
@@ -509,6 +508,10 @@ def main():
 
                 result['msg'] = "User deleted: " + module.params.get('username')
 
+                # after deleting the user we set "guacamole_user_exists = False"
+                # to skip checking if the permissions for this user changed
+                guacamole_user_exists = False
+
             except GuacamoleError as e:
                 module.fail_json(msg=str(e))
 
@@ -523,7 +526,7 @@ def main():
                 base_url=module.params.get('base_url'),
                 validate_certs=module.params.get('validate_certs'),
                 datasource=guacamole_token['dataSource'],
-                datasource=guacamole_token['username'],
+                username=module.params.get('username'),
                 auth_token=guacamole_token['authToken'],
             )
         except GuacamoleError as e:
