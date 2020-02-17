@@ -27,7 +27,7 @@ short_description: Administer guacamole users using the rest API
 version_added: "2.9"
 
 description:
-    - "Create or delete guacamole users.
+    - "Create or delete a guacamole user.
 
 options:
     base_url:
@@ -157,7 +157,7 @@ user_info:
     type: dict
     returned: always
 message:
-    description: Some extra info about what the module did
+    description: Message about what the module did
     type: str
     returned: always
 '''

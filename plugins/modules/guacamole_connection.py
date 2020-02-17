@@ -28,7 +28,7 @@ short_description: Administer guacamole connections using the rest API
 version_added: "2.9"
 
 description:
-    - "Create or delete guacamole connections. You can create rdp, vnc, ssh or telnet connections"
+    - "Add or remove guacamole connections. You can create rdp, vnc, ssh or telnet connections"
 
 options:
     base_url:
@@ -230,7 +230,6 @@ URL_DELETE_CONNECTION = URL_UPDATE_CONNECTION
 URL_CONNECTION_DETAILS = "{url}/api/session/data/{datasource}/connections/{connection_id}/parameters?token={token}"
 
 
-
 def guacamole_get_connection_details(base_url, validate_certs, datasource, connection_id, auth_token):
     """
     Get detailed connection parameters for a single connection.
@@ -254,6 +253,7 @@ def guacamole_get_connection_details(base_url, validate_certs, datasource, conne
     return {
         'guacamole_connection_details': r,
     }
+
 
 def guacamole_populate_connection_payload(module_params):
     """
@@ -293,6 +293,7 @@ def guacamole_populate_connection_payload(module_params):
     }
 
     return payload
+
 
 def guacamole_add_connection(base_url, validate_certs, datasource, auth_token, payload):
     """
