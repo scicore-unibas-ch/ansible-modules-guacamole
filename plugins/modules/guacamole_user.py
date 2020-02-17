@@ -234,12 +234,8 @@ def guacamole_add_user(base_url, validate_certs, datasource, auth_token, payload
 
     try:
         headers = {'Content-Type': 'application/json'}
-        r = open_url(url_add_user, method='POST', validate_certs=validate_certs,
-                     headers=headers, data=json.dumps(payload))
-    except ValueError as e:
-        raise GuacamoleError(
-            'API returned invalid JSON when trying to add user from %s: %s'
-            % (url_add_user, str(e)))
+        open_url(url_add_user, method='POST', validate_certs=validate_certs,
+                    headers=headers, data=json.dumps(payload))
     except Exception as e:
         raise GuacamoleError('Could not add a new user in %s: %s'
                              % (url_add_user, str(e)))
@@ -255,12 +251,8 @@ def guacamole_update_user(base_url, validate_certs, datasource, username, auth_t
 
     try:
         headers = {'Content-Type': 'application/json'}
-        r = open_url(url_update_user, method='PUT', validate_certs=validate_certs,
+        open_url(url_update_user, method='PUT', validate_certs=validate_certs,
                      headers=headers, data=json.dumps(payload))
-    except ValueError as e:
-        raise GuacamoleError(
-            'API returned invalid JSON when trying to update user from %s: %s'
-            % (url_update_user, str(e)))
     except Exception as e:
         raise GuacamoleError('Could not update user in %s: %s'
                              % (url_update_user, str(e)))
@@ -275,11 +267,7 @@ def guacamole_delete_user(base_url, validate_certs, datasource, username, auth_t
         url=base_url, datasource=datasource, username=username, token=auth_token)
 
     try:
-        r = open_url(url_delete_user, method='DELETE', validate_certs=validate_certs)
-    except ValueError as e:
-        raise GuacamoleError(
-            'API returned invalid JSON when trying to delete user from %s: %s'
-            % (url_delete_user, str(e)))
+        open_url(url_delete_user, method='DELETE', validate_certs=validate_certs)
     except Exception as e:
         raise GuacamoleError('Could not delete user in %s: %s'
                              % (url_delete_user, str(e)))

@@ -306,17 +306,8 @@ def guacamole_add_connection(base_url, validate_certs, datasource, auth_token, p
 
     try:
         headers = {'Content-Type': 'application/json'}
-        r = open_url(url_add_connection, method='POST', validate_certs=validate_certs,
+        open_url(url_add_connection, method='POST', validate_certs=validate_certs,
                      headers=headers, data=json.dumps(payload))
-    except HTTPError as e:
-        # guacamole api returns http error code 400 if connection
-        # with the same name already exists
-        if e.code == 400:
-            pass
-    except ValueError as e:
-        raise GuacamoleError(
-            'API returned invalid JSON when trying to add connection from %s: %s'
-            % (url_add_connection, str(e)))
     except Exception as e:
         raise GuacamoleError('Could not add a new connection in %s: %s'
                              % (url_add_connection, str(e)))
@@ -332,17 +323,8 @@ def guacamole_update_connection(base_url, validate_certs, datasource, connection
 
     try:
         headers = {'Content-Type': 'application/json'}
-        r = open_url(url_update_connection, method='PUT', validate_certs=validate_certs,
+        open_url(url_update_connection, method='PUT', validate_certs=validate_certs,
                      headers=headers, data=json.dumps(payload))
-    except HTTPError as e:
-        # guacamole api returns http error code 400 if connection
-        # with the same name already exists
-        if e.code == 400:
-            pass
-    except ValueError as e:
-        raise GuacamoleError(
-            'API returned invalid JSON when trying to update connection from %s: %s'
-            % (url_update_connection, str(e)))
     except Exception as e:
         raise GuacamoleError('Could not add a new connection in %s: %s'
                              % (url_update_connection, str(e)))
@@ -357,7 +339,6 @@ def guacamole_delete_connection(base_url, validate_certs, datasource, connection
     url_delete_connection = URL_DELETE_CONNECTION.format(
         url=base_url, datasource=datasource, connection_id=connection_id, token=auth_token)
 
-    #  print(url_delete_connection)
     try:
         open_url(url_delete_connection, method='DELETE', validate_certs=validate_certs)
     except Exception as e:
