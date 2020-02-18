@@ -62,6 +62,7 @@ Now you can use the modules `guacamole_connection` and `guacamole_user`. Adapt t
     - debug:
         var: _user_info
 
+```
 
 ## Output of "ansible-doc scicore.guacamole.guacamole_connection"
 
