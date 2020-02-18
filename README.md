@@ -28,7 +28,6 @@ Now you can use the modules `guacamole_connection` and `guacamole_user`. Adapt t
     - name: Add a new RDP connection
       scicore.guacamole.guacamole_connection:
         base_url: http://localhost/guacamole
-        validate_certs: false
         auth_username: guacadmin
         auth_password: guacadmin
         connection_name: test_connection
@@ -45,16 +44,13 @@ Now you can use the modules `guacamole_connection` and `guacamole_user`. Adapt t
     - name: Add a new guacamole user
       scicore.guacamole.guacamole_user:
         base_url: http://localhost/guacamole
-        validate_certs: false
         auth_username: guacadmin
         auth_password: guacadmin
         username: play_user_2
         password: aaaaaaaa
-        state: present
         full_name: "John"
         email: "aaaaa@hotmail.com"
         organization: "scicore"
-        disabled: false
         allowed_connections:
           - test_connection
       register: _user_info
