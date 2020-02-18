@@ -37,7 +37,7 @@ def guacamole_get_token(base_url, validate_certs, auth_username, auth_password):
     }
 
     try:
-        token = json.load(open_url(url_token, method='POST',
+        token = json.load(open_url(url_get_token, method='POST',
                                validate_certs=validate_certs,
                                data=urlencode(payload)))
     except ValueError as e:
