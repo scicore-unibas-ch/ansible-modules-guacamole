@@ -179,7 +179,7 @@ URL_UPDATE_USER_PERMISSIONS = URL_GET_USER_PERMISSIONS
 
 def guacamole_get_users(base_url, validate_certs, datasource, auth_token):
     """
-    Return all the users registered in the guacamole server
+    Returns a dict with all the users registered in the guacamole server
     """
 
     url_list_users = URL_LIST_USERS.format(url=base_url, datasource=datasource, token=auth_token)
@@ -226,7 +226,7 @@ def guacamole_populate_user_payload(module_params):
 
 def guacamole_add_user(base_url, validate_certs, datasource, auth_token, payload):
     """
-    Add a new user account to the guacamole server.
+    Add a new user account to the guacamole server doing a POST of the payload to the API
     """
 
     url_add_user = URL_ADD_USER.format(
@@ -243,7 +243,7 @@ def guacamole_add_user(base_url, validate_certs, datasource, auth_token, payload
 
 def guacamole_update_user(base_url, validate_certs, datasource, username, auth_token, payload):
     """
-    Update existing user in the guacamole server.
+    Update existing user in the guacamole server doing a PUT of the payload to the API
     """
 
     url_update_user = URL_UPDATE_USER.format(
@@ -275,7 +275,7 @@ def guacamole_delete_user(base_url, validate_certs, datasource, username, auth_t
 
 def guacamole_get_user_permissions(base_url, validate_certs, datasource, username, auth_token):
     """
-    Get current permissions for a user
+    Return a dict with detailed current permissions for a user
     """
 
     url_get_user_permissions = URL_GET_USER_PERMISSIONS.format(
