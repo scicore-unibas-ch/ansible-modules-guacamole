@@ -199,6 +199,14 @@ EXAMPLES = '''
     sftp_username: sftp_user
     sftp_password: adsfadfasfdasf
 
+- name: Delete a connection
+  scicore.guacamole.guacamole_connection:
+    base_url: http://localhost/guacamole
+    auth_username: guacadmin
+    auth_password: guacadmin
+    connection_name: test_CC
+    state: absent
+
 '''
 
 RETURN = '''
