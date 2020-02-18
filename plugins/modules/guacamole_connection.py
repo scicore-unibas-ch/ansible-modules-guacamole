@@ -231,7 +231,7 @@ URL_CONNECTION_DETAILS = "{url}/api/session/data/{datasource}/connections/{conne
 
 def guacamole_get_connection_details(base_url, validate_certs, datasource, connection_id, auth_token):
     """
-    Get detailed connection parameters for a single connection.
+    Return a dict with detailed connection parameters for a single connection.
     This function requires a connection id and provides more information than function guacamole_get_connections()
     """
 
@@ -239,7 +239,7 @@ def guacamole_get_connection_details(base_url, validate_certs, datasource, conne
         url=base_url, datasource=datasource, connection_id=connection_id, token=auth_token)
 
     try:
-        r = json.load(open_url(url_connection_details, method='GET',
+        connection_details = json.load(open_url(url_connection_details, method='GET',
                                validate_certs=validate_certs))
     except ValueError as e:
         raise GuacamoleError(
@@ -249,9 +249,7 @@ def guacamole_get_connection_details(base_url, validate_certs, datasource, conne
         raise GuacamoleError('Could not obtain connection details from %s: %s'
                              % (url_connection_details, str(e)))
 
-    return {
-        'guacamole_connection_details': r,
-    }
+    return connection_details
 
 
 def guacamole_populate_connection_payload(module_params):
