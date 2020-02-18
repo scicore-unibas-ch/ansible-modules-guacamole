@@ -145,15 +145,16 @@ EXAMPLES = '''
 - name: Create a new guacamole user
   scicore.guacamole.guacamole_user:
     base_url: http://localhost/guacamole
-    validate_certs: false
     auth_username: guacadmin
     auth_password: guacadmin
     username: test_user_3
     password: user_pass
+    allowed_connections:
+      - connection_1
+      - connection_2
     full_name: John Foo
     email: john@email.com
     organization: company_bar
-    organizational_role: ceo
 
 '''
 
