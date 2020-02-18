@@ -172,32 +172,26 @@ EXAMPLES = '''
 - name: Create a new rdp connection
   scicore.guacamole.guacamole_connection:
     base_url: http://localhost/guacamole
-    validate_certs: false
     auth_username: guacadmin
     auth_password: guacadmin
     connection_name: test_name_3
     protocol: rdp
-    parentIdentifier: ROOT
     hostname: 192.168.33.44
     port: 3389
     username: rdp_user
     password: rdp_pass
-    state: present
 
 - name: Create a new vnc connection with sftp enabled
   scicore.guacamole.guacamole_connection:
     base_url: http://localhost/guacamole
-    validate_certs: false
     auth_username: guacadmin
     auth_password: guacadmin
     connection_name: test_vnc
     protocol: vnc
-    parentIdentifier: ROOT
     hostname: 192.168.33.44
     port: 5900
     username: rdp_user
     password: rdp_pass
-    state: present
     sftp_enable: true
     sftp_port: 22
     sftp_hostname: 192.168.11.11
