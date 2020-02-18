@@ -155,6 +155,15 @@ EXAMPLES = '''
     email: john@email.com
     organization: company_bar
 
+- name: Delete a guacamole user
+  scicore.guacamole.guacamole_user:
+    base_url: http://localhost/guacamole
+    validate_certs: false
+    auth_username: guacadmin
+    auth_password: guacadmin
+    username: test_user_3
+    state: absent
+
 '''
 
 RETURN = '''
