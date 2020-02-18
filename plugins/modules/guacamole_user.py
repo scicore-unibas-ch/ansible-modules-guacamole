@@ -63,7 +63,6 @@ options:
     password:
         description:
             - Password for the new user
-        required: true
         type: str
 
     allowed_connections:
@@ -330,7 +329,7 @@ def main():
                            no_log=True),
         validate_certs=dict(type='bool', default=True),
         username=dict(type='str', aliases=['name'], required=True),
-        password=dict(type='str', required=True, no_log=True),
+        password=dict(type='str', no_log=True),
         allowed_connections=dict(type='list'),
         state=dict(type='str', choices=['absent', 'present'], default='present'),
         full_name=dict(type='str', Default=None),
