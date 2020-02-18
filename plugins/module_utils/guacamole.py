@@ -38,8 +38,8 @@ def guacamole_get_token(base_url, validate_certs, auth_username, auth_password):
 
     try:
         token = json.load(open_url(url_get_token, method='POST',
-                               validate_certs=validate_certs,
-                               data=urlencode(payload)))
+                          validate_certs=validate_certs,
+                          data=urlencode(payload)))
     except ValueError as e:
         raise GuacamoleError(
             'API returned invalid JSON when trying to obtain access token from %s: %s'

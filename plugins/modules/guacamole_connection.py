@@ -238,7 +238,7 @@ def guacamole_get_connection_details(base_url, validate_certs, datasource, conne
 
     try:
         connection_details = json.load(open_url(url_connection_details, method='GET',
-                               validate_certs=validate_certs))
+                                       validate_certs=validate_certs))
     except ValueError as e:
         raise GuacamoleError(
             'API returned invalid JSON when trying to obtain connection details from %s: %s'
