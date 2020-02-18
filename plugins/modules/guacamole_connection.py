@@ -80,25 +80,21 @@ options:
     hostname:
         description:
             - Hostname or ip of the server to connect
-        required: true
         type: str
 
     port:
         description:
             - Port to connect
-        required: true
         type: int
 
     username:
         description:
             - Username for the connection
-        required: true
         type: str
 
     password:
         description:
             - Password for the connection
-        required: true
         type: str
 
     state:
@@ -356,10 +352,10 @@ def main():
         parentIdentifier=dict(type='str', default='ROOT'),
         connection_name=dict(type='str', aliases=['name'], required=True),
         protocol=dict(type='str', choices=['rdp', 'vnc', 'ssh', 'telnet']),
-        hostname=dict(type='str', required=True),
-        port=dict(type='int', required=True),
-        username=dict(type='str', required=True),
-        password=dict(type='str', required=True, no_log=True),
+        hostname=dict(type='str'),
+        port=dict(type='int'),
+        username=dict(type='str'),
+        password=dict(type='str', no_log=True),
         state=dict(type='str', choices=['absent', 'present'], default='present'),
         max_connections=dict(type='int', default=1),
         sftp_enable=dict(type='bool', default=False),
