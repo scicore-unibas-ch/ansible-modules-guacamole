@@ -238,7 +238,7 @@ def guacamole_get_connection_details(base_url, validate_certs, datasource, conne
 
     try:
         connection_details = json.load(open_url(url_connection_details, method='GET',
-                                       validate_certs=validate_certs))
+                                                validate_certs=validate_certs))
     except ValueError as e:
         raise GuacamoleError(
             'API returned invalid JSON when trying to obtain connection details from %s: %s'
@@ -407,10 +407,11 @@ def main():
     # If the connection exists we get the connection_id
     guacamole_connection_exists = False
     for connection in guacamole_connections_before:
-        if connection['name'] == module.params.get('connection_name'):
-            guacamole_connection_exists = True
-            connection_id = connection['identifier']
-            break
+        if 'name' in connection:
+            if connection['name'] == module.params.get('connection_name'):
+                guacamole_connection_exists = True
+                connection_id = connection['identifier']
+                break
 
     # module arg state=present so we have to create a new connecion
     # or update a connection if it already exists
@@ -525,8 +526,9 @@ def main():
         result['changed'] = True
 
     for connection in guacamole_connections_after:
-        if connection['name'] == module.params.get('connection_name'):
-            result['connection_info'] = connection
+        if 'name' in connection:
+            if connection['name'] == module.params.get('connection_name'):
+                result['connection_info'] = connection
 
     module.exit_json(**result)
 
