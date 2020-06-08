@@ -184,6 +184,7 @@ URL_UPDATE_USER = "{url}/api/session/data/{datasource}/users/{username}?token={t
 URL_DELETE_USER = URL_UPDATE_USER
 URL_GET_USER_PERMISSIONS = "{url}/api/session/data/{datasource}/users/{username}/permissions?token={token}"
 URL_UPDATE_USER_PERMISSIONS = URL_GET_USER_PERMISSIONS
+URL_UPDATE_PASSWORD_CURRENT_USER = "{url}/api/session/data/{datasource}/users/{username}/password?token={token}"
 
 
 def guacamole_get_users(base_url, validate_certs, datasource, auth_token):
@@ -265,6 +266,30 @@ def guacamole_update_user(base_url, validate_certs, datasource, username, auth_t
     except Exception as e:
         raise GuacamoleError('Could not update user in %s: %s'
                              % (url_update_user, str(e)))
+
+
+def guacamole_update_password_current_user(base_url, validate_certs, datasource, username, current_password, new_password, auth_token):
+    """
+    Update just the password for the user we use to connect to the api
+    We usually do this for the default admin user "guacadmin"
+    http://mail-archives.apache.org/mod_mbox/guacamole-dev/202006.mbox/browser
+    """
+
+    url_update_password_current_user = URL_UPDATE_PASSWORD_CURRENT_USER.format(
+        url=base_url, datasource=datasource, username=username, token=auth_token)
+
+    payload = {
+        'oldPassword': current_password,
+        'newPassword': new_password
+    }
+
+    try:
+        headers = {'Content-Type': 'application/json'}
+        open_url(url_update_password_current_user, method='PUT', validate_certs=validate_certs,
+                 headers=headers, data=json.dumps(payload))
+    except Exception as e:
+        raise GuacamoleError('Could not update user in %s: %s'
+                             % (url_update_password_current_user, str(e)))
 
 
 def guacamole_delete_user(base_url, validate_certs, datasource, username, auth_token):
@@ -403,6 +428,24 @@ def main():
             )
         except GuacamoleError as e:
             module.fail_json(msg=str(e))
+
+    # if we are updating the same user which we use to connect to the api
+    # we assume we only want to update the password. This is usually done for guacadmin user
+    # http://mail-archives.apache.org/mod_mbox/guacamole-dev/202006.mbox/browser
+    if module.params.get('auth_username') == module.params.get('username'):
+        try:
+            guacamole_update_password_current_user(
+                base_url=module.params.get('base_url'),
+                validate_certs=module.params.get('validate_certs'),
+                datasource=guacamole_token['dataSource'],
+                username=module.params.get('username'),
+                current_password=module.params.get('auth_password'),
+                new_password=module.params.get('password'),
+                auth_token=guacamole_token['authToken'],
+            )
+        except GuacamoleError as e:
+            module.fail_json(msg=str(e))
+
 
     # module arg state=present so we must create or update a user in guacamole
     if module.params.get('state') == 'present':
