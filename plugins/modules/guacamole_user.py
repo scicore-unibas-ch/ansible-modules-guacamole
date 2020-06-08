@@ -446,7 +446,6 @@ def main():
         except GuacamoleError as e:
             module.fail_json(msg=str(e))
 
-
     # module arg state=present so we must create or update a user in guacamole
     if module.params.get('state') == 'present':
 
