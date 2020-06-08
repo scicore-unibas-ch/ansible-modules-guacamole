@@ -268,7 +268,8 @@ def guacamole_update_user(base_url, validate_certs, datasource, username, auth_t
                              % (url_update_user, str(e)))
 
 
-def guacamole_update_password_current_user(base_url, validate_certs, datasource, username, current_password, new_password, auth_token):
+def guacamole_update_password_current_user(base_url, validate_certs, datasource, username,
+                                           current_password, new_password, auth_token):
     """
     Update just the password for the user we use to connect to the api
     We usually do this for the default admin user "guacadmin"
