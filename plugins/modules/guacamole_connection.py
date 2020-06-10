@@ -97,6 +97,17 @@ options:
             - Password for the connection
         type: str
 
+    rdp_security:
+        description:
+            - The security mode to use for the RDP connection
+        type: str
+        choices:
+            - any
+            - nla
+            - nla-ext
+            - tls
+            - rdp
+
     state:
         description:
             - Create or delete the connection?
@@ -265,6 +276,7 @@ def guacamole_populate_connection_payload(module_params):
             "port": module_params['port'],
             "username": module_params['username'],
             "password": module_params['password'],
+            "rdp_security": module_params['rdp_security'],
             "enable-sftp": module_params['sftp_enable'],
             "sftp-port": module_params['sftp_port'],
             "sftp-server-alive-interval": module_params['sftp_server_alive_interval'],
@@ -358,6 +370,7 @@ def main():
         port=dict(type='int'),
         username=dict(type='str'),
         password=dict(type='str', no_log=True),
+        rdp_security=dict(type='str', choices=['any', 'nla', 'nla-ext', 'tls', 'rdp'], required=False),
         state=dict(type='str', choices=['absent', 'present'], default='present'),
         max_connections=dict(type='int', default=1),
         sftp_enable=dict(type='bool', default=False),
