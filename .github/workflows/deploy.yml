@@ -1,0 +1,21 @@
+name: Ansible Galaxy
+
+on:
+  release:
+    types:
+      - published
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Get the version from the tag
+      run: echo ::set-env name=RELEASE_VERSION::${GITHUB_REF/refs\/tags\//
+
+    - name: Deploy the collection
+      uses: artis3n/ansible_galaxy_collection@v2
+      with:
+        api_key: '${{ secrets.GALAXY_API_KEY }}'
+        galaxy_version: '${{ env.RELEASE_VERSION }}'
