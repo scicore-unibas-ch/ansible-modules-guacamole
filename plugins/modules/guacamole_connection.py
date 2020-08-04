@@ -276,7 +276,7 @@ def guacamole_populate_connection_payload(module_params):
             "port": module_params['port'],
             "username": module_params['username'],
             "password": module_params['password'],
-            "rdp_security": module_params['rdp_security'],
+            "security": module_params['rdp_security'],
             "enable-sftp": module_params['sftp_enable'],
             "sftp-port": module_params['sftp_port'],
             "sftp-server-alive-interval": module_params['sftp_server_alive_interval'],
