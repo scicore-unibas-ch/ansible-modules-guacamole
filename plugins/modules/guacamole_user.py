@@ -273,7 +273,7 @@ def guacamole_update_password_current_user(base_url, validate_certs, datasource,
     """
     Update just the password for the user we use to connect to the api
     We usually do this for the default admin user "guacadmin"
-    http://mail-archives.apache.org/mod_mbox/guacamole-dev/202006.mbox/browser
+    http://mail-archives.apache.org/mod_mbox/guacamole-dev/202006.mbox/%3CCALKeL-PbLS8qodWEL3yHWWCir87Xqq0z9pVcbp3S-yjwEpYVTw%40mail.gmail.com%3E
     """
 
     url_update_password_current_user = URL_UPDATE_PASSWORD_CURRENT_USER.format(
