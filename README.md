@@ -283,7 +283,7 @@ OPTIONS (= is mandatory):
         type: str
 
 - disable_account_after
-        Date to disable the account in format dd/mm/yyyy
+        Date to disable the account in format "YYYY-MM-DD" e.g. "2020-10-23"
         [Default: (null)]
         type: str
 
@@ -303,7 +303,7 @@ OPTIONS (= is mandatory):
         type: str
 
 - enable_account_after
-        Date to enable the account in format dd/mm/yyyy
+        Date to enable the account in format "YYYY-MM-DD" e.g. "2020-10-23"
         [Default: (null)]
         type: str
 

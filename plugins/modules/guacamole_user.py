@@ -102,12 +102,12 @@ options:
 
     enable_account_after:
         description:
-            - Date to enable the account in format dd/mm/yyyy
+            - Date to enable the account in format "YYYY-MM-DD" e.g. "2020-10-23"
         type: str
 
     disable_account_after:
         description:
-            - Date to disable the account in format dd/mm/yyyy
+            - Date to disable the account in format "YYYY-MM-DD" e.g. "2020-10-23"
         type: str
 
     timezone:
