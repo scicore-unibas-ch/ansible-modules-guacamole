@@ -1,4 +1,4 @@
-name: syntax check
+name: flake8
 
 on: [push]
 

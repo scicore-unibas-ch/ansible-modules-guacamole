@@ -1,3 +1,6 @@
+[![flake8](https://github.com/scicore-unibas-ch/ansible-modules-guacamole/workflows/flake8/badge.svg)](https://github.com/scicore-unibas-ch/ansible-modules-guacamole/actions?query=workflow%3A%22flake8)
+[![Ansible Galaxy](https://img.shields.io/badge/galaxy-pescobar.scicore.guacamole-blue.svg)](https://galaxy.ansible.com/scicore/guacamole)
+
 # Ansible Collection - scicore.guacamole
 
 Ansible modules to administer apache guacamole connections and users using the API
