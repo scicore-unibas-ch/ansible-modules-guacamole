@@ -1,4 +1,4 @@
-[![flake8](https://github.com/scicore-unibas-ch/ansible-modules-guacamole/workflows/flake8/badge.svg)](https://github.com/scicore-unibas-ch/ansible-modules-guacamole/actions?query=workflow%3A%22flake8)
+[![flake8](https://github.com/scicore-unibas-ch/ansible-modules-guacamole/workflows/flake8/badge.svg)](https://github.com/scicore-unibas-ch/ansible-modules-guacamole/actions?query=workflow%3Aflake8)
 [![Ansible Galaxy](https://img.shields.io/badge/galaxy-scicore.guacamole-blue.svg)](https://galaxy.ansible.com/scicore/guacamole)
 
 # Ansible Collection - scicore.guacamole
