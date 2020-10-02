@@ -180,9 +180,9 @@ message:
 
 URL_LIST_USERS = "{url}/api/session/data/{datasource}/users?token={token}"
 URL_ADD_USER = URL_LIST_USERS
-URL_UPDATE_USER = "{url}/api/session/data/postgresql/users/{username}?token={token}"
+URL_UPDATE_USER = "{url}/api/session/data/{datasource}/users/{username}?token={token}"
 URL_DELETE_USER = URL_UPDATE_USER
-URL_GET_USER_PERMISSIONS = "{url}/api/session/data/postgresql/users/{username}/permissions?token={token}"
+URL_GET_USER_PERMISSIONS = "{url}/api/session/data/{datasource}/users/{username}/permissions?token={token}"
 URL_UPDATE_USER_PERMISSIONS = URL_GET_USER_PERMISSIONS
 
 
