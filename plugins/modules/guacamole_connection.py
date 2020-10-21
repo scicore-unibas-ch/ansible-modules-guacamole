@@ -363,7 +363,7 @@ def main():
         auth_password=dict(type='str', required=True,
                            no_log=True),
         validate_certs=dict(type='bool', default=True),
-        parentIdentifier=dict(type='str', default='ROOT'),
+        parentIdentifier=dict(type='str', aliases=['parentName'], default='ROOT'),
         connection_name=dict(type='str', aliases=['name'], required=True),
         protocol=dict(type='str', choices=['rdp', 'vnc', 'ssh', 'telnet']),
         hostname=dict(type='str'),
