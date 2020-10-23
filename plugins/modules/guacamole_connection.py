@@ -34,6 +34,7 @@ options:
         description:
             - Url to access the guacamole API
         required: true
+        aliases: ['url']
         type: str
 
     auth_username:
@@ -58,12 +59,14 @@ options:
         description:
             - Name of the new connection to create
         required: true
+        aliases: ['name']
         type: str
 
     parentIdentifier:
         description:
-            - Parent indentifier where to create the connection
+            - Parent indentifier (group) where to create the connection
         default: 'ROOT'
+        aliases: ['groupName']
         type: str
 
     protocol:
@@ -363,7 +366,7 @@ def main():
         auth_password=dict(type='str', required=True,
                            no_log=True),
         validate_certs=dict(type='bool', default=True),
-        parentIdentifier=dict(type='str', aliases=['parentName'], default='ROOT'),
+        parentIdentifier=dict(type='str', aliases=['groupName'], default='ROOT'),
         connection_name=dict(type='str', aliases=['name'], required=True),
         protocol=dict(type='str', choices=['rdp', 'vnc', 'ssh', 'telnet']),
         hostname=dict(type='str'),
