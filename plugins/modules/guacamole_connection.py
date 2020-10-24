@@ -62,7 +62,7 @@ options:
         aliases: ['name']
         type: str
 
-    groupName:
+    group_name:
         description:
             - Parent indentifier (group) where to create the connection
         default: 'ROOT'
@@ -272,7 +272,7 @@ def guacamole_populate_connection_payload(module_params):
     """
 
     payload = {
-        "parentIdentifier": module_params['groupName'],
+        "parentIdentifier": module_params['group_name'],
         "name": module_params['connection_name'],
         "protocol": module_params['protocol'],
         "parameters": {
@@ -402,7 +402,7 @@ def main():
         auth_password=dict(type='str', required=True,
                            no_log=True),
         validate_certs=dict(type='bool', default=True),
-        groupName=dict(type='str', aliases=['parentIdentifier'], default='ROOT'),
+        group_name=dict(type='str', aliases=['parentIdentifier'], default='ROOT'),
         connection_name=dict(type='str', aliases=['name'], required=True),
         protocol=dict(type='str', choices=['rdp', 'vnc', 'ssh', 'telnet']),
         hostname=dict(type='str'),
@@ -445,13 +445,13 @@ def main():
 
     # get the group numeric ID if we are NOT adding the connection
     # to the default connections group (ROOT)
-    if module.params.get('groupName') != "ROOT":
+    if module.params.get('group_name') != "ROOT":
         try:
-            module.params['groupName'] = guacamole_get_connections_group_id(
+            module.params['group_name'] = guacamole_get_connections_group_id(
                 base_url=module.params.get('base_url'),
                 validate_certs=module.params.get('validate_certs'),
                 datasource=guacamole_token['dataSource'],
-                group=module.params.get('groupName'),
+                group=module.params.get('group_name'),
                 auth_token=guacamole_token['authToken'],
             )
         except GuacamoleError as e:
@@ -463,7 +463,7 @@ def main():
             base_url=module.params.get('base_url'),
             validate_certs=module.params.get('validate_certs'),
             datasource=guacamole_token['dataSource'],
-            group=module.params.get('groupName'),
+            group=module.params.get('group_name'),
             auth_token=guacamole_token['authToken'],
         )
     except GuacamoleError as e:
@@ -582,7 +582,7 @@ def main():
             base_url=module.params.get('base_url'),
             validate_certs=module.params.get('validate_certs'),
             datasource=guacamole_token['dataSource'],
-            group=module.params.get('groupName'),
+            group=module.params.get('group_name'),
             auth_token=guacamole_token['authToken'],
         )
     except GuacamoleError as e:
