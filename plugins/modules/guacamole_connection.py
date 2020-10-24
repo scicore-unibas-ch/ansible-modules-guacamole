@@ -357,7 +357,7 @@ def guacamole_delete_connection(base_url, validate_certs, datasource, connection
                              % (url_delete_connection, str(e)))
 
 
-def guacamole_get_group_id(base_url, validate_certs, datasource, parent_identifier, auth_token):
+def guacamole_get_connections_group_id(base_url, validate_certs, datasource, parent_identifier, auth_token):
     """
     Get the group numeric id from the group name.
     When adding a connection to a group different of the default one (ROOT) we have to map the group
@@ -441,7 +441,7 @@ def main():
     # to the default connections group (ROOT)
     if module.params.get('parentIdentifier') != "ROOT":
         try:
-            module.params['parentIdentifier'] = guacamole_get_group_id(
+            module.params['parentIdentifier'] = guacamole_get_connections_group_id(
                 base_url=module.params.get('base_url'),
                 validate_certs=module.params.get('validate_certs'),
                 datasource=guacamole_token['dataSource'],
