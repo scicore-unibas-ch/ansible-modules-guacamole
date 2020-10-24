@@ -64,7 +64,7 @@ options:
 
     group_name:
         description:
-            - Parent indentifier (group) where to create the connection
+            - Group name (parentIdentifier) where to create the connection
         default: 'ROOT'
         aliases: ['parentIdentifier']
         type: str
