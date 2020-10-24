@@ -239,6 +239,7 @@ URL_ADD_CONNECTION = "{url}/api/session/data/{datasource}/connections?token={tok
 URL_UPDATE_CONNECTION = "{url}/api/session/data/{datasource}/connections/{connection_id}?token={token}"
 URL_DELETE_CONNECTION = URL_UPDATE_CONNECTION
 URL_CONNECTION_DETAILS = "{url}/api/session/data/{datasource}/connections/{connection_id}/parameters?token={token}"
+URL_LIST_CONNECTIONS_GROUPS = "{url}/api/session/data/{datasource}/connectionGroups/?token={token}"
 
 
 def guacamole_get_connection_details(base_url, validate_certs, datasource, connection_id, auth_token):
@@ -356,6 +357,35 @@ def guacamole_delete_connection(base_url, validate_certs, datasource, connection
                              % (url_delete_connection, str(e)))
 
 
+def guacamole_get_group_id(base_url, validate_certs, datasource, parent_identifier, auth_token):
+    """
+    Get the group numeric id from the group name.
+    When adding a connection to a group different of the default one (ROOT) we have to map the group
+    name to its numeric identifier because the API expects a group numeric id, not a group name
+    """
+
+    url_list_connections_groups = URL_LIST_CONNECTIONS_GROUPS.format(
+        url=base_url, datasource=datasource, token=auth_token)
+
+    try:
+        connections_groups = json.load(open_url(url_list_connections_groups, method='GET',
+                                                           validate_certs=validate_certs))
+    except ValueError as e:
+        raise GuacamoleError(
+            'API returned invalid JSON when trying to obtain list of connections groups from %s: %s'
+            % (url_list_connections_groups, str(e)))
+    except Exception as e:
+        raise GuacamoleError('Could not obtain list of guacamole connections groups from %s: %s'
+                             % (url_list_connections_groups, str(e)))
+
+    # find the numeric id for the group name
+    for group_id, group_info in connections_groups.items():
+        if group_info['name'] == parent_identifier:
+            group_numeric_id = group_info['identifier']
+
+    return group_numeric_id
+
+
 def main():
 
     # define the available arguments/parameters that a user can pass to
@@ -406,6 +436,20 @@ def main():
         )
     except GuacamoleError as e:
         module.fail_json(msg=str(e))
+
+    # get the group numeric ID if we are NOT adding the connection
+    # to the default connections group (ROOT)
+    if module.params.get('parentIdentifier') != "ROOT":
+        try:
+            module.params['parentIdentifier'] = guacamole_get_group_id(
+                base_url=module.params.get('base_url'),
+                validate_certs=module.params.get('validate_certs'),
+                datasource=guacamole_token['dataSource'],
+                parent_identifier=module.params.get('parentIdentifier'),
+                auth_token=guacamole_token['authToken'],
+            )
+        except GuacamoleError as e:
+            module.fail_json(msg=str(e))
 
     # Get existing guacamole connections before doing anything else
     try:
