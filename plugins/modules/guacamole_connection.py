@@ -383,7 +383,13 @@ def guacamole_get_connections_group_id(base_url, validate_certs, datasource, par
         if group_info['name'] == parent_identifier:
             group_numeric_id = group_info['identifier']
 
-    return group_numeric_id
+    try:
+        group_numeric_id
+    except NameError:
+        raise GuacamoleError(
+            'Could not find the numeric id for connections group %s. Do the group exists?' % (parent_identifier))
+    else:
+        return group_numeric_id
 
 
 def main():
