@@ -62,11 +62,11 @@ options:
         aliases: ['name']
         type: str
 
-    parentIdentifier:
+    groupName:
         description:
             - Parent indentifier (group) where to create the connection
         default: 'ROOT'
-        aliases: ['groupName']
+        aliases: ['parentIdentifier']
         type: str
 
     protocol:
@@ -272,7 +272,7 @@ def guacamole_populate_connection_payload(module_params):
     """
 
     payload = {
-        "parentIdentifier": module_params['parentIdentifier'],
+        "parentIdentifier": module_params['groupName'],
         "name": module_params['connection_name'],
         "protocol": module_params['protocol'],
         "parameters": {
@@ -357,7 +357,7 @@ def guacamole_delete_connection(base_url, validate_certs, datasource, connection
                              % (url_delete_connection, str(e)))
 
 
-def guacamole_get_connections_group_id(base_url, validate_certs, datasource, parent_identifier, auth_token):
+def guacamole_get_connections_group_id(base_url, validate_certs, datasource, group, auth_token):
     """
     Get the group numeric id from the group name.
     When adding a connection to a group different of the default one (ROOT) we have to map the group
@@ -380,14 +380,14 @@ def guacamole_get_connections_group_id(base_url, validate_certs, datasource, par
 
     # find the numeric id for the group name
     for group_id, group_info in connections_groups.items():
-        if group_info['name'] == parent_identifier:
+        if group_info['name'] == group:
             group_numeric_id = group_info['identifier']
 
     try:
         group_numeric_id
     except NameError:
         raise GuacamoleError(
-            'Could not find the numeric id for connections group %s. Do the group exists?' % (parent_identifier))
+            'Could not find the numeric id for connections group %s. Do the group exists?' % (group))
     else:
         return group_numeric_id
 
@@ -402,7 +402,7 @@ def main():
         auth_password=dict(type='str', required=True,
                            no_log=True),
         validate_certs=dict(type='bool', default=True),
-        parentIdentifier=dict(type='str', aliases=['groupName'], default='ROOT'),
+        groupName=dict(type='str', aliases=['parentIdentifier'], default='ROOT'),
         connection_name=dict(type='str', aliases=['name'], required=True),
         protocol=dict(type='str', choices=['rdp', 'vnc', 'ssh', 'telnet']),
         hostname=dict(type='str'),
@@ -445,13 +445,13 @@ def main():
 
     # get the group numeric ID if we are NOT adding the connection
     # to the default connections group (ROOT)
-    if module.params.get('parentIdentifier') != "ROOT":
+    if module.params.get('groupName') != "ROOT":
         try:
-            module.params['parentIdentifier'] = guacamole_get_connections_group_id(
+            module.params['groupName'] = guacamole_get_connections_group_id(
                 base_url=module.params.get('base_url'),
                 validate_certs=module.params.get('validate_certs'),
                 datasource=guacamole_token['dataSource'],
-                parent_identifier=module.params.get('parentIdentifier'),
+                group=module.params.get('groupName'),
                 auth_token=guacamole_token['authToken'],
             )
         except GuacamoleError as e:
@@ -463,7 +463,7 @@ def main():
             base_url=module.params.get('base_url'),
             validate_certs=module.params.get('validate_certs'),
             datasource=guacamole_token['dataSource'],
-            parent_identifier=module.params.get('parentIdentifier'),
+            group=module.params.get('groupName'),
             auth_token=guacamole_token['authToken'],
         )
     except GuacamoleError as e:
@@ -582,7 +582,7 @@ def main():
             base_url=module.params.get('base_url'),
             validate_certs=module.params.get('validate_certs'),
             datasource=guacamole_token['dataSource'],
-            parent_identifier=module.params.get('parentIdentifier'),
+            group=module.params.get('groupName'),
             auth_token=guacamole_token['authToken'],
         )
     except GuacamoleError as e:

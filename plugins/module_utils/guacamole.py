@@ -10,7 +10,7 @@ from ansible.module_utils.six.moves.urllib.parse import urlencode
 
 URL_GET_TOKEN = "{url}/api/tokens"
 URL_LIST_CONNECTIONS = "{url}/api/session/data/{datasource}/connectionGroups/\
-{parent_identifier}/tree?token={token}"
+{group}/tree?token={token}"
 
 
 class GuacamoleError(Exception):
@@ -57,17 +57,17 @@ def guacamole_get_token(base_url, validate_certs, auth_username, auth_password):
             'Could not obtain access token from %s' % url_get_token)
 
 
-def guacamole_get_connections(base_url, validate_certs, datasource, parent_identifier, auth_token):
+def guacamole_get_connections(base_url, validate_certs, datasource, group, auth_token):
     """
     Return a list of dicts with all the connections registered in the guacamole server
-    for the provided parent_identifier. Default parent_identifier is ROOT
+    for the provided connections group. Default connections group is ROOT
     """
 
     url_list_connections = URL_LIST_CONNECTIONS.format(
-        url=base_url, datasource=datasource, parent_identifier=parent_identifier, token=auth_token)
+        url=base_url, datasource=datasource, group=group, token=auth_token)
 
     try:
-        parent_identifier_connections = json.load(open_url(url_list_connections, method='GET',
+        connections_group = json.load(open_url(url_list_connections, method='GET',
                                                            validate_certs=validate_certs))
     except ValueError as e:
         raise GuacamoleError(
@@ -77,7 +77,7 @@ def guacamole_get_connections(base_url, validate_certs, datasource, parent_ident
         raise GuacamoleError('Could not obtain list of guacamole connections from %s: %s'
                              % (url_list_connections, str(e)))
 
-    if 'childConnections' in parent_identifier_connections:
-        return parent_identifier_connections['childConnections']
+    if 'childConnections' in connections_group:
+        return connections_group['childConnections']
     else:
         return [{}]
