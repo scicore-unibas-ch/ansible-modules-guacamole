@@ -101,6 +101,12 @@ options:
             - present
             - absent
 
+    force_deletion:
+        description:
+            - Force deletion of the group even if it has child connections
+        default: 'False'
+        type: bool
+
 author:
     - Pablo Escobar Lopez (@pescobar)
 '''
@@ -240,7 +246,8 @@ def main():
         max_connections=dict(type='int'),
         max_connections_per_user=dict(type='int'),
         enable_session_affinity=dict(type='bool'),
-        state=dict(type='str', choices=['absent', 'present'], default='present')
+        state=dict(type='str', choices=['absent', 'present'], default='present'),
+        force_deletion=dict(type='bool', default=False)
     )
 
     result = dict(changed=False, msg='', connections_group_info={})
@@ -341,21 +348,8 @@ def main():
         # the group exists so we delete it
         if guacamole_connections_group_exists:
 
-            # Query all the existing guacamole connections in this group
-            # to verify if the group we want to delete has any child connection
-            try:
-                connections_in_group = guacamole_get_connections(
-                    base_url=module.params.get('base_url'),
-                    validate_certs=module.params.get('validate_certs'),
-                    datasource=guacamole_token['dataSource'],
-                    group=group_numeric_id,
-                    auth_token=guacamole_token['authToken'],
-                )
-            except GuacamoleError as e:
-                module.fail_json(msg=str(e))
-
-            # if the group is empty (no child connections) we delete it
-            if not connections_in_group:
+            # if force_deletion=true we delete the group without any extra check
+            if module.params.get('force_deletion'):
 
                 try:
                     guacamole_delete_connections_group(
@@ -367,6 +361,42 @@ def main():
                     )
                 except GuacamoleError as e:
                     module.fail_json(msg=str(e))
+
+            # if we are here it's because force_deletion=false
+            else:
+
+                # Query all the existing guacamole connections in this group
+                # to verify if the group we want to delete has any child connection
+                try:
+                    connections_in_group = guacamole_get_connections(
+                        base_url=module.params.get('base_url'),
+                        validate_certs=module.params.get('validate_certs'),
+                        datasource=guacamole_token['dataSource'],
+                        group=group_numeric_id,
+                        auth_token=guacamole_token['authToken'],
+                    )
+                except GuacamoleError as e:
+                    module.fail_json(msg=str(e))
+
+                # if the group is empty (no child connections) we delete it
+                if not connections_in_group:
+
+                    try:
+                        guacamole_delete_connections_group(
+                            base_url=module.params.get('base_url'),
+                            validate_certs=module.params.get('validate_certs'),
+                            datasource=guacamole_token['dataSource'],
+                            auth_token=guacamole_token['authToken'],
+                            group_numeric_id=group_numeric_id
+                        )
+                    except GuacamoleError as e:
+                        module.fail_json(msg=str(e))
+
+                # if the group has child connections and force_deletion=false fail and exit
+                else:
+                    module.fail_json(
+                    msg="Won't delete a group with child connections unless force_deletion=True"
+                    )
 
         # if the group doesn't exists we just print a message
         else:
