@@ -129,7 +129,7 @@ message:
 
 URL_LIST_CONNECTIONS_GROUPS = "{url}/api/session/data/{datasource}/connectionGroups/?token={token}"
 URL_ADD_CONNECTIONS_GROUP = URL_LIST_CONNECTIONS_GROUPS
-URL_UPDATE_CONNECTIONS_GROUP = "{url}/api/session/data/{datasource}/connectionGroups/{conn_numeric_id}?token={token}"
+URL_UPDATE_CONNECTIONS_GROUP = "{url}/api/session/data/{datasource}/connectionGroups/{group_numeric_id}?token={token}"
 URL_DELETE_CONNECTIONS_GROUP = URL_UPDATE_CONNECTIONS_GROUP
 
 
@@ -158,7 +158,7 @@ def guacamole_get_connections_groups(base_url, validate_certs, datasource, auth_
 
 def guacamole_populate_connections_group_payload(module_params):
     """
-    Populate the json that we send to the guaccamole API to create new connection group
+    Populate the json that we send to the guaccamole API to create new connections group
     """
 
     payload = {
@@ -175,7 +175,7 @@ def guacamole_populate_connections_group_payload(module_params):
     return payload
 
 
-def guacamole_add_connections_group(base_url, validate_certs, datasource, auth_token, payload):
+def guacamole_add_connections_group(base_url, validate_certs, datasource, auth_token,  payload):
     """
     Add a new connections group to the guacamole server.
     """
@@ -190,6 +190,23 @@ def guacamole_add_connections_group(base_url, validate_certs, datasource, auth_t
     except Exception as e:
         raise GuacamoleError('Could not add a new connections group in %s: %s'
                              % (url_add_connections_group, str(e)))
+
+
+def guacamole_update_connections_group(base_url, validate_certs, datasource, auth_token, group_numeric_id, payload):
+    """
+    Update an existing connections group
+    """
+
+    url_update_connections_group = URL_UPDATE_CONNECTIONS_GROUP.format(
+        url=base_url, datasource=datasource, group_numeric_id=group_numeric_id, token=auth_token)
+
+    try:
+        headers = {'Content-Type': 'application/json'}
+        open_url(url_update_connections_group, method='PUT', validate_certs=validate_certs,
+                 headers=headers, data=json.dumps(payload))
+    except Exception as e:
+        raise GuacamoleError('Could not update a connections group in %s: %s'
+                             % (url_update_connections_group, str(e)))
 
 
 def main():
@@ -252,37 +269,52 @@ def main():
     except GuacamoleError as e:
         module.fail_json(msg=str(e))
 
+    # check if the connections group already exists
+    # If the connections group exists we get the id
+    guacamole_connections_group_exists = False
+    for group_id, group_info in guacamole_connections_groups_before.items():
+        if group_info['name'] == module.params.get('group_name'):
+            group_numeric_id = group_info['identifier']
+            guacamole_connections_group_exists = True
 
-    payload = guacamole_populate_connections_group_payload(module.params)
 
-    guacamole_add_connections_group(
-        base_url=module.params.get('base_url'),
-        validate_certs=module.params.get('validate_certs'),
-        datasource=guacamole_token['dataSource'],
-        auth_token=guacamole_token['authToken'],
-        payload=payload
-    )
 
-    # # First check if the connection already exists
-    # # If the connection exists we get the connection_id
-    # guacamole_connection_exists = False
-    # for connection in guacamole_connections_before:
-    #     if 'name' in connection:
-    #         if connection['name'] == module.params.get('connection_name'):
-    #             guacamole_connection_exists = True
-    #             connection_id = connection['identifier']
-    #             break
+    # module arg state=present so we have to create a new connecions group
+    # or update an existing one
+    if module.params.get('state') == 'present':
 
-    # # module arg state=present so we have to create a new connecion
-    # # or update a connection if it already exists
-    # if module.params.get('state') == 'present':
+        # populate the payload(json) with the group info that we
+        # will send to the API
+        payload = guacamole_populate_connections_group_payload(module.params)
 
-    #     # populate the payload(json) with the connection info that we
-    #     # will send to the API
-    #     payload = guacamole_populate_connection_payload(module.params)
+        # the group already exists so we update it
+        if guacamole_connections_group_exists:
 
-    #     # the connection already exists so we update it
-    #     if guacamole_connection_exists:
+            try:
+                guacamole_update_connections_group(
+                    base_url=module.params.get('base_url'),
+                    validate_certs=module.params.get('validate_certs'),
+                    datasource=guacamole_token['dataSource'],
+                    auth_token=guacamole_token['authToken'],
+                    group_numeric_id=group_numeric_id,
+                    payload=payload
+                )
+            except GuacamoleError as e:
+                module.fail_json(msg=str(e))
+
+        # if the group doesn't exists we add it
+        else:
+
+            try:
+                guacamole_add_connections_group(
+                    base_url=module.params.get('base_url'),
+                    validate_certs=module.params.get('validate_certs'),
+                    datasource=guacamole_token['dataSource'],
+                    auth_token=guacamole_token['authToken'],
+                    payload=payload
+                )
+            except GuacamoleError as e:
+                module.fail_json(msg=str(e))
 
     #         try:
     #             # query what's the current config for this connection so
