@@ -9,7 +9,7 @@ import json
 from ansible.module_utils.basic import AnsibleModule
 from ansible.module_utils.urls import open_url
 from ansible_collections.scicore.guacamole.plugins.module_utils.guacamole import GuacamoleError, \
-    guacamole_get_token, guacamole_get_connections
+    guacamole_get_token, guacamole_get_connections, guacamole_get_connections_group_id
 __metaclass__ = type
 
 ANSIBLE_METADATA = {
@@ -34,6 +34,7 @@ options:
         description:
             - Url to access the guacamole API
         required: true
+        aliases: ['url']
         type: str
 
     auth_username:
@@ -58,12 +59,14 @@ options:
         description:
             - Name of the new connection to create
         required: true
+        aliases: ['name']
         type: str
 
-    parentIdentifier:
+    group_name:
         description:
-            - Parent indentifier where to create the connection
+            - Group name (parentIdentifier) where to create the connection
         default: 'ROOT'
+        aliases: ['parentIdentifier']
         type: str
 
     protocol:
@@ -268,7 +271,7 @@ def guacamole_populate_connection_payload(module_params):
     """
 
     payload = {
-        "parentIdentifier": module_params['parentIdentifier'],
+        "parentIdentifier": module_params['group_name'],
         "name": module_params['connection_name'],
         "protocol": module_params['protocol'],
         "parameters": {
@@ -353,6 +356,8 @@ def guacamole_delete_connection(base_url, validate_certs, datasource, connection
                              % (url_delete_connection, str(e)))
 
 
+
+
 def main():
 
     # define the available arguments/parameters that a user can pass to
@@ -363,7 +368,7 @@ def main():
         auth_password=dict(type='str', required=True,
                            no_log=True),
         validate_certs=dict(type='bool', default=True),
-        parentIdentifier=dict(type='str', default='ROOT'),
+        group_name=dict(type='str', aliases=['parentIdentifier'], default='ROOT'),
         connection_name=dict(type='str', aliases=['name'], required=True),
         protocol=dict(type='str', choices=['rdp', 'vnc', 'ssh', 'telnet']),
         hostname=dict(type='str'),
@@ -404,13 +409,27 @@ def main():
     except GuacamoleError as e:
         module.fail_json(msg=str(e))
 
+    # get the group numeric ID if we are NOT adding the connection
+    # to the default connections group (ROOT)
+    if module.params.get('group_name') != "ROOT":
+        try:
+            module.params['group_name'] = guacamole_get_connections_group_id(
+                base_url=module.params.get('base_url'),
+                validate_certs=module.params.get('validate_certs'),
+                datasource=guacamole_token['dataSource'],
+                group=module.params.get('group_name'),
+                auth_token=guacamole_token['authToken'],
+            )
+        except GuacamoleError as e:
+            module.fail_json(msg=str(e))
+
     # Get existing guacamole connections before doing anything else
     try:
         guacamole_connections_before = guacamole_get_connections(
             base_url=module.params.get('base_url'),
             validate_certs=module.params.get('validate_certs'),
             datasource=guacamole_token['dataSource'],
-            parent_identifier=module.params.get('parentIdentifier'),
+            group=module.params.get('group_name'),
             auth_token=guacamole_token['authToken'],
         )
     except GuacamoleError as e:
@@ -529,7 +548,7 @@ def main():
             base_url=module.params.get('base_url'),
             validate_certs=module.params.get('validate_certs'),
             datasource=guacamole_token['dataSource'],
-            parent_identifier=module.params.get('parentIdentifier'),
+            group=module.params.get('group_name'),
             auth_token=guacamole_token['authToken'],
         )
     except GuacamoleError as e:
