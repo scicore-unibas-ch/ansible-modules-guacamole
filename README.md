@@ -66,11 +66,11 @@ Now you can use the modules `guacamole_connection` and `guacamole_user`. Adapt t
 ## Output of "ansible-doc scicore.guacamole.guacamole_connection"
 
 ```
-> GUACAMOLE_CONNECTION    (~/.ansible/collections/ansible_collections/scicore/guacamole/plugins/modules/guacamole_connection.py)
+> SCICORE.GUACAMOLE.GUACAMOLE_CONNECTION    (~/.ansible/collections/ansible_collections/scicore/guacamole/plugins/modules/guacamole_connection.py)
 
-        Add or remove guacamole connections. You can create rdp, vnc, ssh or telnet connections
+        Add or remove guacamole connections. You can create rdp, vnc,
+        ssh or telnet connections
 
-  * This module is maintained by The Ansible Community
 OPTIONS (= is mandatory):
 
 = auth_password
@@ -85,12 +85,17 @@ OPTIONS (= is mandatory):
 
 = base_url
         Url to access the guacamole API
-
+        (Aliases: url)
         type: str
 
 = connection_name
         Name of the new connection to create
+        (Aliases: name)
+        type: str
 
+- group_name
+        Group name (parentIdentifier) where to create the connection
+        (Aliases: parentIdentifier)[Default: ROOT]
         type: str
 
 - hostname
@@ -102,11 +107,6 @@ OPTIONS (= is mandatory):
         Max simultaneos connections allowed for this connection
 
         type: int
-
-- parentIdentifier
-        Parent indentifier where to create the connection
-        [Default: ROOT]
-        type: str
 
 - password
         Password for the connection
@@ -121,6 +121,11 @@ OPTIONS (= is mandatory):
 = protocol
         Protocol to use for the new connection
         (Choices: rdp, vnc, ssh, telnet)
+        type: str
+
+- rdp_security
+        The security mode to use for the RDP connection
+        (Choices: any, nla, nla-ext, tls, rdp)[Default: (null)]
         type: str
 
 - sftp_default_upload_directory
@@ -190,11 +195,15 @@ OPTIONS (= is mandatory):
 
 
 AUTHOR: Pablo Escobar Lopez (@pescobar)
-        METADATA:
-          status:
-          - preview
-          supported_by: community
 
+METADATA:
+  metadata_version: '1.1'
+  status:
+  - preview
+  supported_by: community
+
+
+VERSION_ADDED_COLLECTION: scicore.guacamole
 
 EXAMPLES:
 
@@ -238,21 +247,23 @@ EXAMPLES:
 
 
 RETURN VALUES:
+- connection_info
+        Information about the created or updated connection
 
-connection_info:
-    description: Information about the created or updated connection
-    type: dict
-    returned: always
-message:
-    description: Some extra info about what the module did
-    type: str
-    returned: always
+        returned: always
+        type: dict
+
+- message
+        Some extra info about what the module did
+
+        returned: always
+        type: str
 ```
 
 ## Output of "ansible-doc scicore.guacamole.guacamole_user"
 
 ```
-> GUACAMOLE_USER    (~/.ansible/collections/ansible_collections/scicore/guacamole/plugins/modules/guacamole_user.py)
+> SCICORE.GUACAMOLE.GUACAMOLE_USER    (~/.ansible/collections/ansible_collections/scicore/guacamole/plugins/modules/guacamole_user.py)
 
         Create or delete a guacamole user
 
