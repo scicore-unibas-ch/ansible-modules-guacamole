@@ -355,7 +355,7 @@ def main():
         # if the group doesn't exists we just print a message
         else:
 
-            result['msg'] = "Connections group %s doesn't exists. Not doing anything" \
+            result['msg'] = "Connections group '%s' doesn't exists. Not doing anything" \
                             % (module.params.get('group_name'))
 
     # Get existing guacamole connections groups AFTER to check if something changed
