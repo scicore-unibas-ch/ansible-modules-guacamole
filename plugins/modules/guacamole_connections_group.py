@@ -151,7 +151,7 @@ def guacamole_get_connections_groups(base_url, validate_certs, datasource, auth_
             % (url_list_connections_groups, str(e)))
     except Exception as e:
         raise GuacamoleError('Could not obtain connections groups from %s: %s'
-                             % (url_connection_details, str(e)))
+                             % (url_list_connections_groups, str(e)))
 
     return connections_groups
 
@@ -189,7 +189,7 @@ def guacamole_add_connections_group(base_url, validate_certs, datasource, auth_t
                  headers=headers, data=json.dumps(payload))
     except Exception as e:
         raise GuacamoleError('Could not add a new connections group in %s: %s'
-                             % (url_add_connection, str(e)))
+                             % (url_add_connections_group, str(e)))
 
 
 def main():
