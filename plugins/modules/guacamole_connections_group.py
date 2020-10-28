@@ -341,16 +341,32 @@ def main():
         # the group exists so we delete it
         if guacamole_connections_group_exists:
 
+            # Query all the existing guacamole connections in this group
+            # to verify if the group we want to delete has any child connection
             try:
-                guacamole_delete_connections_group(
+                connections_in_group = guacamole_get_connections(
                     base_url=module.params.get('base_url'),
                     validate_certs=module.params.get('validate_certs'),
                     datasource=guacamole_token['dataSource'],
+                    group=group_numeric_id,
                     auth_token=guacamole_token['authToken'],
-                    group_numeric_id=group_numeric_id
                 )
             except GuacamoleError as e:
                 module.fail_json(msg=str(e))
+
+            # if the group is empty (no child connections) we delete it
+            if not connections_in_group:
+
+                try:
+                    guacamole_delete_connections_group(
+                        base_url=module.params.get('base_url'),
+                        validate_certs=module.params.get('validate_certs'),
+                        datasource=guacamole_token['dataSource'],
+                        auth_token=guacamole_token['authToken'],
+                        group_numeric_id=group_numeric_id
+                    )
+                except GuacamoleError as e:
+                    module.fail_json(msg=str(e))
 
         # if the group doesn't exists we just print a message
         else:
