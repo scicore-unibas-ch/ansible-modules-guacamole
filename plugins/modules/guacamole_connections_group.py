@@ -209,6 +209,22 @@ def guacamole_update_connections_group(base_url, validate_certs, datasource, aut
                              % (url_update_connections_group, str(e)))
 
 
+def guacamole_delete_connections_group(base_url, validate_certs, datasource, auth_token, group_numeric_id):
+    """
+    Delete a connections group
+    """
+
+    url_delete_connections_group = URL_DELETE_CONNECTIONS_GROUP.format(
+        url=base_url, datasource=datasource, group_numeric_id=group_numeric_id, token=auth_token)
+
+    try:
+        headers = {'Content-Type': 'application/json'}
+        open_url(url_delete_connections_group, method='DELETE', validate_certs=validate_certs, headers=headers)
+    except Exception as e:
+        raise GuacamoleError('Could not delete a connections group in %s: %s'
+                             % (url_delete_connections_group, str(e)))
+
+
 def main():
 
     # define the available arguments/parameters that a user can pass to
@@ -279,7 +295,7 @@ def main():
 
 
 
-    # module arg state=present so we have to create a new connecions group
+    # module arg state=present so we have to create a new connections group
     # or update an existing one
     if module.params.get('state') == 'present':
 
@@ -315,6 +331,30 @@ def main():
                 )
             except GuacamoleError as e:
                 module.fail_json(msg=str(e))
+
+
+    # module arg state=absent so we have to delete connections group
+    if module.params.get('state') == 'absent':
+
+        # the group exists so we delete it
+        if guacamole_connections_group_exists:
+
+            try:
+                guacamole_delete_connections_group(
+                    base_url=module.params.get('base_url'),
+                    validate_certs=module.params.get('validate_certs'),
+                    datasource=guacamole_token['dataSource'],
+                    auth_token=guacamole_token['authToken'],
+                    group_numeric_id=group_numeric_id
+                )
+            except GuacamoleError as e:
+                module.fail_json(msg=str(e))
+
+        # if the group doesn't exists we just print a message
+        else:
+
+            result['msg'] = "Connections group %s doesn't exists. Not doing anything" \
+                            % (module.params.get('group_name'))
 
     #         try:
     #             # query what's the current config for this connection so
