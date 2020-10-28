@@ -348,6 +348,7 @@ def main():
         # the group exists so we delete it
         if guacamole_connections_group_exists:
 
+
             # if force_deletion=true we delete the group without any extra check
             if module.params.get('force_deletion'):
 
@@ -419,10 +420,15 @@ def main():
     if guacamole_connections_groups_before != guacamole_connections_groups_after:
        result['changed'] = True
 
-    # return connections_group_info{} for the added or updated connections group
-    for group_id, group_info in guacamole_connections_groups_after.items():
-        if group_info['name'] == module.params.get('group_name'):
-            result['connections_group_info'] = group_info
+    # return connections_group_info{} for the added/updated/deleted connections group
+    if module.params.get('state') == 'present':
+        for group_id, group_info in guacamole_connections_groups_after.items():
+            if group_info['name'] == module.params.get('group_name'):
+                result['connections_group_info'] = group_info
+    else:
+        for group_id, group_info in guacamole_connections_groups_before.items():
+            if group_info['name'] == module.params.get('group_name'):
+                result['connections_group_info'] = group_info
 
     module.exit_json(**result)
 
