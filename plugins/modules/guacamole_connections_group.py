@@ -369,118 +369,14 @@ def main():
     except GuacamoleError as e:
         module.fail_json(msg=str(e))
 
+    # check if something changed (idempotence)
     if guacamole_connections_groups_before != guacamole_connections_groups_after:
        result['changed'] = True
 
+    # return connections_group_info{} for the added or updated connections group
     for group_id, group_info in guacamole_connections_groups_after.items():
         if group_info['name'] == module.params.get('group_name'):
             result['connections_group_info'] = group_info
-
-    #         try:
-    #             # query what's the current config for this connection so
-    #             # we can check later if it has changed
-    #             connection_config_before_update = guacamole_get_connection_details(
-    #                 base_url=module.params.get('base_url'),
-    #                 validate_certs=module.params.get('validate_certs'),
-    #                 datasource=guacamole_token['dataSource'],
-    #                 auth_token=guacamole_token['authToken'],
-    #                 connection_id=connection_id,
-    #             )
-    #         except GuacamoleError as e:
-    #             module.fail_json(msg=str(e))
-
-    #         try:
-    #             # apply the config upddate to the connection
-    #             guacamole_update_connection(
-    #                 base_url=module.params.get('base_url'),
-    #                 validate_certs=module.params.get('validate_certs'),
-    #                 datasource=guacamole_token['dataSource'],
-    #                 auth_token=guacamole_token['authToken'],
-    #                 connection_id=connection_id,
-    #                 payload=payload
-    #             )
-    #         except GuacamoleError as e:
-    #             module.fail_json(msg=str(e))
-
-    #         try:
-    #             # query what's the config for this connection again to
-    #             # verify if it has changed
-    #             connection_config_after_update = guacamole_get_connection_details(
-    #                 base_url=module.params.get('base_url'),
-    #                 validate_certs=module.params.get('validate_certs'),
-    #                 datasource=guacamole_token['dataSource'],
-    #                 auth_token=guacamole_token['authToken'],
-    #                 connection_id=connection_id,
-    #             )
-    #         except GuacamoleError as e:
-    #             module.fail_json(msg=str(e))
-
-    #         if connection_config_before_update != connection_config_after_update:
-    #             # if the connection config has changed we report it
-    #             result['changed'] = True
-    #             result['msg'] = 'Connection config has been updated'
-    #         else:
-    #             # if the connection config hasn't changed we just report a msg
-    #             result['msg'] = 'Connection config not changed'
-
-    #     else:
-    #         # We couldn't find a connection with the provided name so we add it
-    #         try:
-    #             guacamole_add_connection(
-    #                 base_url=module.params.get('base_url'),
-    #                 validate_certs=module.params.get('validate_certs'),
-    #                 datasource=guacamole_token['dataSource'],
-    #                 auth_token=guacamole_token['authToken'],
-    #                 payload=payload
-    #             )
-
-    #             result['msg'] = "Connection added: " + module.params.get('connection_name')
-
-    #         except GuacamoleError as e:
-    #             module.fail_json(msg=str(e))
-
-    # # module arg state=absent so we have to delete the connection
-    # if module.params.get('state') == 'absent':
-
-    #     if guacamole_connection_exists:
-
-    #         try:
-    #             guacamole_delete_connection(
-    #                 base_url=module.params.get('base_url'),
-    #                 validate_certs=module.params.get('validate_certs'),
-    #                 datasource=guacamole_token['dataSource'],
-    #                 auth_token=guacamole_token['authToken'],
-    #                 connection_id=connection_id,
-    #             )
-
-    #             result['msg'] = "Connection deleted: " + module.params.get('connection_name')
-
-    #         except GuacamoleError as e:
-    #             module.fail_json(msg=str(e))
-
-    #     else:
-    #         # the connection doesn't exists so we don't call delete_connection() and just return a msg
-    #         result['msg'] = "There is no guacamole connection named " + module.params.get('connection_name')
-
-    # # Get guacamole connections after
-    # try:
-    #     guacamole_connections_after = guacamole_get_connections(
-    #         base_url=module.params.get('base_url'),
-    #         validate_certs=module.params.get('validate_certs'),
-    #         datasource=guacamole_token['dataSource'],
-    #         group=module.params.get('group_name'),
-    #         auth_token=guacamole_token['authToken'],
-    #     )
-    # except GuacamoleError as e:
-    #     module.fail_json(msg=str(e))
-
-    # if guacamole_connections_before != guacamole_connections_after:
-    #     result['changed'] = True
-
-    # for connection in guacamole_connections_after:
-    #     if 'name' in connection:
-    #         if connection['name'] == module.params.get('connection_name'):
-    #             result['connection_info'] = connection
 
     module.exit_json(**result)
 
