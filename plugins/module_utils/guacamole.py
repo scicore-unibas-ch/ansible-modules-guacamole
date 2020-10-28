@@ -114,6 +114,6 @@ def guacamole_get_connections_group_id(base_url, validate_certs, datasource, gro
         group_numeric_id
     except NameError:
         raise GuacamoleError(
-            'Could not find the numeric id for connections group %s. Do the group exists?' % (group))
+            'Could not find the numeric id for connections group %s. Does the group exists?' % (group))
     else:
         return group_numeric_id
