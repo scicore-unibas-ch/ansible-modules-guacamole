@@ -243,7 +243,7 @@ def main():
         state=dict(type='str', choices=['absent', 'present'], default='present')
     )
 
-    result = dict(changed=False, msg='', diff={}, connections_group_info={})
+    result = dict(changed=False, msg='', connections_group_info={})
 
     module = AnsibleModule(
         argument_spec=module_args,
@@ -332,6 +332,8 @@ def main():
             except GuacamoleError as e:
                 module.fail_json(msg=str(e))
 
+            result['msg'] = "Connections group '%s' added" % module.params.get('group_name')
+
 
     # module arg state=absent so we have to delete connections group
     if module.params.get('state') == 'absent':
@@ -355,6 +357,24 @@ def main():
 
             result['msg'] = "Connections group %s doesn't exists. Not doing anything" \
                             % (module.params.get('group_name'))
+
+    # Get existing guacamole connections groups AFTER to check if something changed
+    try:
+        guacamole_connections_groups_after = guacamole_get_connections_groups(
+            base_url=module.params.get('base_url'),
+            validate_certs=module.params.get('validate_certs'),
+            datasource=guacamole_token['dataSource'],
+            auth_token=guacamole_token['authToken'],
+        )
+    except GuacamoleError as e:
+        module.fail_json(msg=str(e))
+
+    if guacamole_connections_groups_before != guacamole_connections_groups_after:
+       result['changed'] = True
+
+    for group_id, group_info in guacamole_connections_groups_after.items():
+        if group_info['name'] == module.params.get('group_name'):
+            result['connections_group_info'] = group_info
 
     #         try:
     #             # query what's the current config for this connection so
