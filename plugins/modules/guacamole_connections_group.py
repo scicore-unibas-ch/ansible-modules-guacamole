@@ -284,7 +284,7 @@ def main():
     except GuacamoleError as e:
         module.fail_json(msg=str(e))
 
-    # get the group numeric ID if parent_group is not ROOT
+    # get the parent_group numeric ID if parent_group is not ROOT
     if module.params.get('parent_group') != "ROOT":
         try:
             module.params['parent_group'] = guacamole_get_connections_group_id(
@@ -309,14 +309,12 @@ def main():
         module.fail_json(msg=str(e))
 
     # check if the connections group already exists
-    # If the connections group exists we get the id
+    # If the connections group exists we get the numeric id
     guacamole_connections_group_exists = False
     for group_id, group_info in guacamole_connections_groups_before.items():
         if group_info['name'] == module.params.get('group_name'):
             group_numeric_id = group_info['identifier']
             guacamole_connections_group_exists = True
-
-
 
     # module arg state=present so we have to create a new connections group
     # or update an existing one
@@ -357,13 +355,11 @@ def main():
 
             result['msg'] = "Connections group '%s' added" % module.params.get('group_name')
 
-
     # module arg state=absent so we have to delete connections group
     if module.params.get('state') == 'absent':
 
         # the group exists so we delete it
         if guacamole_connections_group_exists:
-
 
             # if force_deletion=true we delete the group without any extra check
             if module.params.get('force_deletion'):
@@ -379,7 +375,7 @@ def main():
                 except GuacamoleError as e:
                     module.fail_json(msg=str(e))
 
-            # if we are here it's because force_deletion=false
+            # if we are here it's because the group exists and force_deletion=false
             else:
 
                 # Query all the existing guacamole connections in this group
@@ -415,7 +411,7 @@ def main():
                     msg="Won't delete a group with child connections unless force_deletion=True"
                     )
 
-        # if the group doesn't exists we just print a message
+        # if the group to delete doesn't exists we just print a message
         else:
 
             result['msg'] = "Connections group '%s' doesn't exists. Not doing anything" \
