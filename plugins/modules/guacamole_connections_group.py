@@ -113,13 +113,29 @@ author:
 
 EXAMPLES = '''
 
-- name: Create a new group "group_3"
+- name: Create a new connections group "group_3"
   scicore.guacamole.guacamole_connections_group:
     base_url: http://localhost/guacamole
     auth_username: guacadmin
     auth_password: guacadmin
     group_name: group_3
 
+- name: Delete connections group "group_4"
+  scicore.guacamole.guacamole_connections_group:
+    base_url: http://localhost/guacamole
+    auth_username: guacadmin
+    auth_password: guacadmin
+    group_name: group_4
+    state: absent
+
+- name: Force deletion of connections group "group_5 which has child connections"
+  scicore.guacamole.guacamole_connections_group:
+    base_url: http://localhost/guacamole
+    auth_username: guacadmin
+    auth_password: guacadmin
+    group_name: group_4
+    state: absent
+    force_deletion: true
 '''
 
 RETURN = '''
