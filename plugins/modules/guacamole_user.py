@@ -402,6 +402,8 @@ def main():
     # if we are updating the same user which we use to connect to the api we need to use a different
     # api endpoing to update the password. This is usually done for default admin user "guacadmin"
     # http://mail-archives.apache.org/mod_mbox/guacamole-dev/202006.mbox/%3CCALKeL-PbLS8qodWEL3yHWWCir87Xqq0z9pVcbp3S-yjwEpYVTw%40mail.gmail.com%3E
+    # After updating the password for guacadmin user we just exit because last guacamole version
+    # doesn't allow to update anything else for the guacadmin account
     if module.params.get('auth_username') == module.params.get('username'):
 
         try:
@@ -418,15 +420,9 @@ def main():
             module.fail_json(msg=str(e))
 
         if module.params.get('auth_password') == module.params.get('password'):
-            result['changed'] = False
+            module.exit_json(changed=False)
         else:
-            result['changed'] = True
-
-        # populate the payload for the current user
-        payload = guacamole_populate_user_payload(module.params)
-
-        # remove password from the payload because we already updated it
-        payload.pop('password', None)
+            module.exit_json(changed=True)
 
     # Get existing guacamole users before doing anything else
     try:
@@ -463,12 +459,7 @@ def main():
     if module.params.get('state') == 'present':
 
         # populate the payload with the user info to send to the API
-        # unless it was populated above because we are updating the same
-        # user that we are using to connect to the API
-        try:
-            payload
-        except NameError:
-            payload = guacamole_populate_user_payload(module.params)
+        payload = guacamole_populate_user_payload(module.params)
 
         # if the user already exists in guacamole we update it
         if guacamole_user_exists:
