@@ -81,7 +81,7 @@ def guacamole_get_connections(base_url, validate_certs, datasource, group, auth_
     if 'childConnections' in connections_group:
         return connections_group['childConnections']
     else:
-        return [{}]
+        return []
 
 
 def guacamole_get_connections_group_id(base_url, validate_certs, datasource, group, auth_token):
