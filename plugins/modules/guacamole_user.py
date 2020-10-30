@@ -465,7 +465,9 @@ def main():
         # populate the payload with the user info to send to the API
         # unless it was populated above because we are updating the same
         # user that we are using to connect to the API
-        if not payload:
+        try:
+            payload
+        except NameError:
             payload = guacamole_populate_user_payload(module.params)
 
         # if the user already exists in guacamole we update it
