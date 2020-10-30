@@ -184,6 +184,7 @@ URL_UPDATE_USER = "{url}/api/session/data/{datasource}/users/{username}?token={t
 URL_DELETE_USER = URL_UPDATE_USER
 URL_GET_USER_PERMISSIONS = "{url}/api/session/data/{datasource}/users/{username}/permissions?token={token}"
 URL_UPDATE_USER_PERMISSIONS = URL_GET_USER_PERMISSIONS
+URL_UPDATE_PASSWORD_CURRENT_USER = "{url}/api/session/data/{datasource}/users/{username}/password?token={token}"
 
 
 def guacamole_get_users(base_url, validate_certs, datasource, auth_token):
@@ -327,6 +328,31 @@ def guacamole_update_user_permissions(base_url, validate_certs, datasource, user
                              % (url_update_user_permissions, str(e)))
 
 
+def guacamole_update_password_current_user(base_url, validate_certs, datasource, username,
+                                           current_password, new_password, auth_token):
+    """
+    Update just the password for the user we use to connect to the api
+    We usually do this for the default admin user "guacadmin"
+    http://mail-archives.apache.org/mod_mbox/guacamole-dev/202006.mbox/%3CCALKeL-PbLS8qodWEL3yHWWCir87Xqq0z9pVcbp3S-yjwEpYVTw%40mail.gmail.com%3E
+    """
+
+    url_update_password_current_user = URL_UPDATE_PASSWORD_CURRENT_USER.format(
+        url=base_url, datasource=datasource, username=username, token=auth_token)
+
+    payload = {
+        'oldPassword': current_password,
+        'newPassword': new_password
+    }
+
+    try:
+        headers = {'Content-Type': 'application/json'}
+        open_url(url_update_password_current_user, method='PUT', validate_certs=validate_certs,
+                 headers=headers, data=json.dumps(payload))
+    except Exception as e:
+        raise GuacamoleError('Could not update user in %s: %s'
+                             % (url_update_password_current_user, str(e)))
+
+
 def main():
 
     # define the available arguments/parameters that a user can pass to
@@ -373,6 +399,35 @@ def main():
     except GuacamoleError as e:
         module.fail_json(msg=str(e))
 
+    # if we are updating the same user which we use to connect to the api we need to use a different
+    # api endpoing to update the password. This is usually done for default admin user "guacadmin"
+    # http://mail-archives.apache.org/mod_mbox/guacamole-dev/202006.mbox/%3CCALKeL-PbLS8qodWEL3yHWWCir87Xqq0z9pVcbp3S-yjwEpYVTw%40mail.gmail.com%3E
+    if module.params.get('auth_username') == module.params.get('username'):
+
+        try:
+            guacamole_update_password_current_user(
+                base_url=module.params.get('base_url'),
+                validate_certs=module.params.get('validate_certs'),
+                datasource=guacamole_token['dataSource'],
+                username=module.params.get('username'),
+                current_password=module.params.get('auth_password'),
+                new_password=module.params.get('password'),
+                auth_token=guacamole_token['authToken'],
+            )
+        except GuacamoleError as e:
+            module.fail_json(msg=str(e))
+
+        if module.params.get('auth_password') == module.params.get('password'):
+            result['changed'] = False
+        else:
+            result['changed'] = True
+
+        # populate the payload for the current user
+        payload = guacamole_populate_user_payload(module.params)
+
+        # remove password from the payload because we already updated it
+        payload.pop('password', None)
+
     # Get existing guacamole users before doing anything else
     try:
         guacamole_users_before = guacamole_get_users(
@@ -408,7 +463,10 @@ def main():
     if module.params.get('state') == 'present':
 
         # populate the payload with the user info to send to the API
-        payload = guacamole_populate_user_payload(module.params)
+        # unless it was populated above because we are updating the same
+        # user that we are using to connect to the API
+        if not payload:
+            payload = guacamole_populate_user_payload(module.params)
 
         # if the user already exists in guacamole we update it
         if guacamole_user_exists:
