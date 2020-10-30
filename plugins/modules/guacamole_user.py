@@ -545,10 +545,9 @@ def main():
     if guacamole_users_before != guacamole_users_after:
         result['changed'] = True
 
-    for user in guacamole_users_after.items():
-        if user[1]['username'] == module.params.get('username'):
-            result['user_info'] = user[1]
-            break
+    for username, userinfo in guacamole_users_after.items():
+        if username == module.params.get('username'):
+            result['user_info'] = userinfo
 
     module.exit_json(**result)
 
