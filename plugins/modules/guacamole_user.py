@@ -158,12 +158,18 @@ EXAMPLES = '''
 - name: Delete a guacamole user
   scicore.guacamole.guacamole_user:
     base_url: http://localhost/guacamole
-    validate_certs: false
     auth_username: guacadmin
     auth_password: guacadmin
     username: test_user_3
     state: absent
 
+- name: Update password guacadmin user
+  scicore.guacamole.guacamole_user:
+    base_url: http://localhost/guacamole
+    auth_username: guacadmin
+    auth_password: guacadmin
+    username: guacadmin
+    password: newpassword
 '''
 
 RETURN = '''
