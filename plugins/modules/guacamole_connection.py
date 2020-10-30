@@ -398,8 +398,6 @@ def main():
         supports_check_mode=False
     )
 
-    print(aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa)
-
     # Obtain access token, initialize API
     try:
         guacamole_token = guacamole_get_token(
