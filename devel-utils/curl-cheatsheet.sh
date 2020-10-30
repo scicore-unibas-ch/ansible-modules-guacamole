@@ -17,3 +17,6 @@ curl -s $guacamole_connections_urls | jq -C .
 
 guacamole_connections_groups_url="${guacamole_url}/api/session/data/${guacamole_datasource}/connectionGroups/?token=${guacamole_token}"
 curl -s $guacamole_connections_groups_url | jq -C .
+
+guacamole_users_url="${guacamole_url}/api/session/data/${guacamole_datasource}/users?token=${guacamole_token}"
+curl -s $guacamole_users_url | jq -C .

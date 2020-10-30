@@ -1,0 +1,32 @@
+name: ci-test
+
+on: [push]
+
+jobs:
+
+  test:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set up Python 3.6
+      uses: actions/setup-python@v1
+      with:
+        python-version: 3.6
+
+    - name: Boot the docker containers with latest guacamole
+      working-directory: ./devel-utils
+      run: docker-compose up -d
+
+    - uses: nelonoel/branch-name@v1
+
+    - name: Install latest ansible and the collection
+      run: |
+        pip install ansible
+        ansible-galaxy collection install git+https://github.com/scicore-unibas-ch/ansible-modules-guacamole.git,${BRANCH_NAME}
+
+    - name: Execute the CI playbook
+      working-directory: ./devel-utils
+      run: ansible-playbook test-collection.yml

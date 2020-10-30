@@ -1,3 +1,4 @@
+[![CI-tests](https://github.com/scicore-unibas-ch/ansible-modules-guacamole/workflows/ci-test/badge.svg)](https://github.com/scicore-unibas-ch/ansible-modules-guacamole/actions?query=workflow%3Aci-test)
 [![flake8](https://github.com/scicore-unibas-ch/ansible-modules-guacamole/workflows/flake8/badge.svg)](https://github.com/scicore-unibas-ch/ansible-modules-guacamole/actions?query=workflow%3Aflake8)
 [![Ansible Galaxy](https://img.shields.io/badge/galaxy-scicore.guacamole-blue.svg)](https://galaxy.ansible.com/scicore/guacamole)
 
@@ -7,15 +8,14 @@ Ansible modules to administer apache guacamole connections and users using the A
 
 ## Installation
 
-Download the ansible collection to the root folder of your playbook:
-
 ```
-$> cd /path/to/playbook/root/folder
+ansible-galaxy collection install scicore.guacamole
 
-$> ansible-galaxy collection install -p ./collections/ scicore.guacamole
 ```
 
 Now you can use the modules `guacamole_connection` and `guacamole_user`. Adapt the examples below to your needs.
+
+You can find more examples in the [ci-tests-playbook](devel-utils/test-collection.yml)
 
 
 ## Example playbook:
