@@ -448,7 +448,7 @@ def main():
                 base_url=module.params.get('base_url'),
                 validate_certs=module.params.get('validate_certs'),
                 datasource=guacamole_token['dataSource'],
-                parent_identifier='ROOT',
+                group='ROOT',
                 auth_token=guacamole_token['authToken'],
             )
         except GuacamoleError as e:
