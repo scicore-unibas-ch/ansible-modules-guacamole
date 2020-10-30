@@ -61,7 +61,7 @@ def guacamole_get_token(base_url, validate_certs, auth_username, auth_password):
 def guacamole_get_connections(base_url, validate_certs, datasource, group, auth_token):
     """
     Return a list of dicts with all the connections registered in the guacamole server
-    for the provided connections group. Default connections group is ROOT
+    for the provided connections group and its sub-groups. Default connections group is ROOT
     """
 
     url_list_connections = URL_LIST_CONNECTIONS.format(
@@ -78,10 +78,17 @@ def guacamole_get_connections(base_url, validate_certs, datasource, group, auth_
         raise GuacamoleError('Could not obtain list of guacamole connections from %s: %s'
                              % (url_list_connections, str(e)))
 
+
+    all_connections = []
     if 'childConnections' in connections_group:
-        return connections_group['childConnections']
-    else:
-        return []
+        all_connections = connections_group['childConnections']
+
+    if 'childConnectionGroups' in connections_group:
+        for group in connections_group['childConnectionGroups']:
+            if 'childConnections' in group:
+                all_connections = all_connections + group['childConnections']
+
+    return all_connections
 
 
 def guacamole_get_connections_group_id(base_url, validate_certs, datasource, group, auth_token):
