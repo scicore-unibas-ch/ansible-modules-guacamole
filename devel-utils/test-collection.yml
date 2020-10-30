@@ -230,3 +230,21 @@
           - _delete_group.connections_group_info.name == 'group_test'
         success_msg: "Connections group deleted"
         fail_msg: "Failed deleting a connections group"
+
+    - name: Update guacadmin user
+      scicore.guacamole.guacamole_user:
+        base_url: "{{ local_guacamole_url }}"
+        auth_username: "{{ local_guacamole_user }}"
+        auth_password: "{{ local_guacamole_password }}"
+        username: guacadmin
+        password: newpassword
+        full_name: "sysadmin"
+        email: "sysadmin@mail.com"
+
+    - name: Update guacadmin user again
+      scicore.guacamole.guacamole_user:
+        base_url: "{{ local_guacamole_url }}"
+        auth_username: "{{ local_guacamole_user }}"
+        auth_password: newpassword
+        username: guacadmin
+        password: "{{ local_guacamole_password }}"
