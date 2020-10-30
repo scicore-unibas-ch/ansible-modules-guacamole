@@ -9,3 +9,5 @@ You can install a specific collection branch doing:
 ```
 $> ansible-galaxy collection install git+https://github.com/scicore-unibas-ch/ansible-modules-guacamole.git,master
 ```
+
+Once you have a running guacamole instance you can execute `ansible-playbook test-collection.yml` to do some unit testing.
