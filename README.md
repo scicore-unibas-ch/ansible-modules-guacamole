@@ -21,8 +21,6 @@ Now you can use the modules `guacamole_connection` and `guacamole_user`. Adapt t
 ## Example playbook:
 
 ```
-
-
 - name: Add a guacamole connection and user
   hosts: localhost
 
@@ -263,11 +261,10 @@ RETURN VALUES:
 ## Output of "ansible-doc scicore.guacamole.guacamole_user"
 
 ```
-> SCICORE.GUACAMOLE.GUACAMOLE_USER    (~/.ansible/collections/ansible_collections/scicore/guacamole/plugins/modules/guacamole_user.py)
+> SCICORE.GUACAMOLE.GUACAMOLE_USER    (~/ansible/collections/ansible_collections/scicore/guacamole/plugins/modules/guacamole_user.py)
 
         Create or delete a guacamole user
 
-  * This module is maintained by The Ansible Community
 OPTIONS (= is mandatory):
 
 - allow_access_after
@@ -368,11 +365,15 @@ OPTIONS (= is mandatory):
 
 
 AUTHOR: Pablo Escobar Lopez (@pescobar)
-        METADATA:
-          status:
-          - preview
-          supported_by: community
 
+METADATA:
+  metadata_version: '1.1'
+  status:
+  - preview
+  supported_by: community
+
+
+VERSION_ADDED_COLLECTION: scicore.guacamole
 
 EXAMPLES:
 
@@ -401,13 +402,133 @@ EXAMPLES:
 
 
 RETURN VALUES:
+- message
+        Message about what the module did
+        returned: always
+        type: str
 
-user_info:
-    description: Information about the created or updated user
-    type: dict
-    returned: always
-message:
-    description: Message about what the module did
-    type: str
-    returned: always
+- user_info
+        Information about the created or updated user
+        returned: always
+        type: dict
+```
+
+## Output of "ansible-doc scicore.guacamole.guacamole_connections_group"
+
+```
+> SCICORE.GUACAMOLE.GUACAMOLE_CONNECTIONS_GROUP    (~/.ansible/collections/ansible_collections/scicore/guacamole/plugins/modules/guacamole_connections_group.py)
+
+        Add or remove guacamole connections groups.
+
+OPTIONS (= is mandatory):
+
+= auth_password
+        Guacamole admin user password to login to the API
+
+        type: str
+
+= auth_username
+        Guacamole admin user to login to the API
+
+        type: str
+
+= base_url
+        Url to access the guacamole API
+        (Aliases: url)
+        type: str
+
+- enable_session_affinity
+        Enable session affinity for this group
+        [Default: (null)]
+        type: bool
+
+- force_deletion
+        Force deletion of the group even if it has child connections
+        [Default: False]
+        type: bool
+
+= group_name
+        Group name to create
+
+        type: str
+
+- group_type
+        Choose the group type
+        (Choices: ORGANIZATIONAL, BALANCING)[Default: ORGANIZATIONAL]
+        type: str
+
+- max_connections
+        Max connections in this group
+        [Default: (null)]
+        type: int
+
+- max_connections_per_user
+        Max connections per user in this group
+        [Default: (null)]
+        type: int
+
+- parent_group
+        Parent group in case this is a sub-group
+        (Aliases: parentIdentifier)[Default: ROOT]
+        type: str
+
+- state
+        Create or delete the connections group?
+        (Choices: present, absent)[Default: present]
+        type: str
+
+- validate_certs
+        Validate ssl certs?
+        [Default: True]
+        type: bool
+
+
+AUTHOR: Pablo Escobar Lopez (@pescobar)
+
+METADATA:
+  metadata_version: '1.1'
+  status:
+  - preview
+  supported_by: community
+
+
+VERSION_ADDED_COLLECTION: scicore.guacamole
+
+EXAMPLES:
+
+- name: Create a new connections group "group_3"
+  scicore.guacamole.guacamole_connections_group:
+    base_url: http://localhost/guacamole
+    auth_username: guacadmin
+    auth_password: guacadmin
+    group_name: group_3
+
+- name: Delete connections group "group_4"
+  scicore.guacamole.guacamole_connections_group:
+    base_url: http://localhost/guacamole
+    auth_username: guacadmin
+    auth_password: guacadmin
+    group_name: group_4
+    state: absent
+
+- name: Force deletion of connections group "group_5 which has child connections"
+  scicore.guacamole.guacamole_connections_group:
+    base_url: http://localhost/guacamole
+    auth_username: guacadmin
+    auth_password: guacadmin
+    group_name: group_4
+    state: absent
+    force_deletion: true
+
+
+RETURN VALUES:
+- connections_group_info
+        Information about the created or updated connections group
+        returned: always
+        type: dict
+
+- message
+        Some extra info about what the module did
+        returned: always
+        type: str
 ```
