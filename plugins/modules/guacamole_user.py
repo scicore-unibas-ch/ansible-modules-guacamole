@@ -402,7 +402,7 @@ def main():
     # if we are updating the same user which we use to connect to the api we need to use a different
     # api endpoing to update the password. This is usually done for default admin user "guacadmin"
     # http://mail-archives.apache.org/mod_mbox/guacamole-dev/202006.mbox/%3CCALKeL-PbLS8qodWEL3yHWWCir87Xqq0z9pVcbp3S-yjwEpYVTw%40mail.gmail.com%3E
-    # After updating the password for guacadmin user we just exit because last guacamole version
+    # After updating the password for guacadmin user we just exit because last guacamole version (1.2.0)
     # doesn't allow to update anything else for the guacadmin account
     if module.params.get('auth_username') == module.params.get('username'):
 
@@ -419,10 +419,11 @@ def main():
         except GuacamoleError as e:
             module.fail_json(msg=str(e))
 
-        if module.params.get('auth_password') == module.params.get('password'):
-            module.exit_json(changed=False)
-        else:
+        if module.params.get('auth_password') != module.params.get('password'):
             module.exit_json(changed=True)
+            result['msg'] = "Password updated for user %s" % module.params.get('username')
+        else:
+            module.exit_json(changed=False)
 
     # Get existing guacamole users before doing anything else
     try:
