@@ -1,0 +1,232 @@
+---
+
+- name: Testing the Guacamole collection
+  hosts: localhost
+
+  vars:
+    local_guacamole_url: "http://localhost:8080/guacamole"
+    local_guacamole_user: "guacadmin"
+    local_guacamole_password: "guacadmin"
+
+  tasks:
+
+    - name: Add a new RDP connection
+      scicore.guacamole.guacamole_connection:
+        base_url: "{{ local_guacamole_url }}"
+        auth_username: "{{ local_guacamole_user }}"
+        auth_password: "{{ local_guacamole_password }}"
+        connection_name: test_connection_rdp
+        protocol: rdp
+        hostname: 192.168.33.43
+        port: 3389
+        username: rdp_user
+        password: rdp_pass
+      register: _add_connection
+
+    - name: Verify that the connection has been created
+      assert:
+        that:
+          - _add_connection.connection_info.name == 'test_connection_rdp'
+          - _add_connection.connection_info.parentIdentifier == 'ROOT'
+        success_msg: "Connection created"
+        fail_msg: "Failed creating a connection"
+
+    - name: Update a RDP connection
+      scicore.guacamole.guacamole_connection:
+        base_url: "{{ local_guacamole_url }}"
+        auth_username: "{{ local_guacamole_user }}"
+        auth_password: "{{ local_guacamole_password }}"
+        connection_name: test_connection_rdp
+        protocol: rdp
+        hostname: 10.10.1.33
+        port: 3389
+        username: rdp_user
+        password: rdp_pass
+      register: _update_connection
+
+    - name: Verify that the connection has been updated
+      assert:
+        that:
+          - _update_connection.changed
+          - _update_connection.connection_info.name == 'test_connection_rdp'
+        success_msg: "Connection updated"
+        fail_msg: "Failed updating a connection"
+
+    - name: Add a new guacamole user and grant access to 'test_connection_rdp'
+      scicore.guacamole.guacamole_user:
+        base_url: "{{ local_guacamole_url }}"
+        auth_username: "{{ local_guacamole_user }}"
+        auth_password: "{{ local_guacamole_password }}"
+        username: test_user_1
+        password: aaaaaaaa
+        full_name: "John"
+        email: "aaaaa@hotmail.com"
+        organization: "scicore"
+        allowed_connections:
+          - test_connection_rdp
+      register: _add_user
+
+    - name: Verify that the user has been created
+      assert:
+        that:
+          - _add_user.user_info.username == 'test_user_1'
+        success_msg: "User created"
+        fail_msg: "Failed creating a user"
+
+    - name: Update existing user
+      scicore.guacamole.guacamole_user:
+        base_url: "{{ local_guacamole_url }}"
+        auth_username: "{{ local_guacamole_user }}"
+        auth_password: "{{ local_guacamole_password }}"
+        username: test_user_1
+        password: aaaaaaaa
+        full_name: "Bob"
+        email: "aaaaa@hotmail.com"
+        organization: "scicore"
+        allowed_connections:
+          - test_connection_rdp
+      register: _update_user
+
+    - name: Verify that the user has been updated
+      assert:
+        that:
+          - _update_user.user_info.attributes.get('guac-full-name') == 'Bob'
+        success_msg: "User created"
+        fail_msg: "Failed creating a user"
+
+    - name: Add a new connections group
+      scicore.guacamole.guacamole_connections_group:
+        base_url: "{{ local_guacamole_url }}"
+        auth_username: "{{ local_guacamole_user }}"
+        auth_password: "{{ local_guacamole_password }}"
+        group_name: group_test
+      register: _add_group
+
+    - name: Verify that the connections group has been created
+      assert:
+        that:
+          - _add_group.connections_group_info.name == 'group_test'
+          - _add_group.connections_group_info.parentIdentifier == 'ROOT'
+        success_msg: "Connections group created"
+        fail_msg: "Failed creating a connections group"
+
+    - name: Update a connections group
+      scicore.guacamole.guacamole_connections_group:
+        base_url: "{{ local_guacamole_url }}"
+        auth_username: "{{ local_guacamole_user }}"
+        auth_password: "{{ local_guacamole_password }}"
+        group_name: group_test
+        max_connections: 10
+      register: _update_group
+
+    - name: Verify that the connections group has been updated
+      assert:
+        that:
+          - _update_group.changed
+          - _update_group.connections_group_info.attributes.get('max-connections') == '10'
+        success_msg: "Connections group updated"
+        fail_msg: "Failed updating a connections group"
+
+    - name: Add a child connections group
+      scicore.guacamole.guacamole_connections_group:
+        base_url: "{{ local_guacamole_url }}"
+        auth_username: "{{ local_guacamole_user }}"
+        auth_password: "{{ local_guacamole_password }}"
+        group_name: group_test_child
+        parent_group: group_test
+      register: _add_child_group
+
+    - name: Verify that the child connections group has been created
+      assert:
+        that:
+          - _add_child_group.connections_group_info.name == 'group_test_child'
+          - _add_child_group.connections_group_info.parentIdentifier == _add_group.connections_group_info.identifier
+        success_msg: "Child connections group created"
+        fail_msg: "Failed creating a child connections group"
+
+    - name: Add a connection in the child connections group
+      scicore.guacamole.guacamole_connection:
+        base_url: "{{ local_guacamole_url }}"
+        auth_username: "{{ local_guacamole_user }}"
+        auth_password: "{{ local_guacamole_password }}"
+        connection_name: test_connection_2
+        protocol: vnc
+        hostname: 192.168.33.44
+        port: 5901
+        username: vnc_user
+        password: vnc_pass
+        group_name: group_test
+      register: _add_child_connection
+
+    - name: Verify that the connection in the child connections group has been created
+      assert:
+        that:
+          - _add_child_connection.connection_info.name == 'test_connection_2'
+          - _add_child_connection.connection_info.parentIdentifier == _add_group.connections_group_info.identifier
+        success_msg: "Child connection created"
+        fail_msg: "Failed creating a child connection"
+
+    - name: Force deletion of group of connections
+      scicore.guacamole.guacamole_connections_group:
+        base_url: "{{ local_guacamole_url }}"
+        auth_username: "{{ local_guacamole_user }}"
+        auth_password: "{{ local_guacamole_password }}"
+        group_name: group_test_child
+        state: absent
+        force_deletion: true
+      register: _delete_group
+
+    - name: Verify that the child connections group has been deleted
+      assert:
+        that:
+          - _delete_group.changed
+          - _delete_group.connections_group_info.name == 'group_test_child'
+        success_msg: "Child connections group deleted"
+        fail_msg: "Failed deleting a child connections group"
+
+    - name: Delete a user
+      scicore.guacamole.guacamole_user:
+        base_url: "{{ local_guacamole_url }}"
+        auth_username: "{{ local_guacamole_user }}"
+        auth_password: "{{ local_guacamole_password }}"
+        username: test_user_1
+        state: absent
+      register: _delete_user
+
+    - name: Verify that the user has been deleted
+      assert:
+        that: _delete_user.changed
+        success_msg: "User deleted"
+        fail_msg: "Failed deleting a user"
+
+    - name: Delete a connection
+      scicore.guacamole.guacamole_connection:
+        base_url: "{{ local_guacamole_url }}"
+        auth_username: "{{ local_guacamole_user }}"
+        auth_password: "{{ local_guacamole_password }}"
+        connection_name: test_connection_2
+        state: absent
+      register: _delete_connection
+
+    - name: Verify that the connection has been deleted
+      assert:
+        that: _delete_connection.changed
+        success_msg: "Connection deleted"
+        fail_msg: "Failed deleting a connection"
+
+    - name: Delete a connections group
+      scicore.guacamole.guacamole_connections_group:
+        base_url: "{{ local_guacamole_url }}"
+        auth_username: "{{ local_guacamole_user }}"
+        auth_password: "{{ local_guacamole_password }}"
+        group_name: group_test
+        state: absent
+      register: _delete_group
+
+    - name: Verify that the connections group has been deleted
+      assert:
+        that:
+          - _delete_group.changed
+          - _delete_group.connections_group_info.name == 'group_test'
+        success_msg: "Connections group deleted"
+        fail_msg: "Failed deleting a connections group"
