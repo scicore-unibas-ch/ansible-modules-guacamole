@@ -426,8 +426,8 @@ def main():
             module.fail_json(msg=str(e))
 
         if module.params.get('auth_password') != module.params.get('password'):
-            module.exit_json(changed=True)
             result['msg'] = "Password updated for user %s" % module.params.get('username')
+            module.exit_json(changed=True)
         else:
             module.exit_json(changed=False)
 
