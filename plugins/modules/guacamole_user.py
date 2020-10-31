@@ -444,8 +444,8 @@ def main():
 
     # check if the user already exists in guacamole
     guacamole_user_exists = False
-    for user in guacamole_users_before.items():
-        if user[1]['username'] == module.params.get('username'):
+    for username, userinfo in guacamole_users_before.items():
+        if username == module.params.get('username'):
             guacamole_user_exists = True
             break
 
@@ -606,6 +606,7 @@ def main():
     for username, userinfo in guacamole_users_after.items():
         if username == module.params.get('username'):
             result['user_info'] = userinfo
+            break
 
     module.exit_json(**result)
 

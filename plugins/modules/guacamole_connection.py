@@ -561,6 +561,7 @@ def main():
         if 'name' in connection:
             if connection['name'] == module.params.get('connection_name'):
                 result['connection_info'] = connection
+                break
 
     module.exit_json(**result)
 

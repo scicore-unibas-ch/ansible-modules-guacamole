@@ -315,6 +315,7 @@ def main():
         if group_info['name'] == module.params.get('group_name'):
             group_numeric_id = group_info['identifier']
             guacamole_connections_group_exists = True
+            break
 
     # module arg state=present so we have to create a new connections group
     # or update an existing one
@@ -437,10 +438,12 @@ def main():
         for group_id, group_info in guacamole_connections_groups_after.items():
             if group_info['name'] == module.params.get('group_name'):
                 result['connections_group_info'] = group_info
+                break
     else:
         for group_id, group_info in guacamole_connections_groups_before.items():
             if group_info['name'] == module.params.get('group_name'):
                 result['connections_group_info'] = group_info
+                break
 
     module.exit_json(**result)
 
