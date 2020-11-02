@@ -231,11 +231,11 @@ def guacamole_update_users_in_group(base_url, validate_certs, datasource, auth_t
     url_update_users_in_group = URL_UPDATE_USERS_IN_GROUP.format(
         url=base_url, datasource=datasource, token=auth_token, group_name=group_name)
 
-    payload = {
+    payload = [{
         "op": action,
         "path": '/',
         "value": user,
-    }
+    }]
 
     try:
         headers = {'Content-Type': 'application/json'}
@@ -258,11 +258,11 @@ def guacamole_update_connections_in_group(base_url, validate_certs, datasource, 
     url_update_connections_in_group = URL_UPDATE_CONNECTIONS_IN_GROUP.format(
         url=base_url, datasource=datasource, token=auth_token, group_name=group_name)
 
-    payload = {
+    payload = [{
         "op": action,
         "path": '/connectionPermissions/%s' % connection_id,
-        "value": 'READ',
-    }
+        "value": 'READ'
+    }]
 
     try:
         headers = {'Content-Type': 'application/json'}
@@ -338,6 +338,7 @@ def main():
     # module arg state=present so we have to create a new group
     if module.params.get('state') == 'present':
 
+        # if the group doesn't exists we add it
         if module.params.get('group_name') not in groups_before:
 
             try:
@@ -352,6 +353,57 @@ def main():
                 module.fail_json(msg=str(e))
 
             result['changed'] = True
+
+        # if the group already exists we only add the connections and users
+        else:
+
+            # query exiting connections in guacamole
+            try:
+                guacamole_existing_connections = guacamole_get_connections(
+                    base_url=module.params.get('base_url'),
+                    validate_certs=module.params.get('validate_certs'),
+                    datasource=guacamole_token['dataSource'],
+                    group='ROOT',
+                    auth_token=guacamole_token['authToken'],
+                )
+            except GuacamoleError as e:
+                module.fail_json(msg=str(e))
+
+            # add the connections to the grouop
+            if module.params.get('connections'):
+                for connection in module.params.get('connections'):
+                    for c in guacamole_existing_connections:
+                        if c['name'] == connection:
+                            try:
+                                guacamole_update_connections_in_group(
+                                    base_url=module.params.get('base_url'),
+                                    validate_certs=module.params.get('validate_certs'),
+                                    datasource=guacamole_token['dataSource'],
+                                    auth_token=guacamole_token['authToken'],
+                                    group_name=module.params.get('group_name'),
+                                    connection_id=c['identifier'],
+                                    action='add',
+                                )
+                            except GuacamoleError as e:
+                                module.fail_json(msg=str(e))
+                        else:
+                            try:
+                                guacamole_update_connections_in_group(
+                                    base_url=module.params.get('base_url'),
+                                    validate_certs=module.params.get('validate_certs'),
+                                    datasource=guacamole_token['dataSource'],
+                                    auth_token=guacamole_token['authToken'],
+                                    group_name=module.params.get('group_name'),
+                                    connection_id=c['identifier'],
+                                    action='remove',
+                                )
+                            except GuacamoleError as e:
+                                module.fail_json(msg=str(e))
+
+                        # if the connection doesn't exists we exit with an error
+                        #  else:
+                        #      module.fail_json(msg="%s '%s'" % (c['name'], connection))
+                        #      #  module.fail_json(msg="Cannot find a conection named '%s'" % connection)
 
 
     if module.params.get('state') == 'absent':
