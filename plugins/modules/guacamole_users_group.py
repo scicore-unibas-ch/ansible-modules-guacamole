@@ -61,51 +61,26 @@ options:
         required: true
         type: str
 
-    parent_group:
+    connections:
         description:
-            - Parent group in case this is a sub-group
-        default: 'ROOT'
-        aliases: ['parentIdentifier']
-        type: str
+            - List of connections in this group
+        type: list
+        elements: str
 
-    group_type:
+    users:
         description:
-            - Choose the group type
-        default: 'ORGANIZATIONAL'
-        type: str
-        choices:
-            - "ORGANIZATIONAL"
-            - "BALANCING"
-
-    max_connections:
-        description:
-            - Max connections in this group
-        type: int
-
-    max_connections_per_user:
-        description:
-            - Max connections per user in this group
-        type: int
-
-    enable_session_affinity:
-        description:
-            - Enable session affinity for this group
-        type: bool
+            - List of users in this group
+        type: list
+        elements: str
 
     state:
         description:
-            - Create or delete the connections group?
+            - Create or delete the users group
         default: 'present'
         type: str
         choices:
             - present
             - absent
-
-    force_deletion:
-        description:
-            - Force deletion of the group even if it has child connections
-        default: 'False'
-        type: bool
 
 author:
     - Pablo Escobar Lopez (@pescobar)
@@ -113,29 +88,26 @@ author:
 
 EXAMPLES = '''
 
-- name: Create a new connections group "group_3"
-  scicore.guacamole.guacamole_connections_group:
+- name: Create a new group "lab_3"
+  scicore.guacamole.guacamole_users_group:
     base_url: http://localhost/guacamole
     auth_username: guacadmin
     auth_password: guacadmin
-    group_name: group_3
+    group_name: lab_3
+    connections:
+      - rdp_lab_1
+      - vnc_lab_1
+    users:
+      - john
+      - laura
 
-- name: Delete connections group "group_4"
-  scicore.guacamole.guacamole_connections_group:
+- name: Delete users group "developers"
+  scicore.guacamole.guacamole_users_group:
     base_url: http://localhost/guacamole
     auth_username: guacadmin
     auth_password: guacadmin
-    group_name: group_4
+    group_name: developers
     state: absent
-
-- name: Force deletion of connections group "group_5 which has child connections"
-  scicore.guacamole.guacamole_connections_group:
-    base_url: http://localhost/guacamole
-    auth_username: guacadmin
-    auth_password: guacadmin
-    group_name: group_4
-    state: absent
-    force_deletion: true
 '''
 
 RETURN = '''
@@ -311,6 +283,8 @@ def main():
         auth_password=dict(type='str', required=True, no_log=True),
         validate_certs=dict(type='bool', default=True),
         group_name=dict(type='str', required=True),
+        users=dict(type='list'),
+        connections=dict(type='list'),
         state=dict(type='str', choices=['absent', 'present'], default='present')
         #  parent_group=dict(type='str', default='ROOT'),
         #  group_type=dict(type='str', choices=['ORGANIZATIONAL', 'BALANCING'], default='ORGANIZATIONAL'),
@@ -338,21 +312,8 @@ def main():
     except GuacamoleError as e:
         module.fail_json(msg=str(e))
 
-    #  if module.params.get('parent_group') != "ROOT":
-    #      try:
-    #          module.params['parent_group'] = guacamole_get_connections_group_id(
-    #              base_url=module.params.get('base_url'),
-    #              validate_certs=module.params.get('validate_certs'),
-    #              datasource=guacamole_token['dataSource'],
-    #              group=module.params.get('parent_group'),
-    #              auth_token=guacamole_token['authToken'],
-    #          )
-    #      except GuacamoleError as e:
-    #          module.fail_json(msg=str(e))
-
-    # Get existing guacamole connections groups before doing anything else
     try:
-        guacamole_users_groups_before = guacamole_get_users_groups(
+        groups_before = guacamole_get_users_groups(
             base_url=module.params.get('base_url'),
             validate_certs=module.params.get('validate_certs'),
             datasource=guacamole_token['dataSource'],
@@ -360,6 +321,8 @@ def main():
         )
     except GuacamoleError as e:
         module.fail_json(msg=str(e))
+
+    #  module.fail_json(msg=guacamole_users_groups_before)
 
     #  try:
     #      group_permissions = guacamole_get_users_group_permissions(
@@ -372,31 +335,44 @@ def main():
     #  except GuacamoleError as e:
     #      module.fail_json(msg=str(e))
 
-    try:
-        guacamole_add_group(
-            base_url=module.params.get('base_url'),
-            validate_certs=module.params.get('validate_certs'),
-            datasource=guacamole_token['dataSource'],
-            auth_token=guacamole_token['authToken'],
-            group_name=module.params.get('group_name'),
-        )
-    except GuacamoleError as e:
-        module.fail_json(msg=str(e))
+    # module arg state=present so we have to create a new group
+    if module.params.get('state') == 'present':
 
-    try:
-        guacamole_delete_group(
-            base_url=module.params.get('base_url'),
-            validate_certs=module.params.get('validate_certs'),
-            datasource=guacamole_token['dataSource'],
-            auth_token=guacamole_token['authToken'],
-            group_name="group_test",
-            #  group_name=module.params.get('group_name'),
-        )
-    except GuacamoleError as e:
-        module.fail_json(msg=str(e))
+        if module.params.get('group_name') not in groups_before:
+
+            try:
+                guacamole_add_group(
+                    base_url=module.params.get('base_url'),
+                    validate_certs=module.params.get('validate_certs'),
+                    datasource=guacamole_token['dataSource'],
+                    auth_token=guacamole_token['authToken'],
+                    group_name=module.params.get('group_name'),
+                )
+            except GuacamoleError as e:
+                module.fail_json(msg=str(e))
+
+            result['changed'] = True
+
+
+    if module.params.get('state') == 'absent':
+
+        if module.params.get('group_name') in groups_before:
+
+            try:
+                guacamole_delete_group(
+                    base_url=module.params.get('base_url'),
+                    validate_certs=module.params.get('validate_certs'),
+                    datasource=guacamole_token['dataSource'],
+                    auth_token=guacamole_token['authToken'],
+                    group_name=module.params.get('group_name'),
+                )
+            except GuacamoleError as e:
+                module.fail_json(msg=str(e))
+
+            result['changed'] = True
 
     #module.fail_json(msg=group_permissions)
-    module.fail_json(msg=guacamole_users_groups_before)
+    #  module.fail_json(msg=guacamole_users_groups_before)
 
     #  # check if the connections group already exists
     #  # If the connections group exists we get the numeric id
