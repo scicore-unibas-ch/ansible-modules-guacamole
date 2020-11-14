@@ -539,8 +539,8 @@ def main():
             module.fail_json(msg=str(e))
 
 
-        # if var "allowed connections" is defined we grant the required access
-        if module.params.get('allowed_connections'):
+        # if var "allowed connections" is not an empty list we grant the required access
+        if module.params['allowed_connections']:
 
             for connection in guacamole_connections:
 
