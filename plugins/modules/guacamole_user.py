@@ -310,7 +310,7 @@ def guacamole_get_user_permissions(base_url, validate_certs, datasource, usernam
     return user_permissions
 
 
-def guacamole_update_user_permissions(base_url, validate_certs, datasource, username,
+def guacamole_update_user_permissions_for_connection(base_url, validate_certs, datasource, username,
                                       connection_id, operation, auth_token):
     """
     Update permissions for existing user in a specific connection
@@ -517,7 +517,7 @@ def main():
             # we grant access
             if connection['name'] in module.params.get('allowed_connections'):
                 try:
-                    guacamole_update_user_permissions(
+                    guacamole_update_user_permissions_for_connection(
                         base_url=module.params.get('base_url'),
                         validate_certs=module.params.get('validate_certs'),
                         datasource=guacamole_token['dataSource'],
@@ -533,7 +533,7 @@ def main():
                 # if the connection is NOT in the list of allowed connections for
                 # this user we make sure to remove access
                 try:
-                    guacamole_update_user_permissions(
+                    guacamole_update_user_permissions_for_connection(
                         base_url=module.params.get('base_url'),
                         validate_certs=module.params.get('validate_certs'),
                         datasource=guacamole_token['dataSource'],
