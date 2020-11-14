@@ -397,7 +397,7 @@ def main():
         validate_certs=dict(type='bool', default=True),
         username=dict(type='str', aliases=['name'], required=True),
         password=dict(type='str', no_log=True),
-        allowed_connections=dict(type='list'),
+        allowed_connections=dict(type='list', default=[]),
         state=dict(type='str', choices=['absent', 'present'], default='present'),
         full_name=dict(type='str', Default=None),
         email=dict(type='str', Default=None),
@@ -592,10 +592,7 @@ def main():
                             module.fail_json(msg=str(e))
 
         # loop again over all the connections to remove access to those connections
-        # not explicitely defined for the user. this is always executed
-        if not module.params.get('allowed_connections'):
-            module.params['allowed_connections'] = []
-
+        # not explicitely defined for the user. This is always executed
         for connection in guacamole_connections:
             if connection['name'] not in module.params.get('allowed_connections'):
                 try:
