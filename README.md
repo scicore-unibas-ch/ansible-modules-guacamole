@@ -121,6 +121,11 @@ OPTIONS (= is mandatory):
         (Choices: rdp, vnc, ssh, telnet)
         type: str
 
+- rdp_ignore_server_certs
+        Ignore rdp server certs
+        [Default: (null)]
+        type: bool
+
 - rdp_security
         The security mode to use for the RDP connection
         (Choices: any, nla, nla-ext, tls, rdp)[Default: (null)]
