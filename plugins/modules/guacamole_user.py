@@ -310,7 +310,7 @@ def guacamole_get_user_permissions(base_url, validate_certs, datasource, usernam
     return user_permissions
 
 
-def guacamole_update_user_permissions(base_url, validate_certs, datasource, username,
+def guacamole_update_user_permissions_for_connection(base_url, validate_certs, datasource, username,
                                       connection_id, operation, auth_token):
     """
     Update permissions for existing user in a specific connection
@@ -322,6 +322,32 @@ def guacamole_update_user_permissions(base_url, validate_certs, datasource, user
     payload = [{
         'op': operation,
         'path': '/connectionPermissions/' + str(connection_id),
+        'value': 'READ'
+    }]
+
+    try:
+        headers = {'Content-Type': 'application/json'}
+        open_url(url_update_user_permissions, method='PATCH', validate_certs=validate_certs, headers=headers,
+                 data=json.dumps(payload))
+    except Exception as e:
+        raise GuacamoleError('Could not update permissions in %s: %s'
+                             % (url_update_user_permissions, str(e)))
+
+
+def guacamole_update_user_permissions_for_group(base_url, validate_certs, datasource, username,
+                                      group_id, operation, auth_token):
+    """
+    Update permissions for existing user in a specific group of connections
+    When granting access to a connection which is located in a group of connections we need
+    to grant access to the parent group too
+    """
+
+    url_update_user_permissions = URL_UPDATE_USER_PERMISSIONS.format(
+        url=base_url, datasource=datasource, username=username, token=auth_token)
+
+    payload = [{
+        'op': operation,
+        'path': '/connectionGroupPermissions/' + str(group_id),
         'value': 'READ'
     }]
 
@@ -371,7 +397,7 @@ def main():
         validate_certs=dict(type='bool', default=True),
         username=dict(type='str', aliases=['name'], required=True),
         password=dict(type='str', no_log=True),
-        allowed_connections=dict(type='list'),
+        allowed_connections=dict(type='list', default=[]),
         state=dict(type='str', choices=['absent', 'present'], default='present'),
         full_name=dict(type='str', Default=None),
         email=dict(type='str', Default=None),
@@ -512,28 +538,65 @@ def main():
         except GuacamoleError as e:
             module.fail_json(msg=str(e))
 
-        for connection in guacamole_connections:
-            # if the connection is in the list of allowed connections for this user
-            # we grant access
-            if connection['name'] in module.params.get('allowed_connections'):
-                try:
-                    guacamole_update_user_permissions(
-                        base_url=module.params.get('base_url'),
-                        validate_certs=module.params.get('validate_certs'),
-                        datasource=guacamole_token['dataSource'],
-                        auth_token=guacamole_token['authToken'],
-                        username=module.params.get('username'),
-                        connection_id=connection['identifier'],
-                        operation='add'
-                    )
-                except GuacamoleError as e:
-                    module.fail_json(msg=str(e))
 
-            else:
-                # if the connection is NOT in the list of allowed connections for
-                # this user we make sure to remove access
+        # if var "allowed connections" is not an empty list we grant the required access
+        if module.params['allowed_connections']:
+
+            for connection in guacamole_connections:
+
+                # if the connection is in the top group (ROOT) we only need to grant access to the connection
+                if connection['parentIdentifier'] == 'ROOT':
+                    # if the connection is in the list of allowed connections for this user we grant access.
+                    if connection['name'] in module.params.get('allowed_connections'):
+                        try:
+                            guacamole_update_user_permissions_for_connection(
+                                base_url=module.params.get('base_url'),
+                                validate_certs=module.params.get('validate_certs'),
+                                datasource=guacamole_token['dataSource'],
+                                auth_token=guacamole_token['authToken'],
+                                username=module.params.get('username'),
+                                connection_id=connection['identifier'],
+                                operation='add'
+                            )
+                        except GuacamoleError as e:
+                            module.fail_json(msg=str(e))
+
+                # if the connection is in a sub-group we need to grant access to the connection and the group
+                if connection['parentIdentifier'] != 'ROOT':
+                    if connection['name'] in module.params.get('allowed_connections'):
+
+                        try:
+                            guacamole_update_user_permissions_for_group(
+                                base_url=module.params.get('base_url'),
+                                validate_certs=module.params.get('validate_certs'),
+                                datasource=guacamole_token['dataSource'],
+                                auth_token=guacamole_token['authToken'],
+                                username=module.params.get('username'),
+                                group_id=connection['parentIdentifier'],
+                                operation='add'
+                            )
+                        except GuacamoleError as e:
+                            module.fail_json(msg=str(e))
+
+                        try:
+                            guacamole_update_user_permissions_for_connection(
+                                base_url=module.params.get('base_url'),
+                                validate_certs=module.params.get('validate_certs'),
+                                datasource=guacamole_token['dataSource'],
+                                auth_token=guacamole_token['authToken'],
+                                username=module.params.get('username'),
+                                connection_id=connection['identifier'],
+                                operation='add'
+                            )
+                        except GuacamoleError as e:
+                            module.fail_json(msg=str(e))
+
+        # loop again over all the connections to remove access to those connections
+        # not explicitely defined for the user. This is always executed
+        for connection in guacamole_connections:
+            if connection['name'] not in module.params.get('allowed_connections'):
                 try:
-                    guacamole_update_user_permissions(
+                    guacamole_update_user_permissions_for_connection(
                         base_url=module.params.get('base_url'),
                         validate_certs=module.params.get('validate_certs'),
                         datasource=guacamole_token['dataSource'],
@@ -544,6 +607,7 @@ def main():
                     )
                 except GuacamoleError as e:
                     module.fail_json(msg=str(e))
+
 
     # module arg state=absent so we must delete a user from guacamole
     if module.params.get('state') == 'absent':
