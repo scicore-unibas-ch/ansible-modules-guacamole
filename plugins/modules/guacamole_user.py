@@ -547,7 +547,6 @@ def main():
                 # if the connection is in the top group (ROOT) we only need to grant access to the connection
                 if connection['parentIdentifier'] == 'ROOT':
                     # if the connection is in the list of allowed connections for this user we grant access.
-                    # fist check if "allowed_connections" is defined
                     if connection['name'] in module.params.get('allowed_connections'):
                         try:
                             guacamole_update_user_permissions_for_connection(
@@ -564,7 +563,6 @@ def main():
 
                 # if the connection is in a sub-group we need to grant access to the connection and the group
                 if connection['parentIdentifier'] != 'ROOT':
-                    # check if "allowed_connections" is defined
                     if connection['name'] in module.params.get('allowed_connections'):
 
                         try:
