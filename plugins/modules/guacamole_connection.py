@@ -111,6 +111,11 @@ options:
             - tls
             - rdp
 
+    rdp_ignore_server_certs:
+        description:
+            - Ignore rdp server certs
+        type: bool
+
     state:
         description:
             - Create or delete the connection?
@@ -279,7 +284,6 @@ def guacamole_populate_connection_payload(module_params):
             "port": module_params['port'],
             "username": module_params['username'],
             "password": module_params['password'],
-            "security": module_params['rdp_security'],
             "enable-sftp": module_params['sftp_enable'],
             "sftp-port": module_params['sftp_port'],
             "sftp-server-alive-interval": module_params['sftp_server_alive_interval'],
@@ -301,6 +305,12 @@ def guacamole_populate_connection_payload(module_params):
             "max-connections-per-user": ""
         }
     }
+
+    if module_params['protocol'] == 'rdp':
+        if module_params.get('rdp_security'):
+            payload['parameters']['security'] =  module_params['rdp_security']
+        if module_params.get('rdp_ignore_server_certs'):
+            payload['parameters']['ignore-cert'] =  module_params['rdp_ignore_server_certs']
 
     return payload
 
@@ -376,6 +386,7 @@ def main():
         username=dict(type='str'),
         password=dict(type='str', no_log=True),
         rdp_security=dict(type='str', choices=['any', 'nla', 'nla-ext', 'tls', 'rdp'], required=False),
+        rdp_ignore_server_certs=dict(type='bool', required=False),
         state=dict(type='str', choices=['absent', 'present'], default='present'),
         max_connections=dict(type='int', default=1),
         sftp_enable=dict(type='bool', default=False),
