@@ -21,13 +21,6 @@ jobs:
     - name: Install latest ansible and make the collection available
       run: |
         mkdir -p ~/.ansible/collections/ansible_collections/scicore/
-        ln -s ~/.ansible/collections/ansible_collections/scicore/guacamole ${GITHUB_WORKSPACE}
-        pip install ansible
-
-    - name: Boot the docker containers with latest guacamole
-      working-directory: ./devel-utils
-      run: docker-compose up -d
-
-    - name: Execute the CI playbook
-      working-directory: ./devel-utils
-      run: ansible-playbook test-collection.yml
+        ln -s ~/.ansible/collections/ansible_collections/scicore/guacamole/ ${GITHUB_WORKSPACE}
+        ls -la s ~/.ansible/collections/ansible_collections/scicore/
+        ls -la s ~/.ansible/collections/ansible_collections/scicore/guacamole/
