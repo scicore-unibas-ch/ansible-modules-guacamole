@@ -161,7 +161,7 @@ OPTIONS (= is mandatory):
         [Default: (null)]
         type: str
 
-- sftp_private_key_password
+- sftp_passphrase
         Password for the sftp private key used for authentication
         [Default: (null)]
         type: str

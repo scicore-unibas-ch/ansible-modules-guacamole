@@ -100,6 +100,45 @@ options:
             - Password for the connection
         type: str
 
+    rdp_color_depth:
+        decription:
+            - Color depth in bits
+        type: int
+        choices:
+            - 8
+            - 16
+            - 24
+            - 32
+
+    rdp_domain:
+        description:
+            - Domain for the connection
+
+    rdp_drive_enable:
+        description:
+            - Enable network drive mapping
+        type: bool
+
+    rdp_drive_name:
+        description:
+            - Network drive name
+        type: str
+
+    rdp_drive_path:
+        description:
+            - Path to network drive
+        type: str
+
+    rdp_enable_full_window_drag:
+        decription:
+            - Display whole windows when they are being dragged
+        type: bool
+
+    rdp_ignore_server_certs:
+        description:
+            - Ignore rdp server certs
+        type: bool
+
     rdp_security:
         description:
             - The security mode to use for the RDP connection
@@ -111,10 +150,37 @@ options:
             - tls
             - rdp
 
-    rdp_ignore_server_certs:
+    rdp_server_layout:
+        decription:
+            - Keyboard layout
+        type: str
+        choices:
+            - en-us-qwerty
+            - en-gb-qwerty
+            - de-ch-qwertz
+            - de-de-qwertz
+            - fr-be-azerty
+            - fr-fr-azerty
+            - fr-ch-qwertz
+            - hu-hu-qwertz
+            - it-it-qwerty
+            - ja-jp-qwerty
+            - pt-br-qwerty
+            - es-es-qwerty
+            - es-latam-qwerty
+            - sv-se-qwerty
+            - tr-tr-qwerty
+            - failsafe
+
+    ssh_passphrase:
         description:
-            - Ignore rdp server certs
-        type: bool
+            - Passphrase for the SSH private key
+        type: str
+
+    ssh_private_key:
+        description:
+            - Private key for the SSH connection
+        type: str
 
     state:
         description:
@@ -127,9 +193,29 @@ options:
 
     max_connections:
         description:
-            - Max simultaneos connections allowed for this connection
+            - Max simultaneous connections allowed for this connection
         required: true
         type: int
+
+    max_connections_per_user:
+        description:
+            - Max simultaneous connections allowed per guacamole user for this connection
+        type: int
+
+    recording_path:
+        decription:
+            - recording path for connection
+        type: str
+
+    recording_include_keys:
+        decription:
+            - include keyboard events for connection
+        type: bool
+
+    recording_name:
+        decription:
+            - recording name for connection
+        type: str
 
     sftp_enable:
         description:
@@ -166,7 +252,7 @@ options:
             - Private key for sftp authentication
         type: str
 
-    sftp_private_key_password:
+    sftp_passphrase:
         description:
             - Password for the sftp private key used for authentication
         type: str
@@ -269,6 +355,17 @@ def guacamole_get_connection_details(base_url, validate_certs, datasource, conne
     return connection_details
 
 
+def guacamole_add_parameter(payload, module_params, parameters, protocol=None):
+    for parameter in parameters:
+        if protocol is None:
+            ansible_parameter = parameter
+        else:
+            ansible_parameter = "{}_{}".format(protocol, parameter)
+        api_parameter = parameter.replace("_", "-")
+        if module_params.get(ansible_parameter):
+            payload["parameters"][api_parameter] = module_params[ansible_parameter]
+
+
 def guacamole_populate_connection_payload(module_params):
     """
     Populate the json that we send to the guaccamole API to create new connection
@@ -280,20 +377,8 @@ def guacamole_populate_connection_payload(module_params):
         "name": module_params['connection_name'],
         "protocol": module_params['protocol'],
         "parameters": {
-            "hostname": module_params['hostname'],
-            "port": module_params['port'],
-            "username": module_params['username'],
-            "password": module_params['password'],
             "enable-sftp": module_params['sftp_enable'],
-            "sftp-port": module_params['sftp_port'],
-            "sftp-server-alive-interval": module_params['sftp_server_alive_interval'],
-            "sftp-hostname": module_params['sftp_hostname'],
-            "sftp-username": module_params['sftp_username'],
-            "sftp-password": module_params['sftp_password'],
-            "sftp-private-key": module_params['sftp_private_key'],
-            "passphrase": module_params['sftp_private_key_password'],
-            "sftp-root-directory": module_params['sftp_root_directory'],
-            "sftp-directory": module_params['sftp_default_upload_directory']
+            "sftp-directory": module_params['sftp_default_upload_directory'],
         },
         "attributes": {
             "guacd-encryption": "",
@@ -302,15 +387,46 @@ def guacamole_populate_connection_payload(module_params):
             "max-connections": module_params['max_connections'],
             "guacd-hostname": "",
             "guacd-port": "",
-            "max-connections-per-user": ""
+            "max-connections-per-user": module_params['max_connections_per_user']
         }
     }
 
+    parameters = (
+        "hostname",
+        "port",
+        "username",
+        "password",
+        "recording_path",
+        "recording_include_keys",
+        "recording_name",
+        "sftp_port",
+        "sftp_server_alive_interval",
+        "sftp_hostname",
+        "sftp_username",
+        "sftp_passphrase",
+        "sftp_password",
+        "sftp_private_key",
+        "sftp_root_directory",
+    )
+    guacamole_add_parameter(payload, module_params, parameters)
+
     if module_params['protocol'] == 'rdp':
-        if module_params.get('rdp_security'):
-            payload['parameters']['security'] =  module_params['rdp_security']
+        parameters = (
+            "color_depth",
+            "domain",
+            "drive_enable",
+            "drive_name",
+            "drive_path",
+            "enable_full_window_drag",
+            "security",
+            "server_layout",
+        )
+        guacamole_add_parameter(payload, module_params, parameters, "rdp")
         if module_params.get('rdp_ignore_server_certs'):
-            payload['parameters']['ignore-cert'] =  module_params['rdp_ignore_server_certs']
+            payload['parameters']['ignore-cert'] = module_params['rdp_ignore_server_certs']
+    elif module_params["protocol"] == "ssh":
+        parameters = ("private_key", "passphrase")
+        guacamole_add_parameter(payload, module_params, parameters, "ssh")
 
     return payload
 
@@ -366,8 +482,6 @@ def guacamole_delete_connection(base_url, validate_certs, datasource, connection
                              % (url_delete_connection, str(e)))
 
 
-
-
 def main():
 
     # define the available arguments/parameters that a user can pass to
@@ -385,20 +499,53 @@ def main():
         port=dict(type='int'),
         username=dict(type='str'),
         password=dict(type='str', no_log=True),
-        rdp_security=dict(type='str', choices=['any', 'nla', 'nla-ext', 'tls', 'rdp'], required=False),
+        rdp_color_depth=dict(type='int', choices=(8, 16, 24, 32)),
+        rdp_domain=dict(type='str'),
+        rdp_drive_enable=dict(type='bool', default=False),
+        rdp_drive_name=dict(type='str'),
+        rdp_drive_path=dict(type='str'),
+        rdp_enable_full_window_drag=dict(type='bool', default=True),
         rdp_ignore_server_certs=dict(type='bool', required=False),
+        rdp_security=dict(type='str', choices=['any', 'nla', 'nla-ext', 'tls', 'rdp'], required=False),
+        rdp_server_layout=dict(
+            type='str',
+            choices=(
+                'en-us-qwerty',
+                'en-gb-qwerty',
+                'de-ch-qwertz',
+                'de-de-qwertz',
+                'fr-be-azerty',
+                'fr-fr-azerty',
+                'fr-ch-qwertz',
+                'hu-hu-qwertz',
+                'it-it-qwerty',
+                'ja-jp-qwerty',
+                'pt-br-qwerty',
+                'es-es-qwerty',
+                'es-latam-qwerty',
+                'sv-se-qwerty',
+                'tr-tr-qwerty',
+                'failsafe',
+            )
+        ),
         state=dict(type='str', choices=['absent', 'present'], default='present'),
         max_connections=dict(type='int', default=1),
+        max_connections_per_user=dict(type='int'),
+        recording_path=dict(type='str', required=False),
+        recording_include_keys=dict(type='bool', required=False),
+        recording_name=dict(type='str', required=False),
         sftp_enable=dict(type='bool', default=False),
         sftp_port=dict(type='int', required=False),
         sftp_server_alive_interval=dict(type='int', required=False),
         sftp_hostname=dict(type='str', required=False),
         sftp_username=dict(type='str', required=False),
         sftp_password=dict(type='str', required=False, no_log=True),
+        sftp_passphrase=dict(type='str', required=False, no_log=True),
         sftp_private_key=dict(type='str', required=False, no_log=True),
-        sftp_private_key_password=dict(type='str', required=False, no_log=True),
         sftp_root_directory=dict(type='str', required=False),
-        sftp_default_upload_directory=dict(type='str', required=False)
+        sftp_default_upload_directory=dict(type='str', required=False),
+        ssh_passphrase=dict(type='str', no_log=True),
+        ssh_private_key=dict(type='str', no_log=True),
     )
 
     result = dict(changed=False, msg='', diff={},
