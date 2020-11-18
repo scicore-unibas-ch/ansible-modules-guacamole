@@ -10,6 +10,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+
     - uses: actions/checkout@v2
 
     - name: Set up Python 3.6
@@ -17,16 +18,15 @@ jobs:
       with:
         python-version: 3.6
 
+    - name: Install latest ansible and make the collection available
+      run: |
+        mkdir -p ~/.ansible/collections/ansible_collections/scicore/
+        ln -s ~/.ansible/collections/ansible_collections/scicore/guacamole ${GITHUB_WORKSPACE}
+        pip install ansible
+
     - name: Boot the docker containers with latest guacamole
       working-directory: ./devel-utils
       run: docker-compose up -d
-
-    - uses: nelonoel/branch-name@v1.0.1
-
-    - name: Install latest ansible and the collection
-      run: |
-        pip install ansible
-        ansible-galaxy collection install git+https://github.com/scicore-unibas-ch/ansible-modules-guacamole.git,${BRANCH_NAME}
 
     - name: Execute the CI playbook
       working-directory: ./devel-utils
