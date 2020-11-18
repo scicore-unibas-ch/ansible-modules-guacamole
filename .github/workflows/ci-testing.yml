@@ -22,5 +22,5 @@ jobs:
       run: |
         mkdir -p $HOME/.ansible/collections/ansible_collections/scicore/
         ln -s $HOME/.ansible/collections/ansible_collections/scicore/guacamole/ ${GITHUB_WORKSPACE}
-        ls -la s $HOME/.ansible/collections/ansible_collections/scicore/
-        ls -la s $HOME/.ansible/collections/ansible_collections/scicore/guacamole/
+        ls -la $HOME/.ansible/collections/ansible_collections/scicore/
+        ls -la $HOME/.ansible/collections/ansible_collections/scicore/guacamole/
