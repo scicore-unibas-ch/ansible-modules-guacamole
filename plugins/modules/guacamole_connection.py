@@ -395,7 +395,7 @@ def main():
         sftp_hostname=dict(type='str', required=False),
         sftp_username=dict(type='str', required=False),
         sftp_password=dict(type='str', required=False, no_log=True),
-        sftp_private_key=dict(type='str', required=False),
+        sftp_private_key=dict(type='str', required=False, no_log=True),
         sftp_private_key_password=dict(type='str', required=False, no_log=True),
         sftp_root_directory=dict(type='str', required=False),
         sftp_default_upload_directory=dict(type='str', required=False)
