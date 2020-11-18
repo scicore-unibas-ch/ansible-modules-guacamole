@@ -21,7 +21,7 @@ jobs:
       working-directory: ./devel-utils
       run: docker-compose up -d
 
-    - uses: nelonoel/branch-name@v1
+    - uses: nelonoel/branch-name@v1.0.1
 
     - name: Install latest ansible and the collection
       run: |
