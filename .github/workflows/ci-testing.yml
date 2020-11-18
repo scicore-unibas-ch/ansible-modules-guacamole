@@ -21,6 +21,8 @@ jobs:
     - name: Install latest ansible and make the collection available
       run: |
         mkdir -p $HOME/.ansible/collections/ansible_collections/scicore/
+        echo ${GITHUB_WORKSPACE}
+        env
         ln -s $HOME/.ansible/collections/ansible_collections/scicore/guacamole/ .
         ls -la $HOME/.ansible/collections/ansible_collections/scicore/
         ls -la $HOME/.ansible/collections/ansible_collections/scicore/guacamole/
