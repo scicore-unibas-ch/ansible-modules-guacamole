@@ -21,7 +21,7 @@ jobs:
     - name: Install latest ansible and make the collection available
       run: |
         mkdir -p ~/.ansible/collections/ansible_collections/scicore/
-        ln -s ~/.ansible/collections/ansible_collections/scicore/guacamole ${GITHUB_WORKSPACE}
+        ln -s ${GITHUB_WORKSPACE} ~/.ansible/collections/ansible_collections/scicore/guacamole
         pip install ansible
 
     - name: Boot the docker containers with latest guacamole
