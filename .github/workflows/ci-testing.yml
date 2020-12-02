@@ -18,15 +18,15 @@ jobs:
       with:
         python-version: 3.6
 
+    - name: Boot the docker containers with latest guacamole
+      working-directory: ./devel-utils
+      run: docker-compose up -d
+
     - name: Install latest ansible and make the collection available
       run: |
         mkdir -p ~/.ansible/collections/ansible_collections/scicore/
         ln -s ${GITHUB_WORKSPACE} ~/.ansible/collections/ansible_collections/scicore/guacamole
         pip install ansible
-
-    - name: Boot the docker containers with latest guacamole
-      working-directory: ./devel-utils
-      run: docker-compose up -d
 
     - name: Execute the CI playbook
       working-directory: ./devel-utils
