@@ -295,8 +295,8 @@ EXAMPLES = '''
     protocol: vnc
     hostname: 192.168.33.44
     port: 5900
-    username: rdp_user
-    password: rdp_pass
+    username: vnc_user
+    password: vnc_pass
     sftp_enable: true
     sftp_port: 22
     sftp_hostname: 192.168.11.11
