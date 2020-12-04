@@ -101,7 +101,7 @@ options:
         type: str
 
     rdp_color_depth:
-        decription:
+        description:
             - Color depth in bits
         type: int
         choices:
@@ -130,7 +130,7 @@ options:
         type: str
 
     rdp_enable_full_window_drag:
-        decription:
+        description:
             - Display whole windows when they are being dragged
         type: bool
 
@@ -151,7 +151,7 @@ options:
             - rdp
 
     rdp_server_layout:
-        decription:
+        description:
             - Keyboard layout
         type: str
         choices:
@@ -203,17 +203,17 @@ options:
         type: int
 
     recording_path:
-        decription:
+        description:
             - recording path for connection
         type: str
 
     recording_include_keys:
-        decription:
+        description:
             - include keyboard events for connection
         type: bool
 
     recording_name:
-        decription:
+        description:
             - recording name for connection
         type: str
 
