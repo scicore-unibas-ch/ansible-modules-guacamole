@@ -102,8 +102,14 @@ OPTIONS (= is mandatory):
         type: str
 
 = max_connections
-        Max simultaneos connections allowed for this connection
+        Max simultaneous connections allowed for this connection
 
+        type: int
+
+- max_connections_per_user
+        Max simultaneous connections allowed per guacamole user for
+        this connection
+        [Default: (null)]
         type: int
 
 - password
@@ -121,6 +127,35 @@ OPTIONS (= is mandatory):
         (Choices: rdp, vnc, ssh, telnet)
         type: str
 
+- rdp_color_depth
+        Color depth in bits
+        (Choices: 8, 16, 24, 32)[Default: (null)]
+        type: int
+
+- rdp_domain
+        Domain for the connection
+        [Default: (null)]
+
+- rdp_drive_enable
+        Enable network drive mapping
+        [Default: (null)]
+        type: bool
+
+- rdp_drive_name
+        Network drive name
+        [Default: (null)]
+        type: str
+
+- rdp_drive_path
+        Path to network drive
+        [Default: (null)]
+        type: str
+
+- rdp_enable_full_window_drag
+        Display whole windows when they are being dragged
+        [Default: (null)]
+        type: bool
+
 - rdp_ignore_server_certs
         Ignore rdp server certs
         [Default: (null)]
@@ -129,6 +164,30 @@ OPTIONS (= is mandatory):
 - rdp_security
         The security mode to use for the RDP connection
         (Choices: any, nla, nla-ext, tls, rdp)[Default: (null)]
+        type: str
+
+- rdp_server_layout
+        Keyboard layout
+        (Choices: en-us-qwerty, en-gb-qwerty, de-ch-qwertz, de-de-
+        qwertz, fr-be-azerty, fr-fr-azerty, fr-ch-qwertz, hu-hu-
+        qwertz, it-it-qwerty, ja-jp-qwerty, pt-br-qwerty, es-es-
+        qwerty, es-latam-qwerty, sv-se-qwerty, tr-tr-qwerty,
+        failsafe)[Default: (null)]
+        type: str
+
+- recording_include_keys
+        include keyboard events for connection
+        [Default: (null)]
+        type: bool
+
+- recording_name
+        recording name for connection
+        [Default: (null)]
+        type: str
+
+- recording_path
+        recording path for connection
+        [Default: (null)]
         type: str
 
 - sftp_default_upload_directory
@@ -143,6 +202,11 @@ OPTIONS (= is mandatory):
 
 - sftp_hostname
         Hostname or ip for sftp
+        [Default: (null)]
+        type: str
+
+- sftp_passphrase
+        Password for the sftp private key used for authentication
         [Default: (null)]
         type: str
 
@@ -161,11 +225,6 @@ OPTIONS (= is mandatory):
         [Default: (null)]
         type: str
 
-- sftp_passphrase
-        Password for the sftp private key used for authentication
-        [Default: (null)]
-        type: str
-
 - sftp_root_directory
         File browser root directory
         [Default: (null)]
@@ -178,6 +237,16 @@ OPTIONS (= is mandatory):
 
 - sftp_username
         Username for sftp
+        [Default: (null)]
+        type: str
+
+- ssh_passphrase
+        Passphrase for the SSH private key
+        [Default: (null)]
+        type: str
+
+- ssh_private_key
+        Private key for the SSH connection
         [Default: (null)]
         type: str
 
