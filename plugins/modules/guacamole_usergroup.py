@@ -322,12 +322,12 @@ class GuacamoleUserGroupModule(AnsibleModule):
         except ValueError as e:
             raise GuacamoleError(
                 'API returned invalid JSON when trying to obtain usergroups from %s: %s'
-                % (url_list_user_groups, str(e)))
+                % (url_get_user_group, str(e)))
         except Exception as e:
             if e.code == 404:
                 return None
             raise GuacamoleError('Could not obtain usergroups from %s: %s'
-                                 % (url_list_user_groups, str(e)))
+                                 % (url_get_user_group, str(e)))
         return user_group
 
     def guacamole_add_usergroup(self, group_name):
