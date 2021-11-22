@@ -542,7 +542,7 @@ def main():
         allowed_conn_ids = set()
         allowed_group_ids = set()
         for conn in guacamole_connections:
-            if conn['name'] in module.params["allowed_connections"]:
+            if conn['name'] in module.params['allowed_connections']:
                 allowed_conn_ids.add(conn['identifier'])
                 if conn['parentIdentifier'] != 'ROOT':
                     # If the connection is in a sub-group we need to grant access to the connection and the group
