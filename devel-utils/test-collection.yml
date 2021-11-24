@@ -21,6 +21,7 @@
         port: 3389
         username: rdp_user
         password: rdp_pass
+        max_connections: 1
       register: _add_connection
 
     - name: Verify that the connection has been created
@@ -38,17 +39,18 @@
         auth_password: "{{ local_guacamole_password }}"
         connection_name: test_connection_rdp
         protocol: rdp
-        hostname: 10.10.1.33
+        hostname: 192.168.33.43
         port: 3389
         username: rdp_user
         password: rdp_pass
+        max_connections: 10
       register: _update_connection
 
     - name: Verify that the connection has been updated
       assert:
         that:
           - _update_connection.changed
-          - _update_connection.connection_info.name == 'test_connection_rdp'
+          - _update_connection.connection_info.attributes.get('max-connections') == '10'
         success_msg: "Connection updated"
         fail_msg: "Failed updating a connection"
 
