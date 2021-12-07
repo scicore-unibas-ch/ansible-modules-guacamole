@@ -5,7 +5,7 @@
 
 from __future__ import absolute_import, division, print_function
 import json
-
+import ssl
 from ansible.module_utils.basic import AnsibleModule
 from ansible.module_utils.urls import open_url
 from ansible_collections.scicore.guacamole.plugins.module_utils.guacamole import GuacamoleError, \
@@ -160,7 +160,7 @@ def guacamole_get_connections_groups(base_url, validate_certs, datasource, auth_
     Returns a dict of dicts.
     Each dict provides the details for one of the connections groups defined in guacamole
     """
-
+    ssl._create_default_https_context = ssl._create_unverified_context
     url_list_connections_groups = URL_LIST_CONNECTIONS_GROUPS.format(
         url=base_url, datasource=datasource, token=auth_token)
 
@@ -201,7 +201,7 @@ def guacamole_add_connections_group(base_url, validate_certs, datasource, auth_t
     """
     Add a new connections group to the guacamole server.
     """
-
+    ssl._create_default_https_context = ssl._create_unverified_context
     url_add_connections_group = URL_ADD_CONNECTIONS_GROUP.format(
         url=base_url, datasource=datasource, token=auth_token)
 
@@ -218,7 +218,7 @@ def guacamole_update_connections_group(base_url, validate_certs, datasource, aut
     """
     Update an existing connections group
     """
-
+    ssl._create_default_https_context = ssl._create_unverified_context
     url_update_connections_group = URL_UPDATE_CONNECTIONS_GROUP.format(
         url=base_url, datasource=datasource, group_numeric_id=group_numeric_id, token=auth_token)
 
@@ -235,7 +235,7 @@ def guacamole_delete_connections_group(base_url, validate_certs, datasource, aut
     """
     Delete a connections group
     """
-
+    ssl._create_default_https_context = ssl._create_unverified_context
     url_delete_connections_group = URL_DELETE_CONNECTIONS_GROUP.format(
         url=base_url, datasource=datasource, group_numeric_id=group_numeric_id, token=auth_token)
 
