@@ -5,7 +5,7 @@
 
 from __future__ import absolute_import, division, print_function
 import json
-
+import ssl
 from ansible.module_utils.basic import AnsibleModule
 from ansible.module_utils.urls import open_url
 from ansible_collections.scicore.guacamole.plugins.module_utils.guacamole import GuacamoleError, \
@@ -197,7 +197,7 @@ def guacamole_get_users(base_url, validate_certs, datasource, auth_token):
     """
     Returns a dict with all the users registered in the guacamole server
     """
-
+    ssl._create_default_https_context = ssl._create_unverified_context
     url_list_users = URL_LIST_USERS.format(url=base_url, datasource=datasource, token=auth_token)
 
     try:
@@ -244,7 +244,7 @@ def guacamole_add_user(base_url, validate_certs, datasource, auth_token, payload
     """
     Add a new user account to the guacamole server doing a POST of the payload to the API
     """
-
+    ssl._create_default_https_context = ssl._create_unverified_context
     url_add_user = URL_ADD_USER.format(
         url=base_url, datasource=datasource, token=auth_token)
 
@@ -261,7 +261,7 @@ def guacamole_update_user(base_url, validate_certs, datasource, username, auth_t
     """
     Update existing user in the guacamole server doing a PUT of the payload to the API
     """
-
+    ssl._create_default_https_context = ssl._create_unverified_context
     url_update_user = URL_UPDATE_USER.format(
         url=base_url, datasource=datasource, username=username, token=auth_token)
 
@@ -278,7 +278,7 @@ def guacamole_delete_user(base_url, validate_certs, datasource, username, auth_t
     """
     Delete existing user in the guacamole server.
     """
-
+    ssl._create_default_https_context = ssl._create_unverified_context
     url_delete_user = URL_DELETE_USER.format(
         url=base_url, datasource=datasource, username=username, token=auth_token)
 
@@ -293,7 +293,7 @@ def guacamole_get_user_permissions(base_url, validate_certs, datasource, usernam
     """
     Return a dict with detailed current permissions for a user
     """
-
+    ssl._create_default_https_context = ssl._create_unverified_context
     url_get_user_permissions = URL_GET_USER_PERMISSIONS.format(
         url=base_url, datasource=datasource, username=username, token=auth_token)
 
@@ -315,7 +315,7 @@ def guacamole_update_user_permissions_for_connection(base_url, validate_certs, d
     """
     Update permissions for existing user in a specific connection
     """
-
+    ssl._create_default_https_context = ssl._create_unverified_context
     url_update_user_permissions = URL_UPDATE_USER_PERMISSIONS.format(
         url=base_url, datasource=datasource, username=username, token=auth_token)
 
@@ -341,7 +341,7 @@ def guacamole_update_user_permissions_for_group(base_url, validate_certs, dataso
     When granting access to a connection which is located in a group of connections we need
     to grant access to the parent group too
     """
-
+    ssl._create_default_https_context = ssl._create_unverified_context
     url_update_user_permissions = URL_UPDATE_USER_PERMISSIONS.format(
         url=base_url, datasource=datasource, username=username, token=auth_token)
 
@@ -367,7 +367,7 @@ def guacamole_update_password_current_user(base_url, validate_certs, datasource,
     We usually do this for the default admin user "guacadmin"
     http://mail-archives.apache.org/mod_mbox/guacamole-dev/202006.mbox/%3CCALKeL-PbLS8qodWEL3yHWWCir87Xqq0z9pVcbp3S-yjwEpYVTw%40mail.gmail.com%3E
     """
-
+    ssl._create_default_https_context = ssl._create_unverified_context
     url_update_password_current_user = URL_UPDATE_PASSWORD_CURRENT_USER.format(
         url=base_url, datasource=datasource, username=username, token=auth_token)
 

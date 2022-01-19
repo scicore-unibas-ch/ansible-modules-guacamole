@@ -5,7 +5,7 @@
 
 from __future__ import absolute_import, division, print_function
 import json
-
+import ssl
 from ansible.module_utils.basic import AnsibleModule
 from ansible.module_utils.urls import open_url
 from ansible_collections.scicore.guacamole.plugins.module_utils.guacamole import GuacamoleError, \
@@ -337,7 +337,7 @@ def guacamole_get_connection_details(base_url, validate_certs, datasource, conne
     Return a dict with detailed connection parameters for a single connection.
     This function requires a connection id and provides more information than function guacamole_get_connections()
     """
-
+    ssl._create_default_https_context = ssl._create_unverified_context
     url_connection_details = URL_CONNECTION_DETAILS.format(
         url=base_url, datasource=datasource, connection_id=connection_id, token=auth_token)
 
@@ -436,7 +436,7 @@ def guacamole_add_connection(base_url, validate_certs, datasource, auth_token, p
     Add a new connection to the guacamole server. ]
     Connection can be RDP, VNC, SSH or TELNET
     """
-
+    ssl._create_default_https_context = ssl._create_unverified_context
     url_add_connection = URL_ADD_CONNECTION.format(
         url=base_url, datasource=datasource, token=auth_token)
 
@@ -453,7 +453,7 @@ def guacamole_update_connection(base_url, validate_certs, datasource, connection
     """
     Update an existing guacamole connection
     """
-
+    ssl._create_default_https_context = ssl._create_unverified_context
     url_update_connection = URL_UPDATE_CONNECTION.format(
         url=base_url, datasource=datasource, connection_id=connection_id, token=auth_token)
 
@@ -471,7 +471,7 @@ def guacamole_delete_connection(base_url, validate_certs, datasource, connection
     Delete an existing guacamole connection.
     API doesn't return any json
     """
-
+    ssl._create_default_https_context = ssl._create_unverified_context
     url_delete_connection = URL_DELETE_CONNECTION.format(
         url=base_url, datasource=datasource, connection_id=connection_id, token=auth_token)
 

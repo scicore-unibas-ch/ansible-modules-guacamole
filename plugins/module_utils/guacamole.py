@@ -4,7 +4,7 @@
 # GNU General Public License v3.0+ (see COPYING or https://www.gnu.org/licenses/gpl-3.0.txt)
 
 import json
-
+import ssl
 from ansible.module_utils.urls import open_url
 from ansible.module_utils.six.moves.urllib.parse import urlencode
 
@@ -29,6 +29,7 @@ def guacamole_get_token(base_url, validate_certs, auth_username, auth_password):
         'dataSource': 'postgresql'
     }
     """
+    ssl._create_default_https_context = ssl._create_unverified_context
 
     url_get_token = URL_GET_TOKEN.format(url=base_url)
 
@@ -63,7 +64,7 @@ def guacamole_get_connections(base_url, validate_certs, datasource, group, auth_
     Return a list of dicts with all the connections registered in the guacamole server
     for the provided connections group and its sub-groups. Default connections group is ROOT
     """
-
+    ssl._create_default_https_context = ssl._create_unverified_context
     url_list_connections = URL_LIST_CONNECTIONS.format(
         url=base_url, datasource=datasource, group=group, token=auth_token)
 
@@ -97,7 +98,7 @@ def guacamole_get_connections_group_id(base_url, validate_certs, datasource, gro
     When working with a group different of the default one (ROOT) we have to map the group name
     to its numeric identifier because the API expects a group numeric id, not a group name
     """
-
+    ssl._create_default_https_context = ssl._create_unverified_context
     url_list_connections_groups = URL_LIST_CONNECTIONS_GROUPS.format(
         url=base_url, datasource=datasource, token=auth_token)
 
