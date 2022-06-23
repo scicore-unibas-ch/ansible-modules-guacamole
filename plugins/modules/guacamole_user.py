@@ -9,7 +9,7 @@ import json
 from ansible.module_utils.basic import AnsibleModule
 from ansible.module_utils.urls import open_url
 from ansible_collections.scicore.guacamole.plugins.module_utils.guacamole import GuacamoleError, \
-    guacamole_get_token, guacamole_get_connections
+    guacamole_get_token, guacamole_get_connections, guacamole_get_users
 __metaclass__ = type
 
 ANSIBLE_METADATA = {
@@ -191,26 +191,6 @@ URL_DELETE_USER = URL_UPDATE_USER
 URL_GET_USER_PERMISSIONS = "{url}/api/session/data/{datasource}/users/{username}/permissions?token={token}"
 URL_UPDATE_USER_PERMISSIONS = URL_GET_USER_PERMISSIONS
 URL_UPDATE_PASSWORD_CURRENT_USER = "{url}/api/session/data/{datasource}/users/{username}/password?token={token}"
-
-
-def guacamole_get_users(base_url, validate_certs, datasource, auth_token):
-    """
-    Returns a dict with all the users registered in the guacamole server
-    """
-
-    url_list_users = URL_LIST_USERS.format(url=base_url, datasource=datasource, token=auth_token)
-
-    try:
-        guacamole_users = json.load(open_url(url_list_users, method='GET', validate_certs=validate_certs))
-    except ValueError as e:
-        raise GuacamoleError(
-            'API returned invalid JSON when trying to obtain list of users from %s: %s'
-            % (url_list_users, str(e)))
-    except Exception as e:
-        raise GuacamoleError('Could not obtain list of guacamole users from %s: %s'
-                             % (url_list_users, str(e)))
-
-    return guacamole_users
 
 
 def guacamole_populate_user_payload(module_params):
@@ -553,7 +533,7 @@ def main():
         if guacamole_user_exists:
             current_conn_ids = set(user_permissions_before['connectionPermissions'].keys())
             current_group_ids = set(user_permissions_before['connectionGroupPermissions'].keys())
-       
+
         add_conn_ids = allowed_conn_ids - current_conn_ids
         add_group_ids = allowed_group_ids - current_group_ids
         delete_conn_ids = current_conn_ids - allowed_conn_ids
@@ -572,7 +552,7 @@ def main():
                 )
             except GuacamoleError as e:
                 module.fail_json(msg=str(e))
-            
+
         for group_id in add_group_ids:
             try:
                 guacamole_update_user_permissions_for_group(
@@ -586,7 +566,7 @@ def main():
                 )
             except GuacamoleError as e:
                 module.fail_json(msg=str(e))
-        
+
         for conn_id in delete_conn_ids:
             try:
                 guacamole_update_user_permissions_for_connection(
@@ -600,7 +580,7 @@ def main():
                 )
             except GuacamoleError as e:
                 module.fail_json(msg=str(e))
-            
+
         for group_id in delete_group_ids:
             try:
                 guacamole_update_user_permissions_for_group(
