@@ -184,6 +184,7 @@ message:
 '''
 
 
+URL_LIST_USERS = "{url}/api/session/data/{datasource}/users?token={token}"
 URL_ADD_USER = URL_LIST_USERS
 URL_UPDATE_USER = "{url}/api/session/data/{datasource}/users/{username}?token={token}"
 URL_DELETE_USER = URL_UPDATE_USER
