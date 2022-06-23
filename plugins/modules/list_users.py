@@ -123,12 +123,14 @@ def main():
     except GuacamoleError as e:
         module.fail_json(msg=str(e))
 
-    # we return the user details in dict and list formats so you
-    # can use whatever is more convenient for your needs
-    result['users_dict'] = guacamole_users
+    if guacamole_users:
 
-    for key,value in guacamole_users.items():
-       result['users_list'].append(value)
+        # return guacamole users in dict format
+        result['users_dict'] = guacamole_users
+
+        # return guacamole users in list format
+        for key,value in guacamole_users.items():
+           result['users_list'].append(value)
 
     module.exit_json(**result)
 
