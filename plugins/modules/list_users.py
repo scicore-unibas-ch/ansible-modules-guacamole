@@ -66,6 +66,7 @@ EXAMPLES = '''
     base_url: http://localhost:8080/guacamole
     auth_username: guacadmin
     auth_password: guacadmin
+  register: _guacamole_users
 
 '''
 
