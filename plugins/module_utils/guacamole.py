@@ -12,6 +12,7 @@ URL_GET_TOKEN = "{url}/api/tokens"
 URL_LIST_CONNECTIONS = "{url}/api/session/data/{datasource}/connectionGroups/\
 {group}/tree?token={token}"
 URL_LIST_CONNECTIONS_GROUPS = "{url}/api/session/data/{datasource}/connectionGroups/?token={token}"
+URL_LIST_USERS = "{url}/api/session/data/{datasource}/users?token={token}"
 
 
 class GuacamoleError(Exception):
@@ -124,3 +125,23 @@ def guacamole_get_connections_group_id(base_url, validate_certs, datasource, gro
             'Could not find the numeric id for connections group %s. Does the group exists?' % (group))
     else:
         return group_numeric_id
+
+
+def guacamole_get_users(base_url, validate_certs, datasource, auth_token):
+    """
+    Returns a dict with all the users registered in the guacamole server
+    """
+
+    url_list_users = URL_LIST_USERS.format(url=base_url, datasource=datasource, token=auth_token)
+
+    try:
+        guacamole_users = json.load(open_url(url_list_users, method='GET', validate_certs=validate_certs))
+    except ValueError as e:
+        raise GuacamoleError(
+            'API returned invalid JSON when trying to obtain list of users from %s: %s'
+            % (url_list_users, str(e)))
+    except Exception as e:
+        raise GuacamoleError('Could not obtain list of guacamole users from %s: %s'
+                             % (url_list_users, str(e)))
+
+    return guacamole_users
