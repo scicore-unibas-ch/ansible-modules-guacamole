@@ -144,13 +144,14 @@ def main():
     except GuacamoleError as e:
         module.fail_json(msg=str(e))
 
-    result['connections_list'] = guacamole_connections
-
     if guacamole_connections:
-        tmp_dict = {}
+
+        # return connections in list format
+        result['connections_list'] = guacamole_connections
+
+        # return connections in dict format
         for connection in guacamole_connections:
-            tmp_dict[connection['name']] = connection
-        result['connections_dict'] = tmp_dict
+            result['connections_dict'][connection['name']] = connection
 
     module.exit_json(**result)
 
