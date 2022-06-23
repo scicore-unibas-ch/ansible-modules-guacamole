@@ -81,6 +81,11 @@ connections_list:
     description: Information about the existing connections in a guacamole server
     type: list of dicts
     returned: always
+
+connections_dict:
+    description: Information about the existing connections in a guacamole server
+    type: dict
+    returned: always
 '''
 
 
@@ -97,7 +102,7 @@ def main():
         validate_certs=dict(type='bool', default=True),
     )
 
-    result = dict(msg='', connections_list=[])
+    result = dict(msg='', connections_list=[], connections_dict={})
 
     module = AnsibleModule(
         argument_spec=module_args,
@@ -140,6 +145,12 @@ def main():
         module.fail_json(msg=str(e))
 
     result['connections_list'] = guacamole_connections
+
+    if guacamole_connections:
+        tmp_dict = {}
+        for connection in guacamole_connections:
+            tmp_dict[connection['name']] = connection
+        result['connections_dict'] = tmp_dict
 
     module.exit_json(**result)
 
