@@ -59,6 +59,18 @@ You can find more examples in the [ci-tests-playbook](devel-utils/test-collectio
     - debug:
         var: _user_info
 
+    - name: Create a new group "lab_3"
+      scicore.guacamole.guacamole_usergroup:
+        base_url: http://localhost/guacamole
+        auth_username: guacadmin
+        auth_password: guacadmin
+        group_name: lab_3
+        permissions:
+          - CREATE_CONNECTION
+          - CREATE_SHARING_PROFILE
+        users:
+          - john
+          - laura
 ```
 
 ## Output of "ansible-doc scicore.guacamole.guacamole_connection"
