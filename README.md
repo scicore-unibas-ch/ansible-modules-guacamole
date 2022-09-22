@@ -136,7 +136,7 @@ OPTIONS (= is mandatory):
         Domain for the connection
         [Default: (null)]
 
-- rdp_drive_enable
+- rdp_enable_drive
         Enable network drive mapping
         [Default: (null)]
         type: bool
