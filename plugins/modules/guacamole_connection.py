@@ -414,7 +414,7 @@ def guacamole_populate_connection_payload(module_params):
         parameters = (
             "color_depth",
             "domain",
-            "drive_enable",
+            "enable_drive",
             "drive_name",
             "drive_path",
             "enable_full_window_drag",
