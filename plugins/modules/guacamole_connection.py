@@ -114,7 +114,7 @@ options:
         description:
             - Domain for the connection
 
-    rdp_drive_enable:
+    rdp_enable_drive:
         description:
             - Enable network drive mapping
         type: bool
@@ -414,7 +414,7 @@ def guacamole_populate_connection_payload(module_params):
         parameters = (
             "color_depth",
             "domain",
-            "drive_enable",
+            "enable_drive",
             "drive_name",
             "drive_path",
             "enable_full_window_drag",
@@ -501,7 +501,7 @@ def main():
         password=dict(type='str', no_log=True),
         rdp_color_depth=dict(type='int', choices=(8, 16, 24, 32)),
         rdp_domain=dict(type='str'),
-        rdp_drive_enable=dict(type='bool', default=False),
+        rdp_enable_drive=dict(type='bool', default=False),
         rdp_drive_name=dict(type='str'),
         rdp_drive_path=dict(type='str'),
         rdp_enable_full_window_drag=dict(type='bool', default=True),
