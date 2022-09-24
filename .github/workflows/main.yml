@@ -61,7 +61,7 @@ jobs:
       - test
     runs-on: ubuntu-latest
     steps:
-      - name: galaxy
-        uses: robertdebock/galaxy-action@1.2.1
+      - name: publish to ansible galaxy
+        uses: artis3n/ansible_galaxy_collection@v2
         with:
-          galaxy_api_key: ${{ secrets.galaxy_api_key }}
+          api_key: ${{ secrets.galaxy_api_key }}
