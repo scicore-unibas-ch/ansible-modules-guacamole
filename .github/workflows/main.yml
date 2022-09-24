@@ -62,6 +62,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: publish to ansible galaxy
-        uses: artis3n/ansible_galaxy_collection@v2.8.1
+        uses: arillso/action.ansible.collection@master
         with:
           api_key: ${{ secrets.galaxy_api_key }}
