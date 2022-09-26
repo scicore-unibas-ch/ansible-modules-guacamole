@@ -1,9 +1,8 @@
 name: publish to galaxy
 
 on:
-  push:
-    tags:
-      - '*'
+  release:
+    types: [published]
 
 jobs:
 
