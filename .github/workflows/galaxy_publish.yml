@@ -21,7 +21,7 @@ jobs:
         run: echo "RELEASE_VERSION=${GITHUB_REF/refs\/tags\//}" >> $GITHUB_ENV
 
       - name: publish to ansible galaxy
-        uses: arillso/action.ansible.collection@master
+        uses: artis3n/ansible_galaxy_collection@v2
         with:
           api_key: ${{ secrets.galaxy_api_key }}
           galaxy_version: '${{ env.RELEASE_VERSION }}'
