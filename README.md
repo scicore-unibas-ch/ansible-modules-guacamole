@@ -1,5 +1,5 @@
-[![CI-tests](https://github.com/scicore-unibas-ch/ansible-modules-guacamole/workflows/ci-test/badge.svg)](https://github.com/scicore-unibas-ch/ansible-modules-guacamole/actions?query=workflow%3Aci-test)
-[![flake8](https://github.com/scicore-unibas-ch/ansible-modules-guacamole/workflows/flake8/badge.svg)](https://github.com/scicore-unibas-ch/ansible-modules-guacamole/actions?query=workflow%3Aflake8)
+[![ci-test](https://github.com/scicore-unibas-ch/ansible-modules-guacamole/actions/workflows/tests.yml/badge.svg)](https://github.com/scicore-unibas-ch/ansible-modules-guacamole/actions/workflows/tests.yml)
+[![flake8](https://github.com/scicore-unibas-ch/ansible-modules-guacamole/actions/workflows/flake8.yml/badge.svg)](https://github.com/scicore-unibas-ch/ansible-modules-guacamole/actions/workflows/flake8.yml)
 [![Ansible Galaxy](https://img.shields.io/badge/galaxy-scicore.guacamole-blue.svg)](https://galaxy.ansible.com/scicore/guacamole)
 
 # Ansible Collection - scicore.guacamole
