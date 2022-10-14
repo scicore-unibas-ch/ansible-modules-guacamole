@@ -172,6 +172,16 @@ options:
             - tr-tr-qwerty
             - failsafe
 
+    rdp_width:
+        description:
+            - Display width
+        type: int
+
+    rdp_height:
+        description:
+            - Display height
+        type: int
+
     ssh_passphrase:
         description:
             - Passphrase for the SSH private key
@@ -420,6 +430,8 @@ def guacamole_populate_connection_payload(module_params):
             "enable_full_window_drag",
             "security",
             "server_layout",
+            "width",
+            "height"
         )
         guacamole_add_parameter(payload, module_params, parameters, "rdp")
         if module_params.get('rdp_ignore_server_certs'):
@@ -528,6 +540,8 @@ def main():
                 'failsafe',
             )
         ),
+        rdp_width=dict(type='int'),
+        rdp_height=dict(type='int'),
         state=dict(type='str', choices=['absent', 'present'], default='present'),
         max_connections=dict(type='int', default=1),
         max_connections_per_user=dict(type='int'),
