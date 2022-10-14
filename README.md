@@ -175,6 +175,14 @@ OPTIONS (= is mandatory):
         failsafe)[Default: (null)]
         type: str
 
+- rdp_width
+        Display width
+        type: int
+
+- rdp_height
+        Display height
+        type: int
+
 - recording_include_keys
         include keyboard events for connection
         [Default: (null)]
