@@ -177,10 +177,12 @@ OPTIONS (= is mandatory):
 
 - rdp_width
         Display width
+        [Default: (null)]
         type: int
 
 - rdp_height
         Display height
+        [Default: (null)]
         type: int
 
 - recording_include_keys
