@@ -171,11 +171,12 @@ options:
             - sv-se-qwerty
             - tr-tr-qwerty
             - failsafe
+
     rdp_width:
         description:
             - Display width
         type: int
-        
+
     rdp_height:
         description:
             - Display height
