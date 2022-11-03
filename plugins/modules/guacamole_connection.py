@@ -277,6 +277,11 @@ options:
             - File browser default upload directory
         type: str
 
+    cursor:
+        description:
+            - Cursor type, choose between remote or local
+        type: str
+
 
 author:
     - Pablo Escobar Lopez (@pescobar)
@@ -417,6 +422,7 @@ def guacamole_populate_connection_payload(module_params):
         "sftp_password",
         "sftp_private_key",
         "sftp_root_directory",
+        "cursor"
     )
     guacamole_add_parameter(payload, module_params, parameters)
 
@@ -560,6 +566,7 @@ def main():
         sftp_default_upload_directory=dict(type='str', required=False),
         ssh_passphrase=dict(type='str', no_log=True),
         ssh_private_key=dict(type='str', no_log=True),
+        cursor=dict(type='str', required=False),
     )
 
     result = dict(changed=False, msg='', diff={},
