@@ -422,6 +422,8 @@ def guacamole_populate_connection_payload(module_params):
         "sftp_password",
         "sftp_private_key",
         "sftp_root_directory",
+        "disable_copy",
+        "disable_paste",
         "cursor"
     )
     guacamole_add_parameter(payload, module_params, parameters)
@@ -566,6 +568,8 @@ def main():
         sftp_default_upload_directory=dict(type='str', required=False),
         ssh_passphrase=dict(type='str', no_log=True),
         ssh_private_key=dict(type='str', no_log=True),
+        disable_copy=dict(type='bool', default=False),
+        disable_paste=dict(type='bool', default=False),
         cursor=dict(type='str', required=False),
     )
 
