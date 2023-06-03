@@ -81,13 +81,15 @@ def guacamole_get_connections(base_url, validate_certs, datasource, group, auth_
 
 
     all_connections = []
-    if 'childConnections' in connections_group:
-        all_connections = connections_group['childConnections']
+    def fetch_child_connections(a_connections_group, depth=0):
+        for connection in a_connections_group:
+            all_connections.extend(connection.get('childConnections',[]))
+            if connection.get('childConnectionGroups') is not None:
+                fetch_child_connections(connection.get('childConnectionGroups'), depth = depth + 1)
+        if depth == 0:
+            return
 
-    if 'childConnectionGroups' in connections_group:
-        for group in connections_group['childConnectionGroups']:
-            if 'childConnections' in group:
-                all_connections = all_connections + group['childConnections']
+    fetch_child_connections([connections_group])
 
     return all_connections
 
