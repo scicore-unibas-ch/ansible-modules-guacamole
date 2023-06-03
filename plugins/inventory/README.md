@@ -1,6 +1,6 @@
 # scicore.guacamole.guacamole_inventory – Apache Guacamole dynamic inventory plugin
 
-Wait would you say about getting all your connections details from Apache Guacamole and parsing them to ansible as inventory ? It would be amazing, right ? 
+What would you say about getting all your connections details from Apache Guacamole and passing them to Ansible as inventory ? It would be amazing, right ? 
 
 Guess what, You are in the right place. It's all about this plugin.
 
@@ -15,7 +15,7 @@ Guess what, You are in the right place. It's all about this plugin.
 
 ## Synopsis
 
-- Get connection details from Apache Guacamole API and parse them to ansible as inventory.
+- Get connection details from Apache Guacamole API and pass them to ansible as inventory.
 - Uses an YAML configuration file ending with either `guacamole.yml` or `guacamole.yaml` to set parameter values.
 
 ## Requirements
