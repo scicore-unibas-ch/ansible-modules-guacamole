@@ -129,6 +129,29 @@ def guacamole_get_connections_group_id(base_url, validate_certs, datasource, gro
         return group_numeric_id
 
 
+def guacamole_get_connections_groups(base_url, validate_certs, datasource, auth_token):
+    """
+    Returns a dict of dicts.
+    Each dict provides the details for one of the connections groups defined in guacamole
+    """
+
+    url_list_connections_groups = URL_LIST_CONNECTIONS_GROUPS.format(
+        url=base_url, datasource=datasource, token=auth_token)
+
+    try:
+        connections_groups = json.load(open_url(url_list_connections_groups, method='GET',
+                                                validate_certs=validate_certs))
+    except ValueError as e:
+        raise GuacamoleError(
+            'API returned invalid JSON when trying to obtain connections groups from %s: %s'
+            % (url_list_connections_groups, str(e)))
+    except Exception as e:
+        raise GuacamoleError('Could not obtain connections groups from %s: %s'
+                             % (url_list_connections_groups, str(e)))
+
+    return connections_groups
+
+
 def guacamole_get_users(base_url, validate_certs, datasource, auth_token):
     """
     Returns a dict with all the users registered in the guacamole server

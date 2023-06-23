@@ -9,7 +9,7 @@ import json
 from ansible.module_utils.basic import AnsibleModule
 from ansible.module_utils.urls import open_url
 from ansible_collections.scicore.guacamole.plugins.module_utils.guacamole import GuacamoleError, \
-    guacamole_get_token, guacamole_get_connections, guacamole_get_users
+    guacamole_get_token, guacamole_get_connections, guacamole_get_users, guacamole_get_connections_groups
 __metaclass__ = type
 
 ANSIBLE_METADATA = {
@@ -518,15 +518,37 @@ def main():
         except GuacamoleError as e:
             module.fail_json(msg=str(e))
 
+        # Get existing guacamole connections groups
+        try:
+            guacamole_connections_groups = guacamole_get_connections_groups(
+                base_url=module.params.get('base_url'),
+                validate_certs=module.params.get('validate_certs'),
+                datasource=guacamole_token['dataSource'],
+                auth_token=guacamole_token['authToken'],
+            )
+        except GuacamoleError as e:
+            module.fail_json(msg=str(e))
+
         # Grant and revoke access to connection
         allowed_conn_ids = set()
         allowed_group_ids = set()
         for conn in guacamole_connections:
             if conn['name'] in module.params['allowed_connections']:
                 allowed_conn_ids.add(conn['identifier'])
-                if conn['parentIdentifier'] != 'ROOT':
-                    # If the connection is in a sub-group we need to grant access to the connection and the group
-                    allowed_group_ids.add(conn['parentIdentifier'])
+
+                # If the connection is in a sub-group we need to grant access to the connection
+                # and all the parent connection groups.
+
+                # This an inner recursive function which will traverse the entire tree until ROOT
+                # is reached in order to grant access to all necessary parent connection groups.
+                def fetch_parent_grous_id(parentid):
+                    if parentid != 'ROOT':
+                        allowed_group_ids.add(parentid)
+                        for group_id in guacamole_connections_groups:
+                            if group_id == parentid:
+                                fetch_parent_grous_id(guacamole_connections_groups[group_id]['parentIdentifier'])
+                
+                fetch_parent_grous_id(conn['parentIdentifier'])
 
         current_conn_ids = set()
         current_group_ids = set()
