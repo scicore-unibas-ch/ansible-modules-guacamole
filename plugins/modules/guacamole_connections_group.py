@@ -9,7 +9,7 @@ import json
 from ansible.module_utils.basic import AnsibleModule
 from ansible.module_utils.urls import open_url
 from ansible_collections.scicore.guacamole.plugins.module_utils.guacamole import GuacamoleError, \
-    guacamole_get_token, guacamole_get_connections, guacamole_get_connections_group_id
+    guacamole_get_token, guacamole_get_connections, guacamole_get_connections_group_id, guacamole_get_connections_groups
 __metaclass__ = type
 
 ANSIBLE_METADATA = {
@@ -149,33 +149,10 @@ message:
     returned: always
 '''
 
-URL_LIST_CONNECTIONS_GROUPS = "{url}/api/session/data/{datasource}/connectionGroups/?token={token}"
-URL_ADD_CONNECTIONS_GROUP = URL_LIST_CONNECTIONS_GROUPS
+URL_ADD_CONNECTIONS_GROUP = "{url}/api/session/data/{datasource}/connectionGroups/?token={token}"
 URL_UPDATE_CONNECTIONS_GROUP = "{url}/api/session/data/{datasource}/connectionGroups/{group_numeric_id}?token={token}"
 URL_DELETE_CONNECTIONS_GROUP = URL_UPDATE_CONNECTIONS_GROUP
 
-
-def guacamole_get_connections_groups(base_url, validate_certs, datasource, auth_token):
-    """
-    Returns a dict of dicts.
-    Each dict provides the details for one of the connections groups defined in guacamole
-    """
-
-    url_list_connections_groups = URL_LIST_CONNECTIONS_GROUPS.format(
-        url=base_url, datasource=datasource, token=auth_token)
-
-    try:
-        connections_groups = json.load(open_url(url_list_connections_groups, method='GET',
-                                                validate_certs=validate_certs))
-    except ValueError as e:
-        raise GuacamoleError(
-            'API returned invalid JSON when trying to obtain connections groups from %s: %s'
-            % (url_list_connections_groups, str(e)))
-    except Exception as e:
-        raise GuacamoleError('Could not obtain connections groups from %s: %s'
-                             % (url_list_connections_groups, str(e)))
-
-    return connections_groups
 
 
 def guacamole_populate_connections_group_payload(module_params):
