@@ -290,6 +290,27 @@ def guacamole_get_user_permissions(base_url, validate_certs, datasource, usernam
     return user_permissions
 
 
+def guacamole_get_user_attributes(base_url, validate_certs, datasource, username, auth_token):
+    """
+    Return a dict with detailed current attributes for a user
+    """
+
+    url_get_user_attributes = URL_GET_USER_ATTRIBUTES.format(
+        url=base_url, datasource=datasource, username=username, token=auth_token)
+
+    try:
+        user_attributes = json.load(open_url(url_get_user_attributes, method='GET', validate_certs=validate_certs))
+    except ValueError as e:
+        raise GuacamoleError(
+            'API returned invalid JSON when trying to obtain user attributes from %s: %s'
+            % (url_get_user_attributes, str(e)))
+    except Exception as e:
+        raise GuacamoleError('Could not obtain user attributes from %s: %s'
+                             % (url_get_user_attributes, str(e)))
+
+    return user_attributes
+
+
 def guacamole_update_user_permissions_for_connection(base_url, validate_certs, datasource, username,
                                       connection_id, operation, auth_token):
     """
@@ -465,17 +486,40 @@ def main():
                 username=module.params.get('username'),
                 auth_token=guacamole_token['authToken'],
             )
+            user_attributes_before = guacamole_get_user_attributes(
+                base_url=module.params.get('base_url'),
+                validate_certs=module.params.get('validate_certs'),
+                datasource=guacamole_token['dataSource'],
+                username=module.params.get('username'),
+                auth_token=guacamole_token['authToken'],
+            )
         except GuacamoleError as e:
             module.fail_json(msg=str(e))
 
     # module arg state=present so we must create or update a user in guacamole
     if module.params.get('state') == 'present':
 
-        # populate the payload with the user info to send to the API
-        payload = guacamole_populate_user_payload(module.params)
-
         # if the user already exists in guacamole we update it
         if guacamole_user_exists:
+            d = {
+                "guac-full-name": "full_name",
+                "guac-email-address": "email",
+                "guac-organization": "organization",
+                "guac-organizational-role": "organizational_role",
+                "disabled": "disabled",
+                "expired": "expired",
+                "timezone": "timezone",
+                "valid-until": "disable_account_after",
+                "valid-from": "enable_account_after"
+            }
+
+            for k, v in zip(d.keys(), d.values()):
+                if user_attributes_before['attributes'][k] and module.params[v] is None:
+                    module.params[v] = user_attributes_before['attributes'][k]
+
+            # populate the payload with the user info to send to the API
+            payload = guacamole_populate_user_payload(module.params)
+            
             try:
                 guacamole_update_user(
                     base_url=module.params.get('base_url'),
@@ -491,6 +535,7 @@ def main():
 
         # if the user doesn't exist in guacamole we create it
         else:
+            payload = guacamole_populate_user_payload(module.params)
             try:
                 guacamole_add_user(
                     base_url=module.params.get('base_url'),
