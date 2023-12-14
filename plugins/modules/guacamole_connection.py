@@ -204,7 +204,6 @@ options:
     max_connections:
         description:
             - Max simultaneous connections allowed for this connection
-        required: true
         type: int
 
     max_connections_per_user:
@@ -551,7 +550,7 @@ def main():
         rdp_width=dict(type='int'),
         rdp_height=dict(type='int'),
         state=dict(type='str', choices=['absent', 'present'], default='present'),
-        max_connections=dict(type='int', default=1),
+        max_connections=dict(type='int', required=False),
         max_connections_per_user=dict(type='int'),
         recording_path=dict(type='str', required=False),
         recording_include_keys=dict(type='bool', required=False),
