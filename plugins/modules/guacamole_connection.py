@@ -69,6 +69,23 @@ options:
         aliases: ['parentIdentifier']
         type: str
 
+    guacd_hostname:
+        description:
+            - Hostname or ip of the guacd to connect
+        type: str
+
+    guacd_port:
+        description:
+            - Port to connect on guacd
+        type: int
+
+    guacd_encryption:
+        description:
+            - Connect with SSL / TLS or None (unencrypted)
+        type: str
+        choices:
+            - ssl
+            - ""
     protocol:
         description:
             - Protocol to use for the new connection
@@ -204,7 +221,6 @@ options:
     max_connections:
         description:
             - Max simultaneous connections allowed for this connection
-        required: true
         type: int
 
     max_connections_per_user:
@@ -396,12 +412,12 @@ def guacamole_populate_connection_payload(module_params):
             "sftp-directory": module_params['sftp_default_upload_directory'],
         },
         "attributes": {
-            "guacd-encryption": "",
+            "guacd-encryption": module_params['guacd_encryption'],
             "failover-only": "",
             "weight": "",
             "max-connections": module_params['max_connections'],
-            "guacd-hostname": "",
-            "guacd-port": "",
+            "guacd-hostname": module_params['guacd_hostname'],
+            "guacd-port": module_params['guacd_port'],
             "max-connections-per-user": module_params['max_connections_per_user']
         }
     }
@@ -551,7 +567,7 @@ def main():
         rdp_width=dict(type='int'),
         rdp_height=dict(type='int'),
         state=dict(type='str', choices=['absent', 'present'], default='present'),
-        max_connections=dict(type='int', default=1),
+        max_connections=dict(type='int', required=False),
         max_connections_per_user=dict(type='int'),
         recording_path=dict(type='str', required=False),
         recording_include_keys=dict(type='bool', required=False),
@@ -571,6 +587,9 @@ def main():
         disable_copy=dict(type='bool', default=False),
         disable_paste=dict(type='bool', default=False),
         cursor=dict(type='str', required=False),
+        guacd_hostname=dict(type='str', required=False),
+        guacd_port=dict(type='int', required=False),
+        guacd_encryption=dict(type='str', required=False),
     )
 
     result = dict(changed=False, msg='', diff={},
