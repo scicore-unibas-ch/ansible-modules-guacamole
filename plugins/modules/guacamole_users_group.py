@@ -20,7 +20,7 @@ ANSIBLE_METADATA = {
 
 DOCUMENTATION = '''
 ---
-module: guacamole_connections_group
+module: guacamole_users_group
 
 short_description: Administer guacamole connections groups using the rest API
 
@@ -61,12 +61,6 @@ options:
         required: true
         type: str
 
-    connections:
-        description:
-            - List of connections in this group
-        type: list
-        elements: str
-
     users:
         description:
             - List of users in this group
@@ -94,9 +88,6 @@ EXAMPLES = '''
     auth_username: guacadmin
     auth_password: guacadmin
     group_name: lab_3
-    connections:
-      - rdp_lab_1
-      - vnc_lab_1
     users:
       - john
       - laura
@@ -428,11 +419,11 @@ def main():
 
     #  # check if the connections group already exists
     #  # If the connections group exists we get the numeric id
-    #  guacamole_connections_group_exists = False
-    #  for group_id, group_info in guacamole_connections_groups_before.items():
+    #  guacamole_users_group_exists = False
+    #  for group_id, group_info in guacamole_users_groups_before.items():
     #      if group_info['name'] == module.params.get('group_name'):
     #          group_numeric_id = group_info['identifier']
-    #          guacamole_connections_group_exists = True
+    #          guacamole_users_group_exists = True
     #          break
 
     #  # module arg state=present so we have to create a new connections group
@@ -444,7 +435,7 @@ def main():
     #      payload = guacamole_populate_connections_group_payload(module.params)
 
     #      # the group already exists so we update it
-    #      if guacamole_connections_group_exists:
+    #      if guacamole_users_group_exists:
 
     #          try:
     #              guacamole_update_connections_group(
@@ -478,7 +469,7 @@ def main():
     #  if module.params.get('state') == 'absent':
 
     #      # the group exists so we delete it
-    #      if guacamole_connections_group_exists:
+    #      if guacamole_users_group_exists:
 
     #          # if force_deletion=true we delete the group without any extra check
     #          if module.params.get('force_deletion'):
@@ -538,7 +529,7 @@ def main():
 
     #  # Get existing guacamole connections groups AFTER to check if something changed
     #  try:
-    #      guacamole_connections_groups_after = guacamole_get_connections_groups(
+    #      guacamole_users_groups_after = guacamole_get_connections_groups(
     #          base_url=module.params.get('base_url'),
     #          validate_certs=module.params.get('validate_certs'),
     #          datasource=guacamole_token['dataSource'],
@@ -548,17 +539,17 @@ def main():
     #      module.fail_json(msg=str(e))
 
     #  # check if something changed (idempotence)
-    #  if guacamole_connections_groups_before != guacamole_connections_groups_after:
+    #  if guacamole_users_groups_before != guacamole_users_groups_after:
     #     result['changed'] = True
 
     #  # return connections_group_info{} for the added/updated/deleted connections group
     #  if module.params.get('state') == 'present':
-    #      for group_id, group_info in guacamole_connections_groups_after.items():
+    #      for group_id, group_info in guacamole_users_groups_after.items():
     #          if group_info['name'] == module.params.get('group_name'):
     #              result['connections_group_info'] = group_info
     #              break
     #  else:
-    #      for group_id, group_info in guacamole_connections_groups_before.items():
+    #      for group_id, group_info in guacamole_users_groups_before.items():
     #          if group_info['name'] == module.params.get('group_name'):
     #              result['connections_group_info'] = group_info
     #              break
