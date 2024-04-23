@@ -2,6 +2,14 @@
 [![flake8](https://github.com/scicore-unibas-ch/ansible-modules-guacamole/actions/workflows/flake8.yml/badge.svg)](https://github.com/scicore-unibas-ch/ansible-modules-guacamole/actions/workflows/flake8.yml)
 [![Ansible Galaxy](https://img.shields.io/badge/galaxy-scicore.guacamole-blue.svg)](https://galaxy.ansible.com/scicore/guacamole)
 
+## Maintainers Wanted
+
+This project is looking for maintainers.
+
+For now only pull requests of external contributors are being reviewed, accepted and welcomed. No more bug fixes or new features will be implemented.
+
+If you are interested in contributing to this project please mention it in your PRs.
+
 # Ansible Collection - scicore.guacamole
 
 Ansible modules to administer apache guacamole connections and users using the API
