@@ -8,7 +8,7 @@ This project is looking for maintainers.
 
 For now only pull requests of external contributors are being reviewed, accepted and welcomed. No more bug fixes or new features will be implemented.
 
-If you are interested in contributing to this project please mention it in your PRs.
+If you are interested in contributing to this project please mention it in your PRs or add a comment [in this issue](https://github.com/scicore-unibas-ch/ansible-modules-guacamole/issues/50)
 
 # Ansible Collection - scicore.guacamole
 
