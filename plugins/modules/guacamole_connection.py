@@ -248,6 +248,11 @@ options:
             - Should we enable sftp transfers for this connection?
         type: bool
 
+    read_only:
+        description:
+            - True if connection should be read-only.
+        type: bool
+
     sftp_port:
         description:
             - Port to use for sftp
@@ -329,6 +334,7 @@ EXAMPLES = '''
     username: vnc_user
     password: vnc_pass
     sftp_enable: true
+    read_only: false
     sftp_port: 22
     sftp_hostname: 192.168.11.11
     sftp_server_alive_interval: 10
@@ -410,6 +416,7 @@ def guacamole_populate_connection_payload(module_params):
         "parameters": {
             "enable-sftp": module_params['sftp_enable'],
             "sftp-directory": module_params['sftp_default_upload_directory'],
+            "read-only": module_params['read_only']
         },
         "attributes": {
             "guacd-encryption": module_params['guacd_encryption'],
@@ -440,7 +447,8 @@ def guacamole_populate_connection_payload(module_params):
         "sftp_root_directory",
         "disable_copy",
         "disable_paste",
-        "cursor"
+        "cursor",
+        "read_only"
     )
     guacamole_add_parameter(payload, module_params, parameters)
 
@@ -590,6 +598,7 @@ def main():
         guacd_hostname=dict(type='str', required=False),
         guacd_port=dict(type='int', required=False),
         guacd_encryption=dict(type='str', required=False),
+        read_only=dict(type='bool', default=False),
     )
 
     result = dict(changed=False, msg='', diff={},
