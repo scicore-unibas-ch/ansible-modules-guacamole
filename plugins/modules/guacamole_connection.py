@@ -156,6 +156,13 @@ options:
             - Ignore rdp server certs
         type: bool
 
+    rdp_resize_method:
+        description:
+            - Resize method to use when the client display changes
+        choices:
+            - display-update
+            - reconnect
+
     rdp_security:
         description:
             - The security mode to use for the RDP connection
@@ -455,7 +462,8 @@ def guacamole_populate_connection_payload(module_params):
             "security",
             "server_layout",
             "width",
-            "height"
+            "height",
+            "resize_method"
         )
         guacamole_add_parameter(payload, module_params, parameters, "rdp")
         if module_params.get('rdp_ignore_server_certs'):
@@ -542,6 +550,7 @@ def main():
         rdp_drive_path=dict(type='str'),
         rdp_enable_full_window_drag=dict(type='bool', default=True),
         rdp_ignore_server_certs=dict(type='bool', required=False),
+        rdp_resize_method=dict(type='str', choices=['display-update', 'reconnect'], required=False),
         rdp_security=dict(type='str', choices=['any', 'nla', 'nla-ext', 'tls', 'rdp'], required=False),
         rdp_server_layout=dict(
             type='str',
