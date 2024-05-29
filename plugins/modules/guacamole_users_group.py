@@ -342,8 +342,6 @@ def main():
     except GuacamoleError as e:
         module.fail_json(msg=str(e))
 
-    #result['groups'] = connections_groups
-
     if module.params.get('state') in {'present', 'sync'}:
         for group_name, connections in permissions.items():
             # if the group doesn't exists we add it
@@ -362,17 +360,10 @@ def main():
                 result['changed'] = True
 
             # Add the connections to the user group permissions.
-            #new_connections = {connection['name'] for connection
-            #                   in guacamole_existing_connections} & set(connections)
             connection_ids = {connection['identifier'] for connection
                               in guacamole_existing_connections if
                               connection['name'] in set(connections)}
-            group_ids = {connection['identifier'] for connection
-                         in connections_groups.values() if
-                         connection['name'] in set(connections)}
-            if group_ids:
-                result['group'] = group_ids
-            for connection_id in connection_ids | group_ids:
+            for connection_id in connection_ids:
                 try:
                     guacamole_update_connections_in_group(
                         base_url=module.params.get('base_url'),
