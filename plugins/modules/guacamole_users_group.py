@@ -342,7 +342,7 @@ def main():
     except GuacamoleError as e:
         module.fail_json(msg=str(e))
 
-    result['groups'] = connections_groups
+    #result['groups'] = connections_groups
 
     if module.params.get('state') in {'present', 'sync'}:
         for group_name, connections in permissions.items():
@@ -370,7 +370,7 @@ def main():
             group_ids = {connection['identifier'] for connection
                          in connections_groups.values() if
                          connection['name'] in set(connections)}
-            for connection_id in connection_ids: | group_ids:
+            for connection_id in connection_ids | group_ids:
                 try:
                     guacamole_update_connections_in_group(
                         base_url=module.params.get('base_url'),
