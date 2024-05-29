@@ -239,7 +239,7 @@ def guacamole_update_users_in_group(base_url, validate_certs, datasource, auth_t
 
 def guacamole_update_connections_in_group(base_url, validate_certs, datasource, auth_token, group_name, connection_id, action):
     """
-    Add or remove a conection to a group.
+    Add or remove a connection to a group.
     Action must be "add" or "remove"
     """
 
@@ -351,17 +351,20 @@ def main():
                 module.fail_json(msg=str(e))
 
             # Add the connections to the user group permissions.
-            new_connections = {connection['name'] for connection
-                               in guacamole_existing_connections} & set(connections)
-            for connection in new_connections:
+            #new_connections = {connection['name'] for connection
+            #                   in guacamole_existing_connections} & set(connections)
+            connection_ids = {connection['identifier'] for connection
+                              in guacamole_existing_connections if
+                              connection['name'] in set(connections)}
+            for connection_id in connection_ids:
                 try:
                     guacamole_update_connections_in_group(
                         base_url=module.params.get('base_url'),
                         validate_certs=module.params.get('validate_certs'),
                         datasource=guacamole_token['dataSource'],
                         auth_token=guacamole_token['authToken'],
-                        group_name=module.params.get('group_name'),
-                        connection_id=c['identifier'],
+                        group_name=group_name,
+                        connection_id=connection_id,
                         action='add',
                     )
                 except GuacamoleError as e:
