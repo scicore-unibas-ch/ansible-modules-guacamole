@@ -9,7 +9,7 @@ import json
 from ansible.module_utils.basic import AnsibleModule
 from ansible.module_utils.urls import open_url
 from ansible_collections.scicore.guacamole.plugins.module_utils.guacamole import GuacamoleError, \
-    guacamole_get_token, guacamole_get_connections, guacamole_get_connections_group_id
+    guacamole_get_token, guacamole_get_connections, guacamole_get_connections_groups
 __metaclass__ = type
 
 ANSIBLE_METADATA = {
@@ -319,12 +319,33 @@ def main():
     #      module.fail_json(msg=str(e))
     permissions = module.params.get('permissions')
     # module arg state=present so we have to create a new group
+
+    # Get a list of the existing connections.
+    try:
+        guacamole_existing_connections = guacamole_get_connections(
+            base_url=module.params.get('base_url'),
+            validate_certs=module.params.get('validate_certs'),
+            datasource=guacamole_token['dataSource'],
+            group='ROOT',
+            auth_token=guacamole_token['authToken'],
+        )
+    except GuacamoleError as e:
+        module.fail_json(msg=str(e))
+
+    try:
+        connections_groups = guacamole_get_connections_groups(
+            base_url=module.params.get('base_url'),
+            validate_certs=module.params.get('validate_certs'),
+            datasource=guacamole_token['dataSource'],
+            auth_token=guacamole_token['authToken'],
+        )
+    except GuacamoleError as e:
+        module.fail_json(msg=str(e))
+
     if module.params.get('state') in {'present', 'sync'}:
         for group_name, connections in permissions.items():
-
             # if the group doesn't exists we add it
             if group_name not in groups_before:
-
                 try:
                     guacamole_add_group(
                         base_url=module.params.get('base_url'),
@@ -338,25 +359,16 @@ def main():
 
                 result['changed'] = True
 
-            # Get a list of the existing connections.
-            try:
-                guacamole_existing_connections = guacamole_get_connections(
-                    base_url=module.params.get('base_url'),
-                    validate_certs=module.params.get('validate_certs'),
-                    datasource=guacamole_token['dataSource'],
-                    group='ROOT',
-                    auth_token=guacamole_token['authToken'],
-                )
-            except GuacamoleError as e:
-                module.fail_json(msg=str(e))
-
             # Add the connections to the user group permissions.
             #new_connections = {connection['name'] for connection
             #                   in guacamole_existing_connections} & set(connections)
             connection_ids = {connection['identifier'] for connection
                               in guacamole_existing_connections if
                               connection['name'] in set(connections)}
-            for connection_id in connection_ids:
+            group_ids = {connection['identifier'] for connection
+                         in connections_groups if
+                         connection['name'] in set(connections)}
+            for connection_id in connection_ids | group_ids:
                 try:
                     guacamole_update_connections_in_group(
                         base_url=module.params.get('base_url'),
