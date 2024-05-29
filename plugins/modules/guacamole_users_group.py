@@ -370,6 +370,8 @@ def main():
             group_ids = {connection['identifier'] for connection
                          in connections_groups.values() if
                          connection['name'] in set(connections)}
+            if group_ids:
+                result['group'] = group_ids
             for connection_id in connection_ids | group_ids:
                 try:
                     guacamole_update_connections_in_group(
