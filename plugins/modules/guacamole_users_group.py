@@ -360,8 +360,20 @@ def main():
                 result['changed'] = True
 
             # Add the connections to the user group permissions.
+            try:
+                existing_group_connections = guacamole_get_users_group_permissions(
+                    base_url=module.params.get('base_url'),
+                    validate_certs=module.params.get('validate_certs'),
+                    datasource=guacamole_token['dataSource'],
+                    auth_token=guacamole_token['authToken'],
+                    group_name=group_name
+                )
+                result[f'existing_group_connections_{group_name}'] = existing_group_connections
+            except GuacamoleError as e:
+                module.fail_json(msg=str(e))
+
             new_connection_ids = {connection['identifier'] for connection
-                                  in guacamole_existing_connections if
+                                  in existing_group_connections if
                                   connection['name'] in set(connections)}
             for connection_id in new_connection_ids:
                 try:
