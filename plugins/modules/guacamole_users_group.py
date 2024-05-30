@@ -344,7 +344,8 @@ def main():
 
     if module.params.get('state') in {'present', 'sync'}:
         for group_name, connections in permissions.items():
-            # if the group doesn't exists we add it
+
+            # If the group doesn't exists we add it.
             if group_name not in groups_before:
                 try:
                     guacamole_add_group(
@@ -360,34 +361,34 @@ def main():
                 result['changed'] = True
 
             # Add the connections to the user group permissions.
+            # Check the existing connections for the user group.
             try:
-                existing_group_connections = guacamole_get_users_group_permissions(
+                existing_group_connection_ids = set(guacamole_get_users_group_permissions(
                     base_url=module.params.get('base_url'),
                     validate_certs=module.params.get('validate_certs'),
                     datasource=guacamole_token['dataSource'],
                     auth_token=guacamole_token['authToken'],
                     group_name=group_name
-                )
-                result[f'existing_group_connections_{group_name}'] = existing_group_connections
+                )['connectionPermissions'].keys())
             except GuacamoleError as e:
                 module.fail_json(msg=str(e))
 
-#            new_connection_ids = {connection['identifier'] for connection
-#                                  in existing_group_connections if
-#                                  connection['name'] in set(connections)}
-#            for connection_id in new_connection_ids:
-#                try:
-#                    guacamole_update_connections_in_group(
-#                        base_url=module.params.get('base_url'),
-#                        validate_certs=module.params.get('validate_certs'),
-#                        datasource=guacamole_token['dataSource'],
-#                        auth_token=guacamole_token['authToken'],
-#                        group_name=group_name,
-#                        connection_id=connection_id,
-#                        action='add',
-#                    )
-#                except GuacamoleError as e:
-#                    module.fail_json(msg=str(e))
+            group_connection_ids = {connection['identifier'] for connection
+                                  in guacamole_existing_connections if
+                                  connection['name'] in set(connections)} - existing_group_connection_ids
+            for connection_id in group_connection_ids:
+                try:
+                    guacamole_update_connections_in_group(
+                        base_url=module.params.get('base_url'),
+                        validate_certs=module.params.get('validate_certs'),
+                        datasource=guacamole_token['dataSource'],
+                        auth_token=guacamole_token['authToken'],
+                        group_name=group_name,
+                        connection_id=connection_id,
+                        action='add',
+                    )
+                except GuacamoleError as e:
+                    module.fail_json(msg=str(e))
 
     if module.params.get('state') in {'absent', 'sync'}:
 
