@@ -399,7 +399,7 @@ def main():
 
             result['changed'] = True
 
-        for group_name, connections in permissions.items()
+        for group_name, connections in permissions.items():
             # Remove connections.
             if module.params.get('state') == 'absent':
                 remove_groups = set(groups_before) - set(permissions.keys())
