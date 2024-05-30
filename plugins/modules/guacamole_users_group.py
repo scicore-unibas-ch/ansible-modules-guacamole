@@ -184,7 +184,7 @@ def guacamole_delete_group(base_url, validate_certs, datasource, auth_token, gro
         headers = {'Content-Type': 'application/json'}
         open_url(url_delete_group, method='DELETE', validate_certs=validate_certs, headers=headers)
     except Exception as e:
-        raise GuacamoleError('Could not delete a users group. Error msg: %s' % str(e))
+        raise GuacamoleError(f'Could not delete user group {group_name}. Error msg: {e}')
 
 
 def guacamole_get_users_group_permissions(base_url, validate_certs, datasource, auth_token, group_name):
