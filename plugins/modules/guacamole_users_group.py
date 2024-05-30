@@ -372,22 +372,22 @@ def main():
             except GuacamoleError as e:
                 module.fail_json(msg=str(e))
 
-            new_connection_ids = {connection['identifier'] for connection
-                                  in existing_group_connections if
-                                  connection['name'] in set(connections)}
-            for connection_id in new_connection_ids:
-                try:
-                    guacamole_update_connections_in_group(
-                        base_url=module.params.get('base_url'),
-                        validate_certs=module.params.get('validate_certs'),
-                        datasource=guacamole_token['dataSource'],
-                        auth_token=guacamole_token['authToken'],
-                        group_name=group_name,
-                        connection_id=connection_id,
-                        action='add',
-                    )
-                except GuacamoleError as e:
-                    module.fail_json(msg=str(e))
+#            new_connection_ids = {connection['identifier'] for connection
+#                                  in existing_group_connections if
+#                                  connection['name'] in set(connections)}
+#            for connection_id in new_connection_ids:
+#                try:
+#                    guacamole_update_connections_in_group(
+#                        base_url=module.params.get('base_url'),
+#                        validate_certs=module.params.get('validate_certs'),
+#                        datasource=guacamole_token['dataSource'],
+#                        auth_token=guacamole_token['authToken'],
+#                        group_name=group_name,
+#                        connection_id=connection_id,
+#                        action='add',
+#                    )
+#                except GuacamoleError as e:
+#                    module.fail_json(msg=str(e))
 
     if module.params.get('state') in {'absent', 'sync'}:
 
