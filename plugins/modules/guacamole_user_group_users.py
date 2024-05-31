@@ -329,64 +329,39 @@ def main():
                 except GuacamoleError as e:
                      module.fail_json(msg=str(e))
 
-    module.exit_json(**result)
+                result['changed'] = True
 
     if module.params.get('state') in {'absent', 'sync'}:
 
-        # Determine which user groups should be deleted.
-        if module.params.get('state') == 'absent':
-            remove_groups = {group for group, connections in permissions.items()
-                             if not connections}
-        else:
-            remove_groups = set(groups_before) - set(permissions.keys())
-
-        # Remove user groups.
-        for remove_group in remove_groups:
-            try:
-                guacamole_delete_group(
-                    base_url=module.params.get('base_url'),
-                    validate_certs=module.params.get('validate_certs'),
-                    datasource=guacamole_token['dataSource'],
-                    auth_token=guacamole_token['authToken'],
-                    group_name=remove_group,
-                )
-            except GuacamoleError as e:
-                module.fail_json(msg=str(e))
-
-            result['changed'] = True
-
-        for group_name, connections in permissions.items():
-
-            connection_ids = {connection['identifier'] for connection
-                              in guacamole_existing_connections if
-                              connection['name'] in set(connections)}
-
-            # Determine which connections should be remove from group permissions.
+        # Remove users from user group.
+        for group_name, users in users.items():
+            existing_users = set(guacamole_get_user_group_users(
+                base_url=module.params.get('base_url'),
+                validate_certs=module.params.get('validate_certs'),
+                datasource=guacamole_token['dataSource'],
+                auth_token=guacamole_token['authToken'],
+                group_name=group_name
+            ))
             if module.params.get('state') == 'absent':
-                remove_connection_ids = connection_ids
+                remove_users = set(users) & existing_users
             else:
-                remove_connection_ids = set(guacamole_get_users_group_permissions(
-                    base_url=module.params.get('base_url'),
-                    validate_certs=module.params.get('validate_certs'),
-                    datasource=guacamole_token['dataSource'],
-                    auth_token=guacamole_token['authToken'],
-                    group_name=group_name
-                )['connectionPermissions'].keys()) - connection_ids
+                remove_users = existing_users - users
 
-            for remove_connection_id in remove_connection_ids:
+            for remove_user in remove_users:
                 try:
-                    guacamole_update_connections_in_group(
+                    guacamole_update_users_in_group(
                         base_url=module.params.get('base_url'),
                         validate_certs=module.params.get('validate_certs'),
                         datasource=guacamole_token['dataSource'],
                         auth_token=guacamole_token['authToken'],
                         group_name=group_name,
-                        connection_id=remove_connection_id,
+                        user=remove_user,
                         action='remove',
                     )
                 except GuacamoleError as e:
                     module.fail_json(msg=str(e))
 
+                result['changed'] = True
     module.exit_json(**result)
 
 
