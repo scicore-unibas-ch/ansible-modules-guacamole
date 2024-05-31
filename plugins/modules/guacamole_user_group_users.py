@@ -298,7 +298,7 @@ def main():
     users = module.params.get('users')
 
     if module.params.get('state') in {'present', 'sync'}:
-        for group_name, users in users.items():
+        for group_name, usernames in users.items():
 
             # Add the users to the user group permissions.
             # Check the existing users for the user group.
@@ -313,7 +313,7 @@ def main():
             except GuacamoleError as e:
                 module.fail_json(msg=str(e))
 
-            new_users = set(users) - existing_users
+            new_users = set(usernames) - existing_users
 
             for new_user in new_users:
                 try:
@@ -334,7 +334,7 @@ def main():
     if module.params.get('state') in {'absent', 'sync'}:
 
         # Remove users from user group.
-        for group_name, users in users.items():
+        for group_name, usernames in users.items():
             existing_users = set(guacamole_get_user_group_users(
                 base_url=module.params.get('base_url'),
                 validate_certs=module.params.get('validate_certs'),
@@ -343,9 +343,9 @@ def main():
                 group_name=group_name
             ))
             if module.params.get('state') == 'absent':
-                remove_users = set(users) & existing_users
+                remove_users = set(usernames) & existing_users
             else:
-                remove_users = existing_users - users
+                remove_users = existing_users - set(usernames)
 
             for remove_user in remove_users:
                 try:
