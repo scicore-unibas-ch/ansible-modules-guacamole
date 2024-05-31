@@ -187,13 +187,13 @@ def guacamole_delete_group(base_url, validate_certs, datasource, auth_token, gro
         raise GuacamoleError(f'Could not delete user group {group_name}. Error msg: {e}')
 
 
-def guacamole_get_users_group_permissions(base_url, validate_certs, datasource, auth_token, group_name):
+def guacamole_get_user_group_users(base_url, validate_certs, datasource, auth_token, group_name):
     """
     Returns a dict of dicts.
     Each dict provides the details for one of the users groups defined in guacamole
     """
 
-    url_get_users_group_permissions = URL_GET_GROUP_PERMISSIONS.format(
+    url_get_users_group_permissions = URL_GET_GROUP_MEMBERS.format(
         url=base_url, datasource=datasource, token=auth_token, group_name=group_name)
 
     try:
@@ -303,43 +303,33 @@ def main():
             # Add the users to the user group permissions.
             # Check the existing users for the user group.
             try:
-                #existing_group_connection_ids = set(guacamole_get_users_group_permissions(
-                #    base_url=module.params.get('base_url'),
-                #    validate_certs=module.params.get('validate_certs'),
-                #    datasource=guacamole_token['dataSource'],
-                #    auth_token=guacamole_token['authToken'],
-                #    group_name=group_name
-                #)['connectionPermissions'].keys())
-                user_group_permissions = guacamole_get_users_group_permissions(
+                existing_users = set(guacamole_get_user_group_users(
                     base_url=module.params.get('base_url'),
                     validate_certs=module.params.get('validate_certs'),
                     datasource=guacamole_token['dataSource'],
                     auth_token=guacamole_token['authToken'],
                     group_name=group_name
-                )
+                ))
             except GuacamoleError as e:
                 module.fail_json(msg=str(e))
 
-            result['user_group_permissions'] = user_group_permissions
+            new_users = users - existing_users
 
-            module.fail_json(msg=str(e))
-
-            group_connection_ids = {connection['identifier'] for connection
-                                  in guacamole_existing_connections if
-                                  connection['name'] in set(connections)} - existing_group_connection_ids
-            for connection_id in group_connection_ids:
+            for new_user in new_users:
                 try:
-                    guacamole_update_connections_in_group(
+                    guacamole_update_users_in_group(
                         base_url=module.params.get('base_url'),
                         validate_certs=module.params.get('validate_certs'),
                         datasource=guacamole_token['dataSource'],
                         auth_token=guacamole_token['authToken'],
                         group_name=group_name,
-                        connection_id=connection_id,
+                        user=new_user,
                         action='add',
                     )
                 except GuacamoleError as e:
-                    module.fail_json(msg=str(e))
+                     module.fail_json(msg=str(e))
+
+    module.exit_json(**result)
 
     if module.params.get('state') in {'absent', 'sync'}:
 
