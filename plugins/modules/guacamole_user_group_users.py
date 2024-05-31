@@ -313,7 +313,7 @@ def main():
             except GuacamoleError as e:
                 module.fail_json(msg=str(e))
 
-            new_users = users - existing_users
+            new_users = set(users) - existing_users
 
             for new_user in new_users:
                 try:
