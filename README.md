@@ -169,6 +169,11 @@ OPTIONS (= is mandatory):
         [Default: (null)]
         type: bool
 
+- rdp_resize_method
+        Resize method to use when the client display changes
+        (Choices: display-update, reconnect)[Default: (null)]
+        type: str
+
 - rdp_security
         The security mode to use for the RDP connection
         (Choices: any, nla, nla-ext, tls, rdp)[Default: (null)]
