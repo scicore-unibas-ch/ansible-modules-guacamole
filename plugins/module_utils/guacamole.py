@@ -101,6 +101,11 @@ def guacamole_get_connections_group_id(base_url, validate_certs, datasource, gro
     to its numeric identifier because the API expects a group numeric id, not a group name
     """
 
+    # if the group name is an integer we assume it's the group numeric id hardcoded by the user
+    # quick&dirty hack for https://github.com/scicore-unibas-ch/ansible-modules-guacamole/issues/27
+    if isinstance(group, int):
+        return group
+
     url_list_connections_groups = URL_LIST_CONNECTIONS_GROUPS.format(
         url=base_url, datasource=datasource, token=auth_token)
 
