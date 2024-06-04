@@ -126,8 +126,6 @@ URL_ADD_GROUP = URL_LIST_GROUPS
 URL_DELETE_GROUP = "{url}/api/session/data/{datasource}/userGroups/{group_name}?token={token}"
 URL_GET_GROUP_PERMISSIONS = "{url}/api/session/data/{datasource}/userGroups/{group_name}/permissions?token={token}"
 URL_UPDATE_CONNECTIONS_IN_GROUP = URL_GET_GROUP_PERMISSIONS
-URL_GET_GROUP_MEMBERS = "{url}/api/session/data/{datasource}/userGroups/{group_name}/memberUsers?token={token}"
-URL_UPDATE_USERS_IN_GROUP = URL_GET_GROUP_MEMBERS
 
 
 def guacamole_get_users_groups(base_url, validate_certs, datasource, auth_token):
