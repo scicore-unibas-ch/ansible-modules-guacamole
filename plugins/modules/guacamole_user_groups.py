@@ -9,7 +9,7 @@ import json
 from ansible.module_utils.basic import AnsibleModule
 from ansible.module_utils.urls import open_url
 from ansible_collections.scicore.guacamole.plugins.module_utils.guacamole import GuacamoleError, \
-    guacamole_get_token, guacamole_get_connections, guacamole_get_connections_groups
+    guacamole_get_token, guacamole_get_connections
 __metaclass__ = type
 
 ANSIBLE_METADATA = {
@@ -137,7 +137,7 @@ def guacamole_get_users_groups(base_url, validate_certs, datasource, auth_token)
 
     try:
         users_groups = json.load(open_url(url_list_users_groups, method='GET',
-                                                validate_certs=validate_certs))
+                                          validate_certs=validate_certs))
     except ValueError as e:
         raise GuacamoleError(
             'API returned invalid JSON when trying to obtain users groups from %s: %s'
@@ -203,7 +203,7 @@ def guacamole_get_users_group_permissions(base_url, validate_certs, datasource, 
 
     try:
         group_permissions = json.load(open_url(url_get_users_group_permissions, method='GET',
-                                                validate_certs=validate_certs))
+                                               validate_certs=validate_certs))
     except ValueError as e:
         raise GuacamoleError(
             'API returned invalid JSON when trying to obtain group permissions from %s: %s'
@@ -298,17 +298,6 @@ def main():
     except GuacamoleError as e:
         module.fail_json(msg=str(e))
 
-    # Get the list of the existing connection-groups.
-    try:
-        connections_groups = guacamole_get_connections_groups(
-            base_url=module.params.get('base_url'),
-            validate_certs=module.params.get('validate_certs'),
-            datasource=guacamole_token['dataSource'],
-            auth_token=guacamole_token['authToken'],
-        )
-    except GuacamoleError as e:
-        module.fail_json(msg=str(e))
-
     # Add user-groups and assign permisions for connections to the user-groups.
     if module.params.get('state') in {'present', 'sync'}:
         for group_name, connections in permissions.items():
@@ -341,8 +330,8 @@ def main():
                 module.fail_json(msg=str(e))
 
             group_connection_ids = {connection['identifier'] for connection
-                                  in guacamole_existing_connections if
-                                  connection['name'] in set(connections)} - existing_group_connection_ids
+                                    in guacamole_existing_connections if connection['name']
+                                    in set(connections)} - existing_group_connection_ids
 
             # Add connection permissions to the user-group.
             for connection_id in group_connection_ids:
