@@ -9,7 +9,7 @@ import json
 from ansible.module_utils.basic import AnsibleModule
 from ansible.module_utils.urls import open_url
 from ansible_collections.scicore.guacamole.plugins.module_utils.guacamole import GuacamoleError, \
-    guacamole_get_token, guacamole_get_connections, guacamole_get_connections_groups
+    guacamole_get_token
 __metaclass__ = type
 
 ANSIBLE_METADATA = {
@@ -132,7 +132,7 @@ def guacamole_get_users_groups(base_url, validate_certs, datasource, auth_token)
 
     try:
         users_groups = json.load(open_url(url_list_users_groups, method='GET',
-                                                validate_certs=validate_certs))
+                                          validate_certs=validate_certs))
     except ValueError as e:
         raise GuacamoleError(
             'API returned invalid JSON when trying to obtain users groups from %s: %s'
@@ -198,7 +198,7 @@ def guacamole_get_user_group_users(base_url, validate_certs, datasource, auth_to
 
     try:
         group_permissions = json.load(open_url(url_get_users_group_permissions, method='GET',
-                                                validate_certs=validate_certs))
+                                               validate_certs=validate_certs))
     except ValueError as e:
         raise GuacamoleError(
             'API returned invalid JSON when trying to obtain group permissions from %s: %s'
@@ -327,7 +327,7 @@ def main():
                         action='add',
                     )
                 except GuacamoleError as e:
-                     module.fail_json(msg=str(e))
+                    module.fail_json(msg=str(e))
 
                 result['changed'] = True
 
