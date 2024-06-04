@@ -80,12 +80,12 @@ author:
 
 EXAMPLES = '''
 
-- name: Create a new user-group "users1" with permissions for connections: 'c1' and "c2"
+- name: Create a new user-group "users1" with permissions for connections: "c1' and "c2"
   scicore.guacamole.guacamole_users_group:
     base_url: http://localhost/guacamole
     auth_username: guacadmin
     auth_password: guacadmin
-    permissions: "{{ {'users1' : ['c1, c2']} }}"
+    permissions: "{{ {'users1' : ['c1', 'c2']} }}"
     state: present
 
 - name: Remove user-group "users1".
@@ -96,21 +96,25 @@ EXAMPLES = '''
     permissions: "{{ {'users1' : []} }}"
     state: absent
 
+- name: Remove connection "c1" from user-group "users1".
+  scicore.guacamole.guacamole_users_group:
+    base_url: http://localhost/guacamole
+    auth_username: guacadmin
+    auth_password: guacadmin
+    permissions: "{{ {'users1' : ['c1']} }}"
+    state: absent
+
 - name: Sync user-groups and permissions. This will create groups and permissions defined
     in the permissions dict, and delete anything not defined in the permissions.
   scicore.guacamole.guacamole_users_group:
     base_url: http://localhost/guacamole
     auth_username: guacadmin
     auth_password: guacadmin
-    permissions: "{{ {'users1' : ['c1, c2']} }}"
+    permissions: "{{ {'users1' : ['c1', 'c2']} }}"
     state: sync
 '''
 
 RETURN = '''
-group_info:
-    description: Information about the created or updated group
-    type: dict
-    returned: always
 message:
     description: Some extra info about what the module did
     type: str
@@ -380,7 +384,7 @@ def main():
                               in guacamole_existing_connections if
                               connection['name'] in set(connections)}
 
-            # Determine which connections should be remove from group permissions.
+            # Determine which connections should be removed from group permissions.
             if module.params.get('state') == 'absent':
                 remove_connection_ids = connection_ids
             else:
