@@ -20,14 +20,14 @@ ANSIBLE_METADATA = {
 
 DOCUMENTATION = '''
 ---
-module: guacamole_users_group
+module: guacamole_user_group
 
-short_description: Administer guacamole connections groups using the rest API
+short_description: Administer guacamole user-groups using the rest API.
 
 version_added: "2.9"
 
 description:
-    - "Add or remove guacamole connections groups."
+    - "Manage guacamole user-groups and assign connection permissions."
 
 options:
     base_url:
@@ -55,50 +55,55 @@ options:
         default: true
         type: bool
 
-    group_name:
+    permissions:
         description:
-            - Group name to create
-        required: true
-        type: str
-
-    users:
-        description:
-            - List of users in this group
-        type: list
+            - A dictionary that maps user-group names to connections.
+        type: dict
         elements: str
 
     state:
         description:
-            - Create or delete the users group
+            - Create, delete or sync the user-group.
+            - `sync` will make guacamole match the permissions dict, so it will add and remove.
         default: 'present'
         type: str
         choices:
             - present
             - absent
+            - sync
 
 author:
     - Pablo Escobar Lopez (@pescobar)
+    - Garrett Bischof (@gwbischof)
+    - Robert Schaffer (@RobertSchaffer1)
 '''
 
 EXAMPLES = '''
 
-- name: Create a new group "lab_3"
+- name: Create a new user-group "users1" with permissions for connections: 'c1' and "c2"
   scicore.guacamole.guacamole_users_group:
     base_url: http://localhost/guacamole
     auth_username: guacadmin
     auth_password: guacadmin
-    group_name: lab_3
-    users:
-      - john
-      - laura
+    permissions: "{{ {'users1' : ['c1, c2']} }}"
+    state: present
 
-- name: Delete users group "developers"
+- name: Remove user-group "users1".
   scicore.guacamole.guacamole_users_group:
     base_url: http://localhost/guacamole
     auth_username: guacadmin
     auth_password: guacadmin
-    group_name: developers
+    permissions: "{{ {'users1' : []} }}"
     state: absent
+
+- name: Sync user-groups and permissions. This will create groups and permissions defined
+    in the permissions dict, and delete anything not defined in the permissions.
+  scicore.guacamole.guacamole_users_group:
+    base_url: http://localhost/guacamole
+    auth_username: guacadmin
+    auth_password: guacadmin
+    permissions: "{{ {'users1' : ['c1, c2']} }}"
+    state: sync
 '''
 
 RETURN = '''
