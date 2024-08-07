@@ -154,7 +154,6 @@ URL_UPDATE_CONNECTIONS_GROUP = "{url}/api/session/data/{datasource}/connectionGr
 URL_DELETE_CONNECTIONS_GROUP = URL_UPDATE_CONNECTIONS_GROUP
 
 
-
 def guacamole_populate_connections_group_payload(module_params):
     """
     Populate the json that we send to the guaccamole API to create new connections group
@@ -174,7 +173,7 @@ def guacamole_populate_connections_group_payload(module_params):
     return payload
 
 
-def guacamole_add_connections_group(base_url, validate_certs, datasource, auth_token,  payload):
+def guacamole_add_connections_group(base_url, validate_certs, datasource, auth_token, payload):
     """
     Add a new connections group to the guacamole server.
     """
@@ -386,7 +385,7 @@ def main():
                 # if the group has child connections and force_deletion=false fail and exit
                 else:
                     module.fail_json(
-                    msg="Won't delete a group with child connections unless force_deletion=True"
+                        msg="Won't delete a group with child connections unless force_deletion=True"
                     )
 
         # if the group to delete doesn't exists we just print a message
@@ -408,7 +407,7 @@ def main():
 
     # check if something changed (idempotence)
     if guacamole_connections_groups_before != guacamole_connections_groups_after:
-       result['changed'] = True
+        result['changed'] = True
 
     # return connections_group_info{} for the added/updated/deleted connections group
     if module.params.get('state') == 'present':
