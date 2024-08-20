@@ -206,6 +206,11 @@ options:
             - Display height
         type: int
 
+    rdp_console:
+        description:
+            - Sets session as admin
+        type: bool
+
     ssh_passphrase:
         description:
             - Passphrase for the SSH private key
@@ -471,7 +476,8 @@ def guacamole_populate_connection_payload(module_params):
             "server_layout",
             "width",
             "height",
-            "resize_method"
+            "resize_method",
+            "console"
         )
         guacamole_add_parameter(payload, module_params, parameters, "rdp")
         if module_params.get('rdp_ignore_server_certs'):
@@ -583,6 +589,7 @@ def main():
         ),
         rdp_width=dict(type='int'),
         rdp_height=dict(type='int'),
+        rdp_console=dict(type='bool', default=False, required=False),
         state=dict(type='str', choices=['absent', 'present'], default='present'),
         max_connections=dict(type='int', required=False),
         max_connections_per_user=dict(type='int'),
