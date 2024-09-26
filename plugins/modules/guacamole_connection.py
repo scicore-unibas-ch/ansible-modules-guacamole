@@ -64,9 +64,9 @@ options:
 
     group_name:
         description:
-            - Group name (parentIdentifier) where to create the connection
+            - Group name (parentIdentifier) where to create the connection. Name is preferred but you can use an integer to hardcode the group numeric id.
         default: 'ROOT'
-        aliases: ['parentIdentifier']
+        aliases: ['parentIdentifier', 'group_numeric_id']
         type: str
 
     guacd_hostname:
@@ -550,7 +550,7 @@ def main():
         auth_password=dict(type='str', required=True,
                            no_log=True),
         validate_certs=dict(type='bool', default=True),
-        group_name=dict(type='str', aliases=['parentIdentifier'], default='ROOT'),
+        group_name=dict(type='str', aliases=['parentIdentifier', 'group_numeric_id'], default='ROOT'),
         connection_name=dict(type='str', aliases=['name'], required=True),
         protocol=dict(type='str', choices=['rdp', 'vnc', 'ssh', 'telnet']),
         hostname=dict(type='str'),
