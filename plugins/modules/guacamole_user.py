@@ -92,12 +92,12 @@ options:
 
     allow_access_after:
         description:
-            - Hour to allow access. Format --:--
+            - Hour to allow access. Format --:--:--
         type: str
 
     do_not_allow_access_after:
         description:
-            - Hour to disallow access. Format --:--
+            - Hour to disallow access. Format --:--:--
         type: str
 
     enable_account_after:
@@ -189,7 +189,7 @@ URL_ADD_USER = URL_LIST_USERS
 URL_UPDATE_USER = "{url}/api/session/data/{datasource}/users/{username}?token={token}"
 URL_DELETE_USER = URL_UPDATE_USER
 URL_GET_USER_PERMISSIONS = "{url}/api/session/data/{datasource}/users/{username}/permissions?token={token}"
-URL_GET_USER_ATTRIBUTES = "{url}/api/session/data/{datasource}/users/{username}?token={token}"
+URL_GET_USER_ATTRIBUTES = URL_UPDATE_USER
 URL_UPDATE_USER_PERMISSIONS = URL_GET_USER_PERMISSIONS
 URL_UPDATE_PASSWORD_CURRENT_USER = "{url}/api/session/data/{datasource}/users/{username}/password?token={token}"
 
@@ -502,7 +502,8 @@ def main():
 
         # if the user already exists in guacamole we update it
         if guacamole_user_exists:
-            d = {
+            # Mapping of guacamole attribute keys to module parameter names
+            attribute_to_param_map = {
                 "guac-full-name": "full_name",
                 "guac-email-address": "email",
                 "guac-organization": "organization",
@@ -511,16 +512,19 @@ def main():
                 "expired": "expired",
                 "timezone": "timezone",
                 "valid-until": "disable_account_after",
-                "valid-from": "enable_account_after"
+                "valid-from": "enable_account_after",
+                "access-window-start": "allow_access_after",
+                "access-window-end": "do_not_allow_access_after"
             }
 
-            for k, v in zip(d.keys(), d.values()):
-                if user_attributes_before['attributes'][k] and module.params[v] is None:
-                    module.params[v] = user_attributes_before['attributes'][k]
+            # Iterate over the mapping and update module parameters with existing user attributes if they are not provided
+            for attribute_key, param_name in attribute_to_param_map.items():
+                if user_attributes_before['attributes'][attribute_key] and module.params[param_name] is None:
+                    module.params[param_name] = user_attributes_before['attributes'][attribute_key]
 
             # populate the payload with the user info to send to the API
             payload = guacamole_populate_user_payload(module.params)
-            
+
             try:
                 guacamole_update_user(
                     base_url=module.params.get('base_url'),
@@ -593,7 +597,7 @@ def main():
                         for group_id in guacamole_connections_groups:
                             if group_id == parentid:
                                 fetch_parent_grous_id(guacamole_connections_groups[group_id]['parentIdentifier'])
-                
+
                 fetch_parent_grous_id(conn['parentIdentifier'])
 
         current_conn_ids = set()
