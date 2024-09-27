@@ -210,7 +210,7 @@ def guacamole_populate_user_payload(module_params):
             "access-window-end": module_params['do_not_allow_access_after'],
             "valid-from": module_params['enable_account_after'],
             "valid-until": module_params['disable_account_after'],
-            "timezone": "",
+            "timezone": module_params["timezone"],
             "guac-full-name": module_params['full_name'],
             "guac-email-address": module_params['email'],
             "guac-organization": module_params['organization'],
@@ -519,7 +519,7 @@ def main():
 
             # Iterate over the mapping and update module parameters with existing user attributes if they are not provided
             for attribute_key, param_name in attribute_to_param_map.items():
-                if user_attributes_before['attributes'][attribute_key] and module.params[param_name] is None:
+                if user_attributes_before['attributes'][attribute_key] and (module.params[param_name] is None or module.params[param_name] == ''):
                     module.params[param_name] = user_attributes_before['attributes'][attribute_key]
 
             # populate the payload with the user info to send to the API
