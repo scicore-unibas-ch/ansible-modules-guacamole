@@ -140,6 +140,10 @@ OPTIONS (= is mandatory):
         (Choices: 8, 16, 24, 32)[Default: (null)]
         type: int
 
+- rdp_console  Sets session as admin
+        default: null
+        type: bool
+
 - rdp_domain
         Domain for the connection
         [Default: (null)]

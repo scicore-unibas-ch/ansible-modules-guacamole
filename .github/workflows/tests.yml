@@ -20,7 +20,7 @@ jobs:
 
     - name: Boot the docker containers with latest guacamole
       working-directory: ./devel-utils
-      run: docker-compose up -d
+      run: docker compose up -d
 
     - name: Install latest ansible and make the collection available
       run: |
