@@ -369,7 +369,7 @@ RETURN VALUES:
 OPTIONS (= is mandatory):
 
 - allow_access_after
-        Hour to allow access. Format --:--
+        Hour to allow access. Format --:--:--
         [Default: (null)]
         type: str
 
@@ -405,7 +405,7 @@ OPTIONS (= is mandatory):
         type: bool
 
 - do_not_allow_access_after
-        Hour to disallow access. Format --:--
+        Hour to disallow access. Format --:--:--
         [Default: (null)]
         type: str
 
