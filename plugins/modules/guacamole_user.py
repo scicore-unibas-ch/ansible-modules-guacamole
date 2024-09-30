@@ -71,6 +71,12 @@ options:
         type: list
         elements: str
 
+    allowed_connections_identifiers:
+        description:
+            - List of connections identifiers where this user can connect
+        type: list
+        elements: str
+
     state:
         description:
             - Create or delete the user?
@@ -400,6 +406,7 @@ def main():
         username=dict(type='str', aliases=['name'], required=True),
         password=dict(type='str', no_log=True),
         allowed_connections=dict(type='list', default=[]),
+        allowed_connections_identifiers=dict(type='list', default=[]),
         state=dict(type='str', choices=['absent', 'present'], default='present'),
         full_name=dict(type='str', Default=None),
         email=dict(type='str', Default=None),
@@ -600,16 +607,29 @@ def main():
 
                 fetch_parent_grous_id(conn['parentIdentifier'])
 
-        current_conn_ids = set()
-        current_group_ids = set()
-        if guacamole_user_exists:
-            current_conn_ids = set(user_permissions_before['connectionPermissions'].keys())
-            current_group_ids = set(user_permissions_before['connectionGroupPermissions'].keys())
+            if conn['identifier'] in module.params['allowed_connections_identifiers']:
+                allowed_conn_ids.add(conn['identifier'])
+                def fetch_parent_grous_id(parentid):
+                    if parentid != 'ROOT':
+                        allowed_group_ids.add(parentid)
+                        for group_id in guacamole_connections_groups:
+                            if group_id == parentid:
+                                fetch_parent_grous_id(guacamole_connections_groups[group_id]['parentIdentifier'])
 
-        add_conn_ids = allowed_conn_ids - current_conn_ids
-        add_group_ids = allowed_group_ids - current_group_ids
-        delete_conn_ids = current_conn_ids - allowed_conn_ids
-        delete_group_ids = current_group_ids - allowed_group_ids
+                fetch_parent_grous_id(conn['parentIdentifier'])
+
+        # current_conn_ids = set()
+        # current_group_ids = set()
+        # if guacamole_user_exists:
+        #     current_conn_ids = set(user_permissions_before['connectionPermissions'].keys())
+        #     current_group_ids = set(user_permissions_before['connectionGroupPermissions'].keys())
+
+        add_conn_ids = allowed_conn_ids
+        add_group_ids = allowed_group_ids
+        # add_conn_ids = allowed_conn_ids - current_conn_ids
+        # add_group_ids = allowed_group_ids - current_group_ids
+        # delete_conn_ids = current_conn_ids - allowed_conn_ids
+        # delete_group_ids = current_group_ids - allowed_group_ids
 
         for conn_id in add_conn_ids:
             try:
@@ -639,33 +659,33 @@ def main():
             except GuacamoleError as e:
                 module.fail_json(msg=str(e))
 
-        for conn_id in delete_conn_ids:
-            try:
-                guacamole_update_user_permissions_for_connection(
-                    base_url=module.params.get('base_url'),
-                    validate_certs=module.params.get('validate_certs'),
-                    datasource=guacamole_token['dataSource'],
-                    auth_token=guacamole_token['authToken'],
-                    username=module.params.get('username'),
-                    connection_id=conn_id,
-                    operation='remove'
-                )
-            except GuacamoleError as e:
-                module.fail_json(msg=str(e))
+        # for conn_id in delete_conn_ids:
+        #     try:
+        #         guacamole_update_user_permissions_for_connection(
+        #             base_url=module.params.get('base_url'),
+        #             validate_certs=module.params.get('validate_certs'),
+        #             datasource=guacamole_token['dataSource'],
+        #             auth_token=guacamole_token['authToken'],
+        #             username=module.params.get('username'),
+        #             connection_id=conn_id,
+        #             operation='remove'
+        #         )
+        #     except GuacamoleError as e:
+        #         module.fail_json(msg=str(e))
 
-        for group_id in delete_group_ids:
-            try:
-                guacamole_update_user_permissions_for_group(
-                    base_url=module.params.get('base_url'),
-                    validate_certs=module.params.get('validate_certs'),
-                    datasource=guacamole_token['dataSource'],
-                    auth_token=guacamole_token['authToken'],
-                    username=module.params.get('username'),
-                    group_id=group_id,
-                    operation='remove'
-                )
-            except GuacamoleError as e:
-                module.fail_json(msg=str(e))
+        # for group_id in delete_group_ids:
+        #     try:
+        #         guacamole_update_user_permissions_for_group(
+        #             base_url=module.params.get('base_url'),
+        #             validate_certs=module.params.get('validate_certs'),
+        #             datasource=guacamole_token['dataSource'],
+        #             auth_token=guacamole_token['authToken'],
+        #             username=module.params.get('username'),
+        #             group_id=group_id,
+        #             operation='remove'
+        #         )
+        #     except GuacamoleError as e:
+        #         module.fail_json(msg=str(e))
 
 
     # module arg state=absent so we must delete a user from guacamole
