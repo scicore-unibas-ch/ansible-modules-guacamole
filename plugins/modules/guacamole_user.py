@@ -71,6 +71,12 @@ options:
         type: list
         elements: str
 
+    allowed_connections_identifiers:
+        description:
+            - List of connections identifiers where this user can connect
+        type: list
+        elements: str
+
     state:
         description:
             - Create or delete the user?
@@ -92,12 +98,12 @@ options:
 
     allow_access_after:
         description:
-            - Hour to allow access. Format --:--
+            - Hour to allow access. Format --:--:--
         type: str
 
     do_not_allow_access_after:
         description:
-            - Hour to disallow access. Format --:--
+            - Hour to disallow access. Format --:--:--
         type: str
 
     enable_account_after:
@@ -189,6 +195,7 @@ URL_ADD_USER = URL_LIST_USERS
 URL_UPDATE_USER = "{url}/api/session/data/{datasource}/users/{username}?token={token}"
 URL_DELETE_USER = URL_UPDATE_USER
 URL_GET_USER_PERMISSIONS = "{url}/api/session/data/{datasource}/users/{username}/permissions?token={token}"
+URL_GET_USER_ATTRIBUTES = URL_UPDATE_USER
 URL_UPDATE_USER_PERMISSIONS = URL_GET_USER_PERMISSIONS
 URL_UPDATE_PASSWORD_CURRENT_USER = "{url}/api/session/data/{datasource}/users/{username}/password?token={token}"
 
@@ -209,7 +216,7 @@ def guacamole_populate_user_payload(module_params):
             "access-window-end": module_params['do_not_allow_access_after'],
             "valid-from": module_params['enable_account_after'],
             "valid-until": module_params['disable_account_after'],
-            "timezone": "",
+            "timezone": module_params["timezone"],
             "guac-full-name": module_params['full_name'],
             "guac-email-address": module_params['email'],
             "guac-organization": module_params['organization'],
@@ -288,6 +295,27 @@ def guacamole_get_user_permissions(base_url, validate_certs, datasource, usernam
                              % (url_get_user_permissions, str(e)))
 
     return user_permissions
+
+
+def guacamole_get_user_attributes(base_url, validate_certs, datasource, username, auth_token):
+    """
+    Return a dict with detailed current attributes for a user
+    """
+
+    url_get_user_attributes = URL_GET_USER_ATTRIBUTES.format(
+        url=base_url, datasource=datasource, username=username, token=auth_token)
+
+    try:
+        user_attributes = json.load(open_url(url_get_user_attributes, method='GET', validate_certs=validate_certs))
+    except ValueError as e:
+        raise GuacamoleError(
+            'API returned invalid JSON when trying to obtain user attributes from %s: %s'
+            % (url_get_user_attributes, str(e)))
+    except Exception as e:
+        raise GuacamoleError('Could not obtain user attributes from %s: %s'
+                             % (url_get_user_attributes, str(e)))
+
+    return user_attributes
 
 
 def guacamole_update_user_permissions_for_connection(base_url, validate_certs, datasource, username,
@@ -378,6 +406,7 @@ def main():
         username=dict(type='str', aliases=['name'], required=True),
         password=dict(type='str', no_log=True),
         allowed_connections=dict(type='list', default=[]),
+        allowed_connections_identifiers=dict(type='list', default=[]),
         state=dict(type='str', choices=['absent', 'present'], default='present'),
         full_name=dict(type='str', Default=None),
         email=dict(type='str', Default=None),
@@ -465,17 +494,44 @@ def main():
                 username=module.params.get('username'),
                 auth_token=guacamole_token['authToken'],
             )
+            user_attributes_before = guacamole_get_user_attributes(
+                base_url=module.params.get('base_url'),
+                validate_certs=module.params.get('validate_certs'),
+                datasource=guacamole_token['dataSource'],
+                username=module.params.get('username'),
+                auth_token=guacamole_token['authToken'],
+            )
         except GuacamoleError as e:
             module.fail_json(msg=str(e))
 
     # module arg state=present so we must create or update a user in guacamole
     if module.params.get('state') == 'present':
 
-        # populate the payload with the user info to send to the API
-        payload = guacamole_populate_user_payload(module.params)
-
         # if the user already exists in guacamole we update it
         if guacamole_user_exists:
+            # Mapping of guacamole attribute keys to module parameter names
+            attribute_to_param_map = {
+                "guac-full-name": "full_name",
+                "guac-email-address": "email",
+                "guac-organization": "organization",
+                "guac-organizational-role": "organizational_role",
+                "disabled": "disabled",
+                "expired": "expired",
+                "timezone": "timezone",
+                "valid-until": "disable_account_after",
+                "valid-from": "enable_account_after",
+                "access-window-start": "allow_access_after",
+                "access-window-end": "do_not_allow_access_after"
+            }
+
+            # Iterate over the mapping and update module parameters with existing user attributes if they are not provided
+            for attribute_key, param_name in attribute_to_param_map.items():
+                if user_attributes_before['attributes'][attribute_key] and (module.params[param_name] is None or module.params[param_name] == ''):
+                    module.params[param_name] = user_attributes_before['attributes'][attribute_key]
+
+            # populate the payload with the user info to send to the API
+            payload = guacamole_populate_user_payload(module.params)
+
             try:
                 guacamole_update_user(
                     base_url=module.params.get('base_url'),
@@ -491,6 +547,7 @@ def main():
 
         # if the user doesn't exist in guacamole we create it
         else:
+            payload = guacamole_populate_user_payload(module.params)
             try:
                 guacamole_add_user(
                     base_url=module.params.get('base_url'),
@@ -547,19 +604,32 @@ def main():
                         for group_id in guacamole_connections_groups:
                             if group_id == parentid:
                                 fetch_parent_grous_id(guacamole_connections_groups[group_id]['parentIdentifier'])
-                
+
                 fetch_parent_grous_id(conn['parentIdentifier'])
 
-        current_conn_ids = set()
-        current_group_ids = set()
-        if guacamole_user_exists:
-            current_conn_ids = set(user_permissions_before['connectionPermissions'].keys())
-            current_group_ids = set(user_permissions_before['connectionGroupPermissions'].keys())
+            if conn['identifier'] in module.params['allowed_connections_identifiers']:
+                allowed_conn_ids.add(conn['identifier'])
+                def fetch_parent_grous_id(parentid):
+                    if parentid != 'ROOT':
+                        allowed_group_ids.add(parentid)
+                        for group_id in guacamole_connections_groups:
+                            if group_id == parentid:
+                                fetch_parent_grous_id(guacamole_connections_groups[group_id]['parentIdentifier'])
 
-        add_conn_ids = allowed_conn_ids - current_conn_ids
-        add_group_ids = allowed_group_ids - current_group_ids
-        delete_conn_ids = current_conn_ids - allowed_conn_ids
-        delete_group_ids = current_group_ids - allowed_group_ids
+                fetch_parent_grous_id(conn['parentIdentifier'])
+
+        # current_conn_ids = set()
+        # current_group_ids = set()
+        # if guacamole_user_exists:
+        #     current_conn_ids = set(user_permissions_before['connectionPermissions'].keys())
+        #     current_group_ids = set(user_permissions_before['connectionGroupPermissions'].keys())
+
+        add_conn_ids = allowed_conn_ids
+        add_group_ids = allowed_group_ids
+        # add_conn_ids = allowed_conn_ids - current_conn_ids
+        # add_group_ids = allowed_group_ids - current_group_ids
+        # delete_conn_ids = current_conn_ids - allowed_conn_ids
+        # delete_group_ids = current_group_ids - allowed_group_ids
 
         for conn_id in add_conn_ids:
             try:
@@ -589,33 +659,33 @@ def main():
             except GuacamoleError as e:
                 module.fail_json(msg=str(e))
 
-        for conn_id in delete_conn_ids:
-            try:
-                guacamole_update_user_permissions_for_connection(
-                    base_url=module.params.get('base_url'),
-                    validate_certs=module.params.get('validate_certs'),
-                    datasource=guacamole_token['dataSource'],
-                    auth_token=guacamole_token['authToken'],
-                    username=module.params.get('username'),
-                    connection_id=conn_id,
-                    operation='remove'
-                )
-            except GuacamoleError as e:
-                module.fail_json(msg=str(e))
+        # for conn_id in delete_conn_ids:
+        #     try:
+        #         guacamole_update_user_permissions_for_connection(
+        #             base_url=module.params.get('base_url'),
+        #             validate_certs=module.params.get('validate_certs'),
+        #             datasource=guacamole_token['dataSource'],
+        #             auth_token=guacamole_token['authToken'],
+        #             username=module.params.get('username'),
+        #             connection_id=conn_id,
+        #             operation='remove'
+        #         )
+        #     except GuacamoleError as e:
+        #         module.fail_json(msg=str(e))
 
-        for group_id in delete_group_ids:
-            try:
-                guacamole_update_user_permissions_for_group(
-                    base_url=module.params.get('base_url'),
-                    validate_certs=module.params.get('validate_certs'),
-                    datasource=guacamole_token['dataSource'],
-                    auth_token=guacamole_token['authToken'],
-                    username=module.params.get('username'),
-                    group_id=group_id,
-                    operation='remove'
-                )
-            except GuacamoleError as e:
-                module.fail_json(msg=str(e))
+        # for group_id in delete_group_ids:
+        #     try:
+        #         guacamole_update_user_permissions_for_group(
+        #             base_url=module.params.get('base_url'),
+        #             validate_certs=module.params.get('validate_certs'),
+        #             datasource=guacamole_token['dataSource'],
+        #             auth_token=guacamole_token['authToken'],
+        #             username=module.params.get('username'),
+        #             group_id=group_id,
+        #             operation='remove'
+        #         )
+        #     except GuacamoleError as e:
+        #         module.fail_json(msg=str(e))
 
 
     # module arg state=absent so we must delete a user from guacamole
