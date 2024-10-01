@@ -254,6 +254,11 @@ options:
         description:
             - recording name for connection
         type: str
+        
+    create_recording_path:
+        description:
+            - Should we create the recording path if it does not exist?
+        type: bool
 
     sftp_enable:
         description:
@@ -449,6 +454,7 @@ def guacamole_populate_connection_payload(module_params):
         "recording_path",
         "recording_include_keys",
         "recording_name",
+        "create_recording_path",
         "sftp_port",
         "sftp_server_alive_interval",
         "sftp_hostname",
@@ -596,6 +602,7 @@ def main():
         recording_path=dict(type='str', required=False),
         recording_include_keys=dict(type='bool', required=False),
         recording_name=dict(type='str', required=False),
+        create_recording_path=dict(type='bool', required=False),
         sftp_enable=dict(type='bool', default=False),
         sftp_port=dict(type='int', required=False),
         sftp_server_alive_interval=dict(type='int', required=False),

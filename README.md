@@ -217,6 +217,11 @@ OPTIONS (= is mandatory):
         [Default: (null)]
         type: str
 
+- create_recording_path
+        Should we create the recording path if it does not exist?
+        [Default: (null)]
+        type: bool
+
 - sftp_default_upload_directory
         File browser default upload directory
         [Default: (null)]
