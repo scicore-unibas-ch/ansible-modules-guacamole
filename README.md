@@ -14,11 +14,18 @@ If you are interested in contributing to this project please mention it in your 
 
 Ansible modules to administer apache guacamole connections and users using the API
 
-## Installation
+## Official installation
 
 ```
 ansible-galaxy collection install scicore.guacamole
+```
 
+## To install my forked version
+
+```
+git clone https://github.com/paxprot/ansible-modules-guacamole.git
+cd ansible-modules-guacamole
+ansible-galaxy collection install . --force
 ```
 
 Now you can use the modules `guacamole_connection` and `guacamole_user`. Adapt the examples below to your needs.
@@ -369,7 +376,7 @@ RETURN VALUES:
 OPTIONS (= is mandatory):
 
 - allow_access_after
-        Hour to allow access. Format --:--
+        Hour to allow access. Format --:--:--
         [Default: (null)]
         type: str
 
@@ -405,7 +412,7 @@ OPTIONS (= is mandatory):
         type: bool
 
 - do_not_allow_access_after
-        Hour to disallow access. Format --:--
+        Hour to disallow access. Format --:--:--
         [Default: (null)]
         type: str
 

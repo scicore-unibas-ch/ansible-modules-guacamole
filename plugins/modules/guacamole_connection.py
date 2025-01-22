@@ -69,6 +69,11 @@ options:
         aliases: ['parentIdentifier']
         type: str
 
+    group_identifier:
+        description:
+            - Group identifier where to create the connection
+        type: str
+
     guacd_hostname:
         description:
             - Hostname or ip of the guacd to connect
@@ -551,6 +556,7 @@ def main():
                            no_log=True),
         validate_certs=dict(type='bool', default=True),
         group_name=dict(type='str', aliases=['parentIdentifier'], default='ROOT'),
+        group_identifier=dict(tyoe='str'),
         connection_name=dict(type='str', aliases=['name'], required=True),
         protocol=dict(type='str', choices=['rdp', 'vnc', 'ssh', 'telnet']),
         hostname=dict(type='str'),
@@ -638,7 +644,10 @@ def main():
 
     # get the group numeric ID if we are NOT adding the connection
     # to the default connections group (ROOT)
-    if module.params.get('group_name') != "ROOT":
+    if module.params.get('group_identifier'):
+        module.params['group_name'] = module.params.get('group_identifier')
+
+    if not module.params.get('group_identifier') and module.params.get('group_name') != "ROOT":
         try:
             module.params['group_name'] = guacamole_get_connections_group_id(
                 base_url=module.params.get('base_url'),
