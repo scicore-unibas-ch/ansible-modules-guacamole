@@ -131,6 +131,11 @@ options:
         description:
             - Domain for the connection
 
+    rdp_disable_gfx:
+        description:
+            - Disable GFX acceleration
+        type: bool
+
     rdp_enable_drive:
         description:
             - Enable network drive mapping
@@ -482,6 +487,8 @@ def guacamole_populate_connection_payload(module_params):
         guacamole_add_parameter(payload, module_params, parameters, "rdp")
         if module_params.get('rdp_ignore_server_certs'):
             payload['parameters']['ignore-cert'] = module_params['rdp_ignore_server_certs']
+        if module_params.get('rdp_disable_gfx'):
+            payload['parameters']['disable-gfx'] = module_params['rdp_disable_gfx']
     elif module_params["protocol"] == "ssh":
         parameters = ("private_key", "passphrase")
         guacamole_add_parameter(payload, module_params, parameters, "ssh")
@@ -559,6 +566,7 @@ def main():
         password=dict(type='str', no_log=True),
         rdp_color_depth=dict(type='int', choices=(8, 16, 24, 32)),
         rdp_domain=dict(type='str'),
+        rdp_disable_gfx=dict(type='bool', default=False),
         rdp_enable_drive=dict(type='bool', default=False),
         rdp_drive_name=dict(type='str'),
         rdp_drive_path=dict(type='str'),
