@@ -211,6 +211,21 @@ options:
             - Sets session as admin
         type: bool
 
+    rdp_disable_bitmap_caching:
+        description:
+            - Disable bitmap caching for the rdp connection
+        type: bool
+
+    rdp_disable_offscreen_caching:
+        description:
+            - Disable offscreen caching for the rdp connection
+        type: bool
+
+    rdp_disable_glyph_caching:
+        description:
+            - Disable glyph caching for the rdp connection
+        type: bool
+
     ssh_passphrase:
         description:
             - Passphrase for the SSH private key
@@ -477,7 +492,10 @@ def guacamole_populate_connection_payload(module_params):
             "width",
             "height",
             "resize_method",
-            "console"
+            "console",
+            "disable_bitmap_caching",
+            "disable_offscreen_caching",
+            "disable_glyph_caching"
         )
         guacamole_add_parameter(payload, module_params, parameters, "rdp")
         if module_params.get('rdp_ignore_server_certs'):
@@ -590,6 +608,9 @@ def main():
         rdp_width=dict(type='int'),
         rdp_height=dict(type='int'),
         rdp_console=dict(type='bool', default=False, required=False),
+        rdp_disable_bitmap_caching=dict(type='bool', default=False, required=False),
+        rdp_disable_offscreen_caching=dict(type='bool', default=False, required=False),
+        rdp_disable_glyph_caching=dict(type='bool', default=False, required=False),
         state=dict(type='str', choices=['absent', 'present'], default='present'),
         max_connections=dict(type='int', required=False),
         max_connections_per_user=dict(type='int'),

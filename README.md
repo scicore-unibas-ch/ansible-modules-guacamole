@@ -144,6 +144,21 @@ OPTIONS (= is mandatory):
         default: null
         type: bool
 
+- rdp_disable_bitmap_caching
+        Disable bitmap caching for the rdp connection
+        [Default: false]
+        type: bool
+
+- rdp_disable_glyph_caching
+        Disable glyph caching for the rdp connection
+        [Default: false]
+        type: bool
+
+- rdp_disable_offscreen_caching
+        Disable offscreen caching for the rdp connection
+        [Default: false]
+        type: bool
+
 - rdp_domain
         Domain for the connection
         [Default: (null)]
